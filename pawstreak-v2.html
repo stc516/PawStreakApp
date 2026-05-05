@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawStreak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sand: #F5EFE0;
+  --sand-dark: #E0D5BE;
+  --sand-mid: #CDBFA0;
+  --bark: #2C1810;
+  --bark-mid: #6B3A2A;
+  --bark-light: #9A6050;
+  --sky: #C8DFF0;
+  --sky-deep: #3A7AAA;
+  --grass: #7CB87A;
+  --amber: #E8A830;
+  --amber-deep: #B07010;
+  --cream: #FDFAF4;
+  --paw: #C8503A;
+  --paw-light: #F0907A;
+  --paw-pale: #FAE8E4;
+  --streak-fire: #E05010;
+  --risk-bg: #FFF3E0;
+  --risk-border: #E8A830;
+  --risk-text: #7A4800;
+  --win-bg: #E8F5E2;
+  --win-border: #7CB87A;
+  --win-text: #2A5A22;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--bark);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ===================== ONBOARDING ===================== */
+#screen-onboard{background:var(--bark);align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden;}
+.ob-radial{position:absolute;inset:0;background:radial-gradient(ellipse at 35% 55%, #4A1E10 0%, var(--bark) 65%);pointer-events:none;}
+.ob-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:var(--sand);opacity:.12;animation:twinkle 3s ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:.08}50%{opacity:.3}}
+.ob-content{position:relative;z-index:2;text-align:center;width:100%;max-width:340px;}
+.app-wordmark{font-family:'Fraunces',serif;font-size:12px;font-weight:300;letter-spacing:.28em;color:var(--paw-light);text-transform:uppercase;margin-bottom:2.5rem;}
+.paw-hero{font-size:68px;margin-bottom:1.25rem;animation:pawBounce 2.2s ease-in-out infinite;}
+@keyframes pawBounce{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-9px) rotate(6deg)}}
+.ob-headline{font-family:'Fraunces',serif;font-size:30px;font-weight:300;color:var(--cream);line-height:1.25;margin-bottom:.625rem;font-style:italic;}
+.ob-sub{font-size:14px;color:var(--sand-dark);line-height:1.65;margin-bottom:2.5rem;font-weight:300;}
+.field-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--paw-light);margin-bottom:7px;text-align:left;display:block;}
+.text-input{width:100%;padding:14px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:1.25rem;}
+.text-input:focus{border-color:var(--paw-light);}
+.text-input::placeholder{color:rgba(255,255,255,.22);}
+.btn-primary{width:100%;padding:16px;background:var(--paw);border:none;border-radius:14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s,background .15s;}
+.btn-primary:hover{background:var(--bark-light);transform:translateY(-1px);}
+.btn-primary:active{transform:scale(.98);}
+.ob-skip{margin-top:.875rem;font-size:12px;color:rgba(255,255,255,.28);cursor:pointer;transition:color .15s;}
+.ob-skip:hover{color:rgba(255,255,255,.5);}
+
+/* ===================== SHARED NAV ===================== */
+.bottom-nav{position:sticky;bottom:0;background:var(--cream);border-top:1px solid var(--sand-dark);display:flex;z-index:10;padding:.625rem 0 calc(.625rem + env(safe-area-inset-bottom));}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:500;letter-spacing:.04em;color:var(--bark-light);cursor:pointer;padding:4px 0;text-transform:uppercase;background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .15s;}
+.nav-item.active{color:var(--paw);}
+.nav-icon{font-size:19px;}
+
+/* ===================== DASHBOARD ===================== */
+#screen-dash{background:var(--cream);}
+.dash-scroll{overflow-y:auto;flex:1;padding-bottom:80px;}
+
+/* Dog status hero */
+.dog-status-hero{background:var(--bark);padding:2.75rem 1.5rem 1.75rem;position:relative;overflow:hidden;}
+.dsh-radial{position:absolute;inset:0;background:radial-gradient(ellipse at 75% 15%, #5A2218 0%, var(--bark) 60%);pointer-events:none;}
+.dsh-inner{position:relative;z-index:2;}
+.dsh-greeting{font-size:11px;font-weight:300;letter-spacing:.1em;color:var(--sand-dark);text-transform:uppercase;margin-bottom:.25rem;}
+.dsh-name{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--cream);line-height:1.05;}
+.dsh-name em{color:var(--paw-light);font-style:italic;}
+.dsh-status{font-size:14px;font-weight:300;color:var(--sand-dark);margin-top:.375rem;line-height:1.5;}
+.dsh-status.won{color:#9FE1CB;}
+
+/* Streak row */
+.streak-bar{position:relative;z-index:2;display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:1rem 1.25rem;margin-top:1.25rem;}
+.streak-flame{font-size:36px;animation:flamePulse 1.6s ease-in-out infinite;flex-shrink:0;}
+@keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.streak-num{font-family:'Fraunces',serif;font-size:42px;font-weight:700;color:var(--amber);line-height:1;letter-spacing:-.02em;}
+.streak-meta{flex:1;}
+.streak-days{font-size:12px;color:var(--sand-dark);font-weight:300;letter-spacing:.04em;margin-top:1px;}
+.freeze-pill{background:rgba(100,180,240,.15);border:1px solid rgba(100,180,240,.25);border-radius:10px;padding:7px 10px;text-align:center;flex-shrink:0;}
+.freeze-icon{font-size:18px;}
+.freeze-lbl{font-size:10px;color:var(--sky);font-weight:500;letter-spacing:.04em;line-height:1.2;margin-top:1px;}
+
+/* At-risk banner */
+.risk-banner{background:var(--risk-bg);border-left:3px solid var(--risk-border);border-radius:0 12px 12px 0;padding:.875rem 1.25rem;margin:1rem 1.5rem 0;display:flex;align-items:center;gap:.75rem;}
+.risk-banner.hidden{display:none;}
+.risk-icon{font-size:22px;flex-shrink:0;}
+.risk-text{font-size:13px;font-weight:500;color:var(--risk-text);line-height:1.4;}
+.risk-sub{font-size:12px;font-weight:300;color:var(--risk-text);opacity:.75;margin-top:1px;}
+
+/* Won banner */
+.win-banner{background:var(--win-bg);border-left:3px solid var(--win-border);border-radius:0 12px 12px 0;padding:.875rem 1.25rem;margin:1rem 1.5rem 0;display:none;align-items:center;gap:.75rem;}
+.win-banner.visible{display:flex;}
+.win-text{font-size:13px;font-weight:500;color:var(--win-text);line-height:1.4;}
+
+/* Adventure launch zone */
+.launch-zone{padding:1.25rem 1.5rem .75rem;}
+.section-label{font-size:10px;font-weight:500;letter-spacing:.12em;color:var(--bark-light);text-transform:uppercase;margin-bottom:.75rem;}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:.875rem;}
+.chip{padding:12px 11px;background:#fff;border:1.5px solid var(--sand-dark);border-radius:13px;cursor:pointer;transition:all .15s;text-align:left;display:flex;flex-direction:column;gap:3px;}
+.chip:hover{border-color:var(--paw);transform:translateY(-1px);}
+.chip.selected{border-color:var(--paw);background:var(--paw-pale);}
+.chip-icon{font-size:20px;}
+.chip-name{font-size:13px;font-weight:500;color:var(--bark);}
+.chip-vibe{font-size:11px;color:var(--bark-light);font-weight:300;}
+.pick-btn{width:100%;padding:11px;background:transparent;border:1.5px dashed var(--sand-dark);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--bark-light);cursor:pointer;transition:all .15s;margin-bottom:.75rem;}
+.pick-btn:hover{border-color:var(--bark-light);color:var(--bark);}
+.suggestion-box{background:var(--sky);border-radius:11px;padding:11px 13px;margin-bottom:.75rem;display:none;align-items:flex-start;gap:9px;animation:slideIn .2s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.suggestion-box.visible{display:flex;}
+.sugg-text{font-size:13px;color:#1A4060;flex:1;line-height:1.45;}
+.sugg-reroll{font-size:12px;color:var(--sky-deep);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;text-decoration:underline;padding-top:1px;flex-shrink:0;}
+.btn-start{width:100%;padding:17px;background:var(--paw);border:none;border-radius:15px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em;}
+.btn-start:hover{background:var(--bark-mid);transform:translateY(-2px);box-shadow:0 8px 22px rgba(160,80,58,.28);}
+.btn-start:active{transform:scale(.98);}
+.btn-start.won{background:var(--grass);cursor:default;transform:none;box-shadow:none;}
+
+/* Light stats row */
+.stats-lite{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:0 1.5rem .5rem;}
+.sl-card{background:#fff;border-radius:11px;padding:10px 8px;border:1px solid var(--sand-dark);text-align:center;}
+.sl-val{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--bark);line-height:1;}
+.sl-lbl{font-size:10px;color:var(--bark-light);font-weight:300;letter-spacing:.02em;margin-top:3px;line-height:1.2;}
+
+/* Milestone */
+.milestone-card{margin:.5rem 1.5rem;background:#fff;border-radius:14px;padding:1rem 1.25rem;border:1px solid var(--sand-dark);}
+.mc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.mc-label{font-size:12px;font-weight:500;color:var(--bark);}
+.mc-target{font-size:12px;color:var(--bark-light);}
+.prog-track{height:5px;background:var(--sand-dark);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--paw);border-radius:99px;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+.mc-next{font-size:11px;color:var(--bark-light);margin-top:7px;line-height:1.4;}
+
+/* Recent adventures */
+.recent-section{padding:.75rem 1.5rem 1rem;}
+.adv-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--sand-dark);}
+.adv-item:last-child{border-bottom:none;}
+.adv-icon{width:38px;height:38px;border-radius:11px;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.adv-info{flex:1;}
+.adv-name{font-size:14px;font-weight:500;color:var(--bark);}
+.adv-meta{font-size:12px;color:var(--bark-light);margin-top:1px;}
+.adv-xp{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--amber-deep);}
+
+/* ===================== ACTIVE WALK ===================== */
+#screen-walk{background:var(--bark);}
+.walk-hdr{width:100%;padding:3rem 1.5rem 1.5rem;background:radial-gradient(ellipse at 50% 0%, #5A2218 0%, var(--bark) 70%);text-align:center;}
+.walk-type-lbl{font-size:11px;font-weight:500;letter-spacing:.15em;color:var(--paw-light);text-transform:uppercase;margin-bottom:.375rem;}
+.walk-dog-lbl{font-family:'Fraunces',serif;font-size:26px;font-weight:300;color:var(--cream);font-style:italic;}
+.walk-body{width:100%;padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.75rem;flex:1;}
+.timer-ring{position:relative;width:190px;height:190px;}
+.timer-ring svg{position:absolute;inset:0;transform:rotate(-90deg);}
+.timer-ring circle.track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:3;}
+.timer-ring circle.fill{fill:none;stroke:var(--paw);stroke-width:3;stroke-linecap:round;stroke-dasharray:565;stroke-dashoffset:565;transition:stroke-dashoffset 1s linear;}
+.timer-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.timer-time{font-family:'Fraunces',serif;font-size:44px;font-weight:300;color:var(--cream);letter-spacing:-.02em;line-height:1;}
+.timer-xp{font-size:14px;color:var(--amber);font-weight:500;margin-top:4px;}
+.walk-stats-row{display:flex;gap:2rem;}
+.wstat{text-align:center;}
+.wstat-val{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--cream);}
+.wstat-lbl{font-size:10px;color:var(--sand-dark);font-weight:300;letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.walk-actions{display:flex;gap:11px;width:100%;padding:0 1.5rem 2rem;}
+.btn-end{flex:1;padding:17px;background:var(--paw);border:none;border-radius:15px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-end:hover{background:var(--bark-light);}
+.btn-pause{width:54px;height:54px;border-radius:15px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);color:var(--cream);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
+.btn-pause:hover{background:rgba(255,255,255,.18);}
+
+/* ===================== REWARD ===================== */
+#screen-reward{background:var(--cream);overflow-y:auto;}
+.rew-hero{width:100%;background:var(--bark);padding:3.25rem 1.5rem 2.25rem;text-align:center;position:relative;overflow:hidden;}
+.rew-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.confetti-piece{position:absolute;width:7px;height:7px;border-radius:2px;animation:confettiFall linear forwards;}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(740deg);opacity:0}}
+.rew-won{font-family:'Fraunces',serif;font-size:15px;font-weight:300;color:var(--paw-light);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;}
+.rew-headline{font-family:'Fraunces',serif;font-size:32px;font-weight:400;color:var(--cream);line-height:1.2;font-style:italic;}
+.rew-headline em{color:var(--paw-light);font-style:normal;}
+.rew-subline{font-size:13px;color:var(--sand-dark);font-weight:300;margin-top:.5rem;}
+.rew-body{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.875rem;padding-bottom:2rem;}
+.xp-pop{background:#fff;border-radius:17px;padding:1.375rem;border:1px solid var(--sand-dark);text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .15s both;}
+@keyframes popIn{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+.xp-num{font-family:'Fraunces',serif;font-size:52px;font-weight:700;color:var(--amber);line-height:1;}
+.xp-lbl{font-size:11px;color:var(--bark-light);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+.streak-protected{background:#fff;border-radius:17px;padding:1rem 1.25rem;border:1px solid var(--sand-dark);display:flex;align-items:center;gap:.875rem;animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .25s both;}
+.sp-icon{font-size:30px;flex-shrink:0;}
+.sp-text{font-size:14px;font-weight:500;color:var(--bark);line-height:1.35;}
+.sp-sub{font-size:12px;color:var(--bark-light);margin-top:2px;font-weight:300;}
+.badge-unlock{background:linear-gradient(135deg,#2C1810,#6B3A2A);border-radius:17px;padding:1.125rem 1.25rem;display:flex;align-items:center;gap:.875rem;animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .35s both;}
+.bu-icon{font-size:38px;flex-shrink:0;}
+.bu-info{flex:1;}
+.bu-title{font-family:'Fraunces',serif;font-size:17px;font-weight:400;color:var(--cream);}
+.bu-desc{font-size:12px;color:var(--sand-dark);margin-top:2px;}
+.bu-new{background:var(--amber);color:var(--bark);font-size:10px;font-weight:700;letter-spacing:.07em;padding:3px 7px;border-radius:5px;text-transform:uppercase;}
+.next-ms{background:#fff;border-radius:17px;padding:1rem 1.25rem;border:1px solid var(--sand-dark);animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .4s both;}
+.nm-label{font-size:10px;color:var(--bark-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.nm-prog{height:4px;background:var(--sand-dark);border-radius:99px;overflow:hidden;margin-bottom:7px;}
+.nm-prog-fill{height:100%;background:var(--paw);border-radius:99px;}
+.nm-text{font-size:14px;font-weight:500;color:var(--bark);line-height:1.45;}
+.nm-text span{color:var(--paw);}
+/* Share card */
+.share-wrap{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .5s both;}
+.share-card{background:var(--bark);border-radius:17px;padding:1.375rem;text-align:center;position:relative;overflow:hidden;}
+.sc-radial{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 70%, #5A2218, var(--bark));pointer-events:none;}
+.sc-inner{position:relative;z-index:2;}
+.sc-paw{font-size:28px;margin-bottom:.375rem;}
+.sc-dog{font-family:'Fraunces',serif;font-size:24px;font-weight:400;color:var(--cream);font-style:italic;}
+.sc-type{font-size:10px;letter-spacing:.16em;color:var(--paw-light);text-transform:uppercase;margin:3px 0;}
+.sc-streak{font-family:'Fraunces',serif;font-size:46px;font-weight:700;color:var(--amber);line-height:1;}
+.sc-streak-lbl{font-size:11px;color:var(--sand-dark);letter-spacing:.07em;}
+.sc-tag{font-size:10px;color:rgba(255,255,255,.25);margin-top:.75rem;letter-spacing:.1em;}
+.btn-share{width:100%;padding:13px;margin-top:.625rem;background:#fff;border:none;border-radius:11px;color:var(--bark);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-share:hover{background:var(--sand);}
+/* Commitment */
+.commitment-card{background:var(--sand);border-radius:17px;padding:1.125rem 1.375rem;animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .58s both;}
+.commit-q{font-family:'Fraunces',serif;font-size:18px;font-weight:300;color:var(--bark);font-style:italic;margin-bottom:.75rem;}
+.btn-remind{width:100%;padding:13px;background:var(--paw);border:none;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-remind:hover{background:var(--bark-mid);}
+.btn-remind.set{background:var(--grass);cursor:default;}
+.forward-hook{font-family:'Fraunces',serif;font-size:16px;font-weight:300;color:var(--bark-light);font-style:italic;line-height:1.45;margin-top:.5rem;text-align:center;}
+.forward-hook span{color:var(--paw);font-weight:600;font-style:normal;}
+.btn-done{width:100%;padding:17px;background:var(--paw);border:none;border-radius:15px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .68s both;}
+.btn-done:hover{background:var(--bark-mid);}
+
+/* ===================== STORY/STATS TAB ===================== */
+#screen-story{background:var(--cream);}
+.story-scroll{overflow-y:auto;flex:1;padding-bottom:80px;}
+.story-hero{background:var(--bark);padding:2.75rem 1.5rem 1.75rem;position:relative;overflow:hidden;}
+.sh-radial{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 20%, #5A2218, var(--bark) 65%);pointer-events:none;}
+.sh-inner{position:relative;z-index:2;}
+.sh-eyebrow{font-size:11px;font-weight:300;letter-spacing:.1em;color:var(--paw-light);text-transform:uppercase;margin-bottom:.25rem;}
+.sh-headline{font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:var(--cream);font-style:italic;}
+.sh-sub{font-size:13px;color:var(--sand-dark);font-weight:300;margin-top:.375rem;line-height:1.5;}
+.story-section{padding:1.25rem 1.5rem .25rem;}
+.story-section-title{font-size:10px;font-weight:500;letter-spacing:.12em;color:var(--bark-light);text-transform:uppercase;margin-bottom:.875rem;}
+.story-big-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.25rem;}
+.sbs-card{background:#fff;border-radius:15px;padding:1.125rem 1.25rem;border:1px solid var(--sand-dark);}
+.sbs-val{font-family:'Fraunces',serif;font-size:32px;font-weight:700;color:var(--bark);line-height:1;}
+.sbs-lbl{font-size:12px;color:var(--bark-light);margin-top:4px;font-weight:300;line-height:1.3;}
+.story-row-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.srs-card{background:#fff;border-radius:13px;padding:.875rem 1rem;border:1px solid var(--sand-dark);text-align:center;}
+.srs-val{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--bark);}
+.srs-lbl{font-size:11px;color:var(--bark-light);font-weight:300;margin-top:3px;line-height:1.3;}
+.fav-type-card{background:#fff;border-radius:15px;padding:1.125rem 1.25rem;border:1px solid var(--sand-dark);display:flex;align-items:center;gap:1rem;}
+.fav-icon{font-size:36px;flex-shrink:0;}
+.fav-info{flex:1;}
+.fav-label{font-size:11px;color:var(--bark-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;}
+.fav-name{font-size:16px;font-weight:500;color:var(--bark);}
+.fav-sub{font-size:12px;color:var(--bark-light);font-weight:300;margin-top:2px;}
+/* Timeline */
+.timeline{position:relative;padding-left:1.5rem;}
+.tl-line{position:absolute;left:.9rem;top:0;bottom:0;width:1.5px;background:var(--sand-dark);}
+.tl-item{position:relative;padding:.75rem 0 .75rem 1.125rem;border-bottom:1px solid var(--sand-dark);}
+.tl-item:last-child{border-bottom:none;}
+.tl-dot{position:absolute;left:-.875rem;top:1.125rem;width:10px;height:10px;border-radius:50%;background:var(--paw);border:2px solid var(--cream);flex-shrink:0;}
+.tl-type{font-size:13px;font-weight:500;color:var(--bark);}
+.tl-meta{font-size:12px;color:var(--bark-light);margin-top:1px;}
+.tl-xp{font-size:12px;color:var(--amber-deep);font-weight:500;}
+/* Story badges */
+.badges-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.bm-card{background:#fff;border-radius:13px;padding:.75rem .5rem;border:1px solid var(--sand-dark);text-align:center;}
+.bm-card.locked{opacity:.4;}
+.bm-card.mystery .bm-icon{filter:grayscale(1);opacity:.25;}
+.bm-icon{font-size:26px;margin-bottom:3px;}
+.bm-name{font-size:10px;font-weight:500;color:var(--bark);line-height:1.25;}
+
+/* ===================== BADGES SCREEN ===================== */
+#screen-badges{background:var(--cream);}
+.screen-hdr{padding:2.75rem 1.5rem 1.25rem;background:#fff;border-bottom:1px solid var(--sand-dark);}
+.screen-hdr h1{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:var(--bark);font-style:italic;}
+.screen-hdr p{font-size:13px;color:var(--bark-light);margin-top:3px;}
+.badges-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:1.25rem 1.5rem;overflow-y:auto;padding-bottom:80px;}
+.badge-card{background:#fff;border-radius:15px;padding:1.125rem;border:1px solid var(--sand-dark);text-align:center;transition:transform .15s;}
+.badge-card:hover{transform:translateY(-2px);}
+.badge-card.locked{opacity:.42;}
+.badge-card.mystery .badge-card-icon{filter:grayscale(1);opacity:.25;}
+.badge-card-icon{font-size:34px;margin-bottom:.5rem;}
+.badge-card-name{font-size:13px;font-weight:500;color:var(--bark);margin-bottom:3px;}
+.badge-card-desc{font-size:11px;color:var(--bark-light);line-height:1.4;}
+
+/* ===================== RESPONSIVE ===================== */
+@media(min-width:480px){
+  .screen{max-width:390px;margin:0 auto;box-shadow:0 0 80px rgba(0,0,0,.14);}
+  body{background:#DDD5C5;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== ONBOARDING ===================== -->
+<div id="screen-onboard" class="screen active">
+  <div class="ob-radial"></div>
+  <div class="ob-stars" id="ob-stars"></div>
+  <div class="ob-content">
+    <div class="app-wordmark">PawStreak</div>
+    <div class="paw-hero">🐾</div>
+    <h1 class="ob-headline">Every adventure<br>tells a story.</h1>
+    <p class="ob-sub">Your dog is the main character.<br>You help them win the day.</p>
+    <label class="field-label" for="dog-name-input">Your dog's name</label>
+    <input class="text-input" id="dog-name-input" type="text" placeholder="Bailey" autocomplete="off"/>
+    <button class="btn-primary" id="ob-cta" onclick="startWithDog()">Start Bailey's Story →</button>
+    <div class="ob-skip" onclick="startWithDog()">skip for now</div>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div id="screen-dash" class="screen">
+
+  <div class="dash-scroll">
+    <!-- 1. Dog-first status hero -->
+    <div class="dog-status-hero">
+      <div class="dsh-radial"></div>
+      <div class="dsh-inner">
+        <div class="dsh-greeting" id="dash-greeting">Ready for today?</div>
+        <div class="dsh-name"><em id="dash-dog-name">Bailey</em></div>
+        <div class="dsh-status" id="dash-status">is waiting for today's adventure.</div>
+        <!-- 2. Streak -->
+        <div class="streak-bar">
+          <div class="streak-flame">🔥</div>
+          <div class="streak-meta">
+            <div class="streak-num" id="dash-streak-num">4</div>
+            <div class="streak-days">day adventure streak</div>
+          </div>
+          <div class="freeze-pill">
+            <div class="freeze-icon">🛡</div>
+            <div class="freeze-lbl">Freeze<br>ready</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- At-risk banner -->
+    <div class="risk-banner" id="risk-banner">
+      <div class="risk-icon">⚠️</div>
+      <div>
+        <div class="risk-text" id="risk-text">Bailey's streak ends today.</div>
+        <div class="risk-sub">Complete an adventure to keep it alive.</div>
+      </div>
+    </div>
+
+    <!-- Won banner -->
+    <div class="win-banner" id="win-banner">
+      <div class="risk-icon">🏆</div>
+      <div class="win-text" id="win-text">Bailey won the day. Streak protected.</div>
+    </div>
+
+    <!-- 3. Adventure launch -->
+    <div class="launch-zone">
+      <div class="section-label">Choose today's adventure</div>
+      <div class="chips" id="chips">
+        <div class="chip selected" data-type="Quick" data-emoji="⚡" onclick="selectChip(this)">
+          <div class="chip-icon">⚡</div>
+          <div class="chip-name">Quick Adventure</div>
+          <div class="chip-vibe">15–20 min, close to home</div>
+        </div>
+        <div class="chip" data-type="Park" data-emoji="🌳" onclick="selectChip(this)">
+          <div class="chip-icon">🌳</div>
+          <div class="chip-name">Park Adventure</div>
+          <div class="chip-vibe">Grass, sniffs, open space</div>
+        </div>
+        <div class="chip" data-type="Beach" data-emoji="🌊" onclick="selectChip(this)">
+          <div class="chip-icon">🌊</div>
+          <div class="chip-name">Beach Adventure</div>
+          <div class="chip-vibe">Sand, waves, salt air</div>
+        </div>
+        <div class="chip" data-type="Explore" data-emoji="🗺" onclick="selectChip(this)">
+          <div class="chip-icon">🗺</div>
+          <div class="chip-name">Explore New Spot</div>
+          <div class="chip-vibe">Somewhere totally new</div>
+        </div>
+      </div>
+      <!-- 4. Pick for Me -->
+      <button class="pick-btn" id="pick-btn" onclick="pickForMe()">🎲 Pick for me — what should we do today?</button>
+      <div class="suggestion-box" id="suggestion-box">
+        <div class="sugg-text" id="sugg-text"></div>
+        <button class="sugg-reroll" id="sugg-reroll" onclick="pickForMe()">again →</button>
+      </div>
+      <button class="btn-start" id="btn-start" onclick="handleStartBtn()">
+        <span>🐾</span>
+        <span id="start-btn-label">Start Bailey's Adventure</span>
+      </button>
+    </div>
+
+    <!-- 5. Lightweight stats -->
+    <div class="stats-lite">
+      <div class="sl-card">
+        <div class="sl-val" id="sl-today-dur">—</div>
+        <div class="sl-lbl">Today's time</div>
+      </div>
+      <div class="sl-card">
+        <div class="sl-val" id="sl-today-dist">—</div>
+        <div class="sl-lbl">Today's miles</div>
+      </div>
+      <div class="sl-card">
+        <div class="sl-val" id="sl-week">3</div>
+        <div class="sl-lbl">This week</div>
+      </div>
+      <div class="sl-card">
+        <div class="sl-val" id="sl-total">47</div>
+        <div class="sl-lbl">All time</div>
+      </div>
+    </div>
+
+    <!-- Milestone -->
+    <div class="milestone-card">
+      <div class="mc-top">
+        <div class="mc-label" id="mc-label">Next: Week Warrior</div>
+        <div class="mc-target" id="mc-target">4 / 7</div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="mc-fill" style="width:57%"></div></div>
+      <div class="mc-next" id="mc-next">3 more adventures and Bailey earns the Week Warrior badge 🏅</div>
+    </div>
+
+    <!-- 6. Recent adventures -->
+    <div class="recent-section">
+      <div class="section-label">Recent adventures</div>
+      <div class="adv-item"><div class="adv-icon">🌊</div><div class="adv-info"><div class="adv-name">Beach Adventure</div><div class="adv-meta">Bailey · Yesterday · 34 min · 2.1 mi</div></div><div class="adv-xp">+55</div></div>
+      <div class="adv-item"><div class="adv-icon">🌳</div><div class="adv-info"><div class="adv-name">Park Adventure</div><div class="adv-meta">Bailey · 2 days ago · 28 min · 1.6 mi</div></div><div class="adv-xp">+44</div></div>
+      <div class="adv-item"><div class="adv-icon">⚡</div><div class="adv-info"><div class="adv-name">Quick Adventure</div><div class="adv-meta">Bailey · 3 days ago · 18 min · 0.9 mi</div></div><div class="adv-xp">+27</div></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('dash')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-item" onclick="showScreen('badges')"><span class="nav-icon">🏅</span>Badges</button>
+    <button class="nav-item" onclick="showScreen('story')"><span class="nav-icon">📖</span>Story</button>
+    <button class="nav-item"><span class="nav-icon">👤</span>Profile</button>
+  </div>
+</div>
+
+<!-- ===================== ACTIVE WALK ===================== -->
+<div id="screen-walk" class="screen">
+  <div class="walk-hdr">
+    <div class="walk-type-lbl" id="walk-type-lbl">⚡ Quick Adventure</div>
+    <div class="walk-dog-lbl"><span id="walk-dog-lbl">Bailey</span>'s story is being written...</div>
+  </div>
+  <div class="walk-body">
+    <div class="timer-ring">
+      <svg viewBox="0 0 190 190" width="190" height="190">
+        <circle class="track" cx="95" cy="95" r="87"/>
+        <circle class="fill" id="timer-ring-fill" cx="95" cy="95" r="87"/>
+      </svg>
+      <div class="timer-center">
+        <div class="timer-time" id="walk-time">00:00</div>
+        <div class="timer-xp" id="walk-xp">+0 XP</div>
+      </div>
+    </div>
+    <div class="walk-stats-row">
+      <div class="wstat"><div class="wstat-val" id="walk-dist">0.0</div><div class="wstat-lbl">Miles</div></div>
+      <div class="wstat"><div class="wstat-val" id="walk-pace">—</div><div class="wstat-lbl">Pace</div></div>
+    </div>
+  </div>
+  <div class="walk-actions">
+    <button class="btn-pause">⏸</button>
+    <button class="btn-end" onclick="endWalk()">End Adventure →</button>
+  </div>
+</div>
+
+<!-- ===================== REWARD ===================== -->
+<div id="screen-reward" class="screen">
+  <div class="rew-hero">
+    <div class="rew-confetti" id="rew-confetti"></div>
+    <div class="rew-won">Bailey won the day</div>
+    <div class="rew-headline"><em id="r-dog">Bailey</em> crushed a <span id="r-type">Beach Adventure</span>!</div>
+    <div class="rew-subline" id="r-subline">Day 5 streak — adventure protected 🔥</div>
+  </div>
+  <div class="rew-body">
+    <!-- XP -->
+    <div class="xp-pop">
+      <div class="xp-num" id="r-xp">+42</div>
+      <div class="xp-lbl">XP earned this adventure</div>
+    </div>
+    <!-- Streak protected -->
+    <div class="streak-protected">
+      <div class="sp-icon">🔥</div>
+      <div>
+        <div class="sp-text" id="sp-text">Bailey protected a <strong id="sp-streak">5</strong>-day streak.</div>
+        <div class="sp-sub" id="sp-sub">+1 toward Week Warrior · 2 more to go</div>
+      </div>
+    </div>
+    <!-- Badge unlock (hidden unless earned) -->
+    <div class="badge-unlock" id="badge-unlock" style="display:none">
+      <div class="bu-icon" id="bu-icon">🏅</div>
+      <div class="bu-info">
+        <div class="bu-title" id="bu-title">Week Warrior</div>
+        <div class="bu-desc" id="bu-desc">Bailey went 7 days in a row.</div>
+      </div>
+      <div class="bu-new">New!</div>
+    </div>
+    <!-- Next milestone progress -->
+    <div class="next-ms">
+      <div class="nm-label">Next milestone</div>
+      <div class="nm-prog"><div class="nm-prog-fill" id="nm-fill" style="width:57%"></div></div>
+      <div class="nm-text" id="nm-text">3 more adventures and <span>Bailey earns the Week Warrior badge</span> 🏅</div>
+    </div>
+    <!-- Share card -->
+    <div class="share-wrap">
+      <div class="share-card">
+        <div class="sc-radial"></div>
+        <div class="sc-inner">
+          <div class="sc-paw">🐾</div>
+          <div class="sc-dog" id="sc-dog">Bailey</div>
+          <div class="sc-type" id="sc-type">Beach Adventure</div>
+          <div class="sc-streak" id="sc-streak">5</div>
+          <div class="sc-streak-lbl">day adventure streak</div>
+          <div class="sc-tag">PawStreak</div>
+        </div>
+      </div>
+      <button class="btn-share" onclick="shareCard()">📤 Share Bailey's streak</button>
+    </div>
+    <!-- Commitment -->
+    <div class="commitment-card">
+      <div class="commit-q">Same time tomorrow?</div>
+      <button class="btn-remind" id="btn-remind" onclick="setReminder()">🔔 Remind me</button>
+      <div class="forward-hook" id="forward-hook" style="display:none">Come back tomorrow — <span id="fh-day">Bailey's day 6</span> adventure is waiting.</div>
+    </div>
+    <button class="btn-done" onclick="finishReward()">Done — see you tomorrow 🐾</button>
+  </div>
+</div>
+
+<!-- ===================== STORY TAB ===================== -->
+<div id="screen-story" class="screen">
+  <div class="story-scroll">
+    <div class="story-hero">
+      <div class="sh-radial"></div>
+      <div class="sh-inner">
+        <div class="sh-eyebrow">The story so far</div>
+        <div class="sh-headline" id="story-headline">Bailey's Adventures</div>
+        <div class="sh-sub" id="story-sub">47 adventures · 38.2 miles covered · longest streak: 9 days</div>
+      </div>
+    </div>
+
+    <div class="story-section">
+      <div class="story-section-title">Bailey's numbers</div>
+      <div class="story-big-stats">
+        <div class="sbs-card">
+          <div class="sbs-val" id="st-total">47</div>
+          <div class="sbs-lbl">Adventures completed</div>
+        </div>
+        <div class="sbs-card">
+          <div class="sbs-val" id="st-miles">38.2</div>
+          <div class="sbs-lbl">Miles Bailey has covered</div>
+        </div>
+        <div class="sbs-card">
+          <div class="sbs-val" id="st-streak">4</div>
+          <div class="sbs-lbl">Current streak</div>
+        </div>
+        <div class="sbs-card">
+          <div class="sbs-val">9</div>
+          <div class="sbs-lbl">Longest streak ever</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-section">
+      <div class="story-section-title">This week</div>
+      <div class="story-row-stats">
+        <div class="srs-card">
+          <div class="srs-val" id="st-week-adv">3</div>
+          <div class="srs-lbl">Adventures this week</div>
+        </div>
+        <div class="srs-card">
+          <div class="srs-val">1h 20m</div>
+          <div class="srs-lbl">Time with Bailey</div>
+        </div>
+        <div class="srs-card">
+          <div class="srs-val">4.6</div>
+          <div class="srs-lbl">Miles this week</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-section">
+      <div class="story-section-title">Bailey's favourite adventure</div>
+      <div class="fav-type-card">
+        <div class="fav-icon">🌊</div>
+        <div class="fav-info">
+          <div class="fav-label">Most chosen</div>
+          <div class="fav-name">Beach Adventure</div>
+          <div class="fav-sub">18 out of 47 adventures</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-section">
+      <div class="story-section-title">Recent chapter</div>
+      <div class="timeline">
+        <div class="tl-line"></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-type">🌊 Beach Adventure</div><div class="tl-meta">Yesterday · 34 min · 2.1 mi</div><div class="tl-xp">Bailey earned +55 XP</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-type">🌳 Park Adventure</div><div class="tl-meta">2 days ago · 28 min · 1.6 mi</div><div class="tl-xp">Bailey earned +44 XP</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-type">⚡ Quick Adventure</div><div class="tl-meta">3 days ago · 18 min · 0.9 mi</div><div class="tl-xp">Bailey earned +27 XP</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-type">🗺 Explore New Spot</div><div class="tl-meta">4 days ago · 45 min · 2.8 mi</div><div class="tl-xp">Bailey earned +68 XP</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-type">🌊 Beach Adventure</div><div class="tl-meta">5 days ago · 30 min · 1.9 mi</div><div class="tl-xp">Bailey earned +50 XP</div></div>
+      </div>
+    </div>
+
+    <div class="story-section" style="padding-bottom:1.5rem;">
+      <div class="story-section-title">Bailey's badges</div>
+      <div class="badges-mini">
+        <div class="bm-card"><div class="bm-icon">🐾</div><div class="bm-name">First Step</div></div>
+        <div class="bm-card"><div class="bm-icon">🔥</div><div class="bm-name">3-Day Streak</div></div>
+        <div class="bm-card"><div class="bm-icon">🌊</div><div class="bm-name">Beach Dog</div></div>
+        <div class="bm-card locked"><div class="bm-icon">⚡</div><div class="bm-name">Week Warrior</div></div>
+        <div class="bm-card locked"><div class="bm-icon">🗺</div><div class="bm-name">Explorer</div></div>
+        <div class="bm-card locked"><div class="bm-icon">🌳</div><div class="bm-name">Park Regular</div></div>
+        <div class="bm-card mystery"><div class="bm-icon">❓</div><div class="bm-name">???</div></div>
+        <div class="bm-card mystery"><div class="bm-icon">❓</div><div class="bm-name">???</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('dash')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-item" onclick="showScreen('badges')"><span class="nav-icon">🏅</span>Badges</button>
+    <button class="nav-item active" onclick="showScreen('story')"><span class="nav-icon">📖</span>Story</button>
+    <button class="nav-item"><span class="nav-icon">👤</span>Profile</button>
+  </div>
+</div>
+
+<!-- ===================== BADGES SCREEN ===================== -->
+<div id="screen-badges" class="screen">
+  <div class="screen-hdr">
+    <h1 id="badges-headline">Bailey's Badges</h1>
+    <p>3 earned · 5 to discover</p>
+  </div>
+  <div class="badges-grid">
+    <div class="badge-card"><div class="badge-card-icon">🐾</div><div class="badge-card-name">First Step</div><div class="badge-card-desc">Bailey's very first adventure. It all starts here.</div></div>
+    <div class="badge-card"><div class="badge-card-icon">🔥</div><div class="badge-card-name">3-Day Streak</div><div class="badge-card-desc">Three adventures in a row. The habit is forming.</div></div>
+    <div class="badge-card"><div class="badge-card-icon">🌊</div><div class="badge-card-name">Beach Dog</div><div class="badge-card-desc">First beach adventure completed.</div></div>
+    <div class="badge-card locked"><div class="badge-card-icon">⚡</div><div class="badge-card-name">Week Warrior</div><div class="badge-card-desc">7-day streak — 3 more adventures to go.</div></div>
+    <div class="badge-card locked"><div class="badge-card-icon">🗺</div><div class="badge-card-name">Explorer</div><div class="badge-card-desc">Try an Explore New Spot adventure.</div></div>
+    <div class="badge-card locked"><div class="badge-card-icon">🌳</div><div class="badge-card-name">Park Regular</div><div class="badge-card-desc">Complete 5 park adventures.</div></div>
+    <div class="badge-card mystery"><div class="badge-card-icon">❓</div><div class="badge-card-name">???</div><div class="badge-card-desc">Try all 4 adventure types to reveal.</div></div>
+    <div class="badge-card mystery"><div class="badge-card-icon">❓</div><div class="badge-card-name">???</div><div class="badge-card-desc">Keep adventuring to discover.</div></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('dash')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-item active" onclick="showScreen('badges')"><span class="nav-icon">🏅</span>Badges</button>
+    <button class="nav-item" onclick="showScreen('story')"><span class="nav-icon">📖</span>Story</button>
+    <button class="nav-item"><span class="nav-icon">👤</span>Profile</button>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let dogName = 'Bailey';
+let currentStreak = 4;
+let totalAdventures = 47;
+let todayAdventureDone = false;
+let selectedType = 'Quick';
+let selectedEmoji = '⚡';
+let walkInterval = null;
+let walkSeconds = 0;
+let rerollCount = 0;
+let lastSuggIdx = -1;
+let reminderSet = false;
+
+const suggestions = [
+  { text: 'Bailey needs a sniff-heavy adventure today. Head to the park and let her lead.', type: 'Park', emoji: '🌳' },
+  { text: 'Quick adventure before dinner — the streak stays safe and Bailey gets her run.', type: 'Quick', emoji: '⚡' },
+  { text: 'Find one place Bailey has never sniffed before. Today\'s the day.', type: 'Explore', emoji: '🗺' },
+  { text: 'Beach time. Sand between the paws. Bailey earns this one.', type: 'Beach', emoji: '🌊' },
+  { text: 'Take the long way home. Bailey earns the extra smells.', type: 'Quick', emoji: '⚡' },
+  { text: 'That park you keep driving past? Let Bailey finally check it out.', type: 'Park', emoji: '🌳' },
+  { text: 'Let Bailey lead the route today. Wherever she pulls — go there.', type: 'Explore', emoji: '🗺' },
+  { text: 'Sunrise beach walk. The streak deserves the view.', type: 'Beach', emoji: '🌊' },
+  { text: 'Pick the street with the most interesting smells. Bailey will lose her mind.', type: 'Explore', emoji: '🗺' },
+  { text: 'A quiet park morning before the crowds. Just you and the dog.', type: 'Park', emoji: '🌳' },
+  { text: 'Short and sharp — Bailey wins the day in under 20 minutes.', type: 'Quick', emoji: '⚡' },
+  { text: 'That beachfront path you love? Make it Bailey\'s again today.', type: 'Beach', emoji: '🌊' },
+];
+
+// ========== UTILS ==========
+function dn(fallback){ return dogName || fallback || 'Your dog'; }
+
+function updateAllDogNames(){
+  document.querySelectorAll('[data-dogname]').forEach(el => el.textContent = dn());
+  document.getElementById('dash-dog-name').textContent = dn();
+  document.getElementById('walk-dog-lbl').textContent = dn();
+  document.getElementById('r-dog').textContent = dn();
+  document.getElementById('sc-dog').textContent = dn();
+  document.getElementById('start-btn-label').textContent = `Start ${dn()}'s Adventure`;
+  document.getElementById('badges-headline').textContent = `${dn()}'s Badges`;
+  document.getElementById('story-headline').textContent = `${dn()}'s Adventures`;
+  const streak = currentStreak;
+  document.getElementById('story-sub').textContent = `47 adventures · 38.2 miles covered · longest streak: 9 days`;
+}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+}
+
+function refreshDashState(){
+  const statusEl = document.getElementById('dash-status');
+  const riskBanner = document.getElementById('risk-banner');
+  const winBanner = document.getElementById('win-banner');
+  const btnStart = document.getElementById('btn-start');
+  const startLabel = document.getElementById('start-btn-label');
+  const riskText = document.getElementById('risk-text');
+  if(todayAdventureDone){
+    statusEl.textContent = 'won the day. ✓';
+    statusEl.className = 'dsh-status won';
+    riskBanner.classList.add('hidden');
+    winBanner.classList.add('visible');
+    document.getElementById('win-text').textContent = `${dn()} won the day. Streak protected.`;
+    btnStart.classList.add('won');
+    startLabel.textContent = `${dn()} won today 🏆`;
+  } else {
+    statusEl.textContent = 'is waiting for today\'s adventure.';
+    statusEl.className = 'dsh-status';
+    riskBanner.classList.remove('hidden');
+    winBanner.classList.remove('visible');
+    riskText.textContent = `${dn()}'s streak ends today.`;
+    btnStart.classList.remove('won');
+    startLabel.textContent = `Start ${dn()}'s Adventure`;
+  }
+}
+
+// ========== ONBOARDING ==========
+function generateStars(){
+  const c = document.getElementById('ob-stars');
+  for(let i=0;i<32;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*3+1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*2}s`;
+    c.appendChild(s);
+  }
+}
+
+function startWithDog(){
+  const input = document.getElementById('dog-name-input');
+  const raw = input.value.trim();
+  dogName = raw || 'Your dog';
+  updateAllDogNames();
+  refreshDashState();
+  showScreen('dash');
+  document.querySelector('#screen-dash .nav-item:first-child').classList.add('active');
+}
+
+document.getElementById('dog-name-input').addEventListener('input', function(){
+  const n = this.value.trim() || 'Bailey';
+  document.getElementById('ob-cta').textContent = `Start ${n}'s Story →`;
+});
+document.getElementById('dog-name-input').addEventListener('keydown', e => { if(e.key==='Enter') startWithDog(); });
+
+// ========== CHIPS ==========
+function selectChip(el){
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = el.dataset.type;
+  selectedEmoji = el.dataset.emoji;
+  document.getElementById('suggestion-box').classList.remove('visible');
+  rerollCount = 0;
+  document.getElementById('sugg-reroll').style.display='';
+}
+
+// ========== PICK FOR ME ==========
+function pickForMe(){
+  if(rerollCount >= 2){
+    document.getElementById('sugg-reroll').style.display='none';
+  }
+  rerollCount++;
+  let idx;
+  do { idx = Math.floor(Math.random()*suggestions.length); } while(idx === lastSuggIdx);
+  lastSuggIdx = idx;
+  const s = suggestions[idx];
+  document.getElementById('sugg-text').textContent = s.text;
+  document.getElementById('suggestion-box').classList.add('visible');
+  if(rerollCount >= 2) document.getElementById('sugg-reroll').style.display='none';
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('selected');
+    if(c.dataset.type === s.type) c.classList.add('selected');
+  });
+  selectedType = s.type;
+  selectedEmoji = s.emoji;
+}
+
+// ========== WALK ==========
+function handleStartBtn(){
+  if(todayAdventureDone) return;
+  startWalk();
+}
+
+function startWalk(){
+  document.getElementById('walk-type-lbl').textContent = selectedEmoji + ' ' + selectedType + ' Adventure';
+  document.getElementById('walk-dog-lbl').textContent = dn();
+  walkSeconds = 0;
+  clearInterval(walkInterval);
+  walkInterval = setInterval(updateWalkTimer, 1000);
+  showScreen('walk');
+}
+
+function updateWalkTimer(){
+  walkSeconds++;
+  const m = Math.floor(walkSeconds/60).toString().padStart(2,'0');
+  const s = (walkSeconds%60).toString().padStart(2,'0');
+  document.getElementById('walk-time').textContent = `${m}:${s}`;
+  const xp = Math.floor((walkSeconds/60)*5);
+  document.getElementById('walk-xp').textContent = `+${xp} XP`;
+  const dist = (walkSeconds*0.00042).toFixed(2);
+  document.getElementById('walk-dist').textContent = dist;
+  const distF = parseFloat(dist);
+  if(distF > 0.05){
+    const paceMin = Math.floor((walkSeconds/60)/distF);
+    document.getElementById('walk-pace').textContent = paceMin > 0 && paceMin < 99 ? `${paceMin}'` : '—';
+  }
+  const offset = 547 - (547 * Math.min(walkSeconds,3600)/3600);
+  document.getElementById('timer-ring-fill').style.strokeDashoffset = offset;
+}
+
+function endWalk(){
+  clearInterval(walkInterval);
+  const minutes = Math.floor(walkSeconds/60);
+  const dist = parseFloat((walkSeconds*0.00042).toFixed(2));
+  const xp = Math.max(Math.floor(minutes*5 + dist*10), 12);
+  const newStreak = currentStreak + 1;
+  totalAdventures++;
+  todayAdventureDone = true;
+
+  // Update reward screen
+  document.getElementById('r-dog').textContent = dn();
+  document.getElementById('r-type').textContent = selectedEmoji + ' ' + selectedType + ' Adventure';
+  document.getElementById('r-subline').textContent = `Day ${newStreak} streak — adventure protected 🔥`;
+  document.getElementById('r-xp').textContent = `+${xp}`;
+  document.getElementById('sp-text').innerHTML = `${dn()} protected a <strong>${newStreak}</strong>-day streak.`;
+  const toWeekWarrior = Math.max(7 - newStreak, 0);
+  document.getElementById('sp-sub').textContent = toWeekWarrior > 0
+    ? `+1 toward Week Warrior · ${toWeekWarrior} more to go`
+    : `Week Warrior unlocked!`;
+  document.getElementById('sc-dog').textContent = dn();
+  document.getElementById('sc-type').textContent = selectedType + ' Adventure';
+  document.getElementById('sc-streak').textContent = newStreak;
+  document.getElementById('nm-text').innerHTML = toWeekWarrior > 0
+    ? `${toWeekWarrior} more ${toWeekWarrior===1?'adventure':'adventures'} and <span>${dn()} earns the Week Warrior badge</span> 🏅`
+    : `<span>${dn()} is a Week Warrior.</span> Next: 10-day legend 🏆`;
+  const fillPct = Math.min((newStreak/7)*100, 100);
+  document.getElementById('nm-fill').style.width = fillPct + '%';
+
+  // Forward hook
+  document.getElementById('fh-day').textContent = `${dn()}'s day ${newStreak+1}`;
+
+  // Reminder reset
+  reminderSet = false;
+  document.getElementById('btn-remind').textContent = '🔔 Remind me';
+  document.getElementById('btn-remind').classList.remove('set');
+  document.getElementById('forward-hook').style.display = 'none';
+
+  // Badge check
+  if(newStreak === 7){
+    document.getElementById('badge-unlock').style.display='flex';
+    document.getElementById('bu-icon').textContent = '⚡';
+    document.getElementById('bu-title').textContent = 'Week Warrior';
+    document.getElementById('bu-desc').textContent = `${dn()} went 7 days in a row. Unstoppable.`;
+  } else {
+    document.getElementById('badge-unlock').style.display='none';
+  }
+
+  // Update streak + stats
+  currentStreak = newStreak;
+  document.getElementById('dash-streak-num').textContent = newStreak;
+  document.getElementById('sl-today-dur').textContent = `${minutes}m`;
+  document.getElementById('sl-today-dist').textContent = dist.toFixed(1);
+  document.getElementById('sl-total').textContent = totalAdventures;
+  document.getElementById('st-total').textContent = totalAdventures;
+  document.getElementById('st-streak').textContent = newStreak;
+
+  // Update milestone
+  document.getElementById('mc-label').textContent = newStreak >= 7 ? 'Next: 10-Day Legend' : 'Next: Week Warrior';
+  document.getElementById('mc-target').textContent = `${Math.min(newStreak,7)} / 7`;
+  document.getElementById('mc-fill').style.width = Math.min((newStreak/7)*100,100)+'%';
+  document.getElementById('mc-next').textContent = toWeekWarrior > 0
+    ? `${toWeekWarrior} more ${toWeekWarrior===1?'adventure':'adventures'} and ${dn()} earns the Week Warrior badge 🏅`
+    : `${dn()} is a Week Warrior. Next milestone: 10-day legend.`;
+
+  spawnConfetti();
+  showScreen('reward');
+  refreshDashState();
+}
+
+// ========== REWARD ACTIONS ==========
+function setReminder(){
+  if(reminderSet) return;
+  reminderSet = true;
+  const btn = document.getElementById('btn-remind');
+  btn.textContent = `Reminder set — ${dn()}'s next adventure is waiting.`;
+  btn.classList.add('set');
+  document.getElementById('forward-hook').style.display = 'block';
+}
+
+function shareCard(){
+  const streak = currentStreak;
+  const shareText = `${dn()} just protected a ${streak}-day adventure streak 🐾🔥\nTrying not to let ${dogName === 'Your dog' ? 'them' : 'her'} down tomorrow. #PawStreak`;
+  if(navigator.share){
+    navigator.share({ title: `${dn()}'s ${selectedType} Adventure`, text: shareText });
+  } else {
+    navigator.clipboard?.writeText(shareText)
+      .then(() => alert('Copied! Paste it anywhere.'))
+      .catch(() => {
+        prompt('Copy this to share:', shareText);
+      });
+  }
+}
+
+function finishReward(){
+  showScreen('dash');
+  document.querySelector('#screen-dash .nav-item:first-child').classList.add('active');
+  document.getElementById('suggestion-box').classList.remove('visible');
+  rerollCount = 0;
+  document.getElementById('sugg-reroll').style.display = '';
+}
+
+// ========== CONFETTI ==========
+function spawnConfetti(){
+  const c = document.getElementById('rew-confetti');
+  c.innerHTML = '';
+  const colors = ['#E85A20','#E8A830','#7CB87A','#3A7AAA','#C8503A','#F5EFE0','#D4A020'];
+  for(let i=0;i<44;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `left:${Math.random()*100}%;top:-12px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;animation-duration:${1.4+Math.random()*2.2}s;animation-delay:${Math.random()*0.6}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    c.appendChild(p);
+  }
+}
+
+// ========== INIT ==========
+generateStars();
+refreshDashState();
+</script>
+</body>
+</html>
