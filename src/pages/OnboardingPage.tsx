@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { getEnvironmentForCoords } from '../data/zipEnvironments'
 import { normalizeZip } from '../data/localAdventureEngine'
@@ -355,6 +355,17 @@ export function OnboardingPage() {
                 {googleNote}
               </p>
             ) : null}
+            <p className='mt-2 text-[11px] uppercase tracking-[0.18em] text-[var(--text-3)]'>
+              By continuing you agree to our{' '}
+              <Link to='/terms' className='underline-offset-2 hover:underline'>
+                Terms
+              </Link>{' '}
+              &amp;{' '}
+              <Link to='/privacy' className='underline-offset-2 hover:underline'>
+                Privacy
+              </Link>
+              .
+            </p>
           </div>
         ) : null}
 

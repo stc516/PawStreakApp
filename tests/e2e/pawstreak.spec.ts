@@ -221,6 +221,18 @@ test('Share Adventure fallback/native flow does not crash', async ({ page }) => 
   await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
 })
 
+test('legal pages render and footer links navigate', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'LegalDog', zip: '92104' })
+
+  await page.getByTestId('footer-privacy-link').click()
+  await expect(page).toHaveURL(/\/privacy$/)
+  await expect(page.getByRole('heading', { name: /Privacy, the short version/ })).toBeVisible()
+
+  await page.getByRole('link', { name: 'Terms', exact: true }).first().click()
+  await expect(page).toHaveURL(/\/terms$/)
+  await expect(page.getByRole('heading', { name: /Terms of using PawStreak/ })).toBeVisible()
+})
+
 test('no console errors during main flow', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
   await completeOnboarding(page, { dogName: 'ConsoleDog', zip: '92104' })

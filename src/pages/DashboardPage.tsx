@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
+import { LegalFooter } from '../components/legal/LegalFooter'
 import { useAppState } from '../hooks/useAppState'
 import { personalityExtrasLabel, primaryPersonalityLabel } from '../lib/dogIdentity'
 import { achievementSummary, buildLocalLeaderboard, leaderboardRank } from '../lib/gamification'
@@ -397,6 +398,8 @@ export function DashboardPage() {
         </div>
 
         <div className='h-5' />
+
+        <LegalFooter />
       </div>
       <BottomNav />
     </section>

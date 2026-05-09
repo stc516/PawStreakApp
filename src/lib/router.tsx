@@ -5,8 +5,10 @@ import { BadgesPage } from '../pages/BadgesPage'
 import { CharacterMomentPage } from '../pages/CharacterMomentPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
+import { PrivacyPage } from '../pages/PrivacyPage'
 import { RewardPage } from '../pages/RewardPage'
 import { StoryPage } from '../pages/StoryPage'
+import { TermsPage } from '../pages/TermsPage'
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +42,14 @@ export const router = createBrowserRouter([
   {
     path: '/packs',
     element: <BadgesPage />,
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPage />,
+  },
+  {
+    path: '/terms',
+    element: <TermsPage />,
   },
   {
     path: '*',
