@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getEnvironmentForCoords } from '../data/zipEnvironments'
@@ -10,6 +10,8 @@ import type {
   DogPersonalityId,
   NotificationCadence,
 } from '../types'
+
+const TOTAL_STEPS = 8
 
 const PERSONALITY_OPTIONS: { id: DogPersonalityId; label: string }[] = [
   { id: 'social', label: '🐾 The Social Butterfly' },
@@ -36,6 +38,12 @@ const OWNER_GOAL_OPTIONS = [
   'New experiences',
 ] as const
 
+const SAMPLE_ADVENTURES = [
+  { emoji: '🐾', title: 'Neighborhood Sniffari', sub: 'Nose-led, no script' },
+  { emoji: '☕', title: 'Coffee Crawl', sub: 'Café loop · your blocks' },
+  { emoji: '🌅', title: 'Sunset Stroll', sub: 'Salt mist · big horizon' },
+] as const
+
 function chipButtonClass(active: boolean) {
   return [
     'rounded-xl border px-3 py-2.5 text-left text-sm transition-colors',
@@ -51,7 +59,9 @@ export function OnboardingPage() {
 
   const [step, setStep] = useState(1)
 
-  const [name, setName] = useState(state.dogProfile.name || '')
+  const initialDogName =
+    state.dogProfile.name && state.dogProfile.name !== 'Your dog' ? state.dogProfile.name : ''
+  const [name, setName] = useState(initialDogName)
   const [breed, setBreed] = useState(state.dogProfile.breed || '')
   const [ageRaw, setAgeRaw] = useState(
     state.dogProfile.age != null ? String(state.dogProfile.age) : '',
@@ -70,11 +80,19 @@ export function OnboardingPage() {
   const [morningTime, setMorningTime] = useState(state.notificationPrefs.morningTime || '07:00')
   const [eveningTime, setEveningTime] = useState(state.notificationPrefs.eveningTime || '19:00')
 
+  const [googleNote, setGoogleNote] = useState<string | null>(null)
+
   useEffect(() => {
     if (state.onboardingComplete) {
       navigate('/app')
     }
   }, [navigate, state.onboardingComplete])
+
+  useEffect(() => {
+    if (!googleNote) return
+    const t = window.setTimeout(() => setGoogleNote(null), 4500)
+    return () => window.clearTimeout(t)
+  }, [googleNote])
 
   function togglePersonality(id: DogPersonalityId) {
     setPersonality((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]))
@@ -109,12 +127,17 @@ export function OnboardingPage() {
     )
   }
 
+  const trimmedName = name.trim()
+  const dogDisplayLower = trimmedName || 'your dog'
+  const dogDisplayUpper = trimmedName || 'Your dog'
+  const possessiveUpper = trimmedName ? `${trimmedName}'s` : `Your dog's`
+
   function canProceed(): boolean {
-    if (step === 1) return name.trim().length > 0
-    if (step === 3) return energyLevel !== null
-    if (step === 5) {
+    if (step === 5) return energyLevel !== null
+    if (step === 7) {
       const zipOk = normalizeZip(homeZip).length === 5
-      const coordsOk = homeLat != null && homeLng != null && Number.isFinite(homeLat) && Number.isFinite(homeLng)
+      const coordsOk =
+        homeLat != null && homeLng != null && Number.isFinite(homeLat) && Number.isFinite(homeLng)
       return coordsOk || zipOk
     }
     return true
@@ -122,7 +145,7 @@ export function OnboardingPage() {
 
   function next() {
     if (!canProceed()) return
-    if (step < 6) setStep((s) => s + 1)
+    if (step < TOTAL_STEPS) setStep((s) => s + 1)
   }
 
   function back() {
@@ -130,12 +153,13 @@ export function OnboardingPage() {
   }
 
   function finish() {
+    if (!canProceed()) return
     const ageParsed = ageRaw.trim() === '' ? null : Number.parseInt(ageRaw, 10)
     const age = ageParsed != null && !Number.isNaN(ageParsed) && ageParsed >= 0 ? ageParsed : null
 
     completeOnboarding({
       dogProfile: {
-        name: name.trim(),
+        name: trimmedName,
         breed: breed.trim(),
         age,
         personality,
@@ -156,44 +180,198 @@ export function OnboardingPage() {
     navigate('/app')
   }
 
-  const dogDisplay = name.trim() || 'your dog'
   const zipResolution = resolveUserEnvironment(homeZip)
+
+  const primaryLabel = useMemo(() => {
+    if (step === 1) return trimmedName ? `Meet ${trimmedName} →` : `Let's go →`
+    if (step === 2) {
+      return trimmedName
+        ? `Build ${trimmedName}'s adventure profile →`
+        : `Build your dog's adventure profile →`
+    }
+    if (step === TOTAL_STEPS) return 'Start PawStreak'
+    return 'Continue'
+  }, [step, trimmedName])
+
+  function onPrimary() {
+    if (step === TOTAL_STEPS) {
+      finish()
+    } else {
+      next()
+    }
+  }
+
+  const showStepHeader = step >= 3
 
   return (
     <section
       className='screen active flex min-h-screen flex-col bg-[var(--bg)] px-5 pb-10 pt-8'
       style={{ fontFamily: 'var(--fb), DM Sans, sans-serif' }}
+      data-testid={
+        step === 1
+          ? 'onboarding-welcome'
+          : step === 2
+            ? 'first-adventure-intro'
+            : step === 3
+              ? 'dog-details-step'
+              : `onboarding-step-${step}`
+      }
     >
-      <div className='mb-6 flex items-center justify-between'>
-        <span className='text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]'>
-          Step {step} of 6
-        </span>
-        {step > 1 ? (
-          <button type='button' className='text-sm text-[var(--text-2)]' onClick={back}>
+      {showStepHeader ? (
+        <div className='mb-6 flex items-center justify-between'>
+          <span className='text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]'>
+            Step {step} of {TOTAL_STEPS}
+          </span>
+          <button
+            type='button'
+            className='text-sm text-[var(--text-2)]'
+            onClick={back}
+            data-testid='onboarding-back-button'
+          >
             ← Back
           </button>
-        ) : (
-          <span />
-        )}
-      </div>
+        </div>
+      ) : null}
 
       <div className='flex flex-1 flex-col'>
         {step === 1 ? (
-          <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
-              Dog profile
+          <div className='mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-7 text-center'>
+            <div className='text-[11px] font-bold uppercase tracking-[0.32em] text-[var(--text-2)]'>
+              PawStreak
+            </div>
+            <div
+              aria-hidden
+              className='select-none text-[64px] leading-none drop-shadow-[0_0_22px_var(--orange-glow)]'
+            >
+              🐺
+            </div>
+            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-[28px] font-semibold italic leading-[1.15] text-[var(--text)]'>
+              Your dog&apos;s daily adventure starts here.
             </h1>
-            <p className='mt-2 text-sm text-[var(--text-2)]'>Basics so PawStreak feels personal.</p>
-            <label className='mt-6 block text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)]'>
-              Name *
-            </label>
-            <input
-              className='inp mt-2'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Dog's name"
-              autoComplete='nickname'
-            />
+            <div className='w-full'>
+              <label
+                htmlFor='dog-name-input'
+                className='block text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)]'
+              >
+                What&apos;s your dog&apos;s name?
+              </label>
+              <input
+                id='dog-name-input'
+                data-testid='dog-name-input'
+                className='inp mt-2 text-center'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder='Bailey'
+                autoComplete='nickname'
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onPrimary()
+                }}
+              />
+            </div>
+            <div className='w-full'>
+              <button
+                type='button'
+                className='btn-primary w-full'
+                onClick={onPrimary}
+                data-testid='onboarding-primary-button'
+              >
+                {primaryLabel}
+              </button>
+              <p className='mt-3 text-[11px] uppercase tracking-[0.18em] text-[var(--text-3)]'>
+                Free forever · no credit card
+              </p>
+            </div>
+            <div className='flex w-full items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-[var(--text-3)]'>
+              <span className='h-px flex-1 bg-[color:var(--border-md)]' />
+              <span>or</span>
+              <span className='h-px flex-1 bg-[color:var(--border-md)]' />
+            </div>
+            <button
+              type='button'
+              data-testid='onboarding-google-button'
+              onClick={() => {
+                setGoogleNote('Google sign-in coming soon — you can start with your dog for now.')
+              }}
+              className='flex w-full items-center justify-center gap-2 rounded-xl border border-[color:var(--border-md)] bg-[var(--bg-elevated)] px-4 py-3 text-sm font-semibold text-[var(--text)] transition-colors hover:bg-[color:rgba(255,255,255,0.04)]'
+            >
+              <span aria-hidden className='text-base'>
+                G
+              </span>
+              Continue with Google
+            </button>
+            {googleNote ? (
+              <p
+                role='status'
+                aria-live='polite'
+                className='-mt-2 text-xs text-[var(--text-2)]'
+              >
+                {googleNote}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {step === 2 ? (
+          <div className='flex flex-1 flex-col'>
+            <div className='text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--text-2)]'>
+              {dogDisplayUpper}
+            </div>
+            <h1 className='mt-3 font-[family-name:var(--fd),Fraunces,serif] text-[28px] font-semibold italic leading-[1.15] text-[var(--text)]'>
+              {possessiveUpper} first adventure is waiting.
+            </h1>
+            <p className='mt-3 text-sm leading-relaxed text-[var(--text-2)]'>
+              PawStreak turns daily walks, coffee runs, patios, parks, trails, and weird little
+              neighborhood loops into adventures worth remembering.
+            </p>
+            <div className='mt-7 flex flex-col gap-3'>
+              {SAMPLE_ADVENTURES.map((adv) => (
+                <div
+                  key={adv.title}
+                  className='flex items-center gap-3 rounded-2xl border border-[color:var(--border)] bg-[var(--bg-elevated)] px-4 py-3'
+                >
+                  <span aria-hidden className='text-2xl leading-none'>
+                    {adv.emoji}
+                  </span>
+                  <div className='min-w-0'>
+                    <div className='text-sm font-semibold text-[var(--text)]'>{adv.title}</div>
+                    <div className='text-[12px] text-[var(--text-2)]'>{adv.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 3 ? (
+          <>
+            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-[24px] font-semibold italic text-[var(--text)]'>
+              {trimmedName
+                ? `Tell us a little more about ${trimmedName}.`
+                : `Tell us a little more about your dog.`}
+            </h1>
+            <p className='mt-2 text-sm text-[var(--text-2)]'>All optional — you can edit later.</p>
+
+            {!trimmedName ? (
+              <>
+                <label
+                  htmlFor='dog-name-input-step3'
+                  className='mt-6 block text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)]'
+                >
+                  Dog&apos;s name
+                </label>
+                <input
+                  id='dog-name-input-step3'
+                  data-testid='dog-name-input'
+                  className='inp mt-2'
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder='Bailey'
+                  autoComplete='nickname'
+                />
+              </>
+            ) : null}
+
             <label className='mt-4 block text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)]'>
               Breed
             </label>
@@ -216,7 +394,7 @@ export function OnboardingPage() {
           </>
         ) : null}
 
-        {step === 2 ? (
+        {step === 4 ? (
           <>
             <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
               Personality
@@ -237,7 +415,7 @@ export function OnboardingPage() {
           </>
         ) : null}
 
-        {step === 3 ? (
+        {step === 5 ? (
           <>
             <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
               Energy level
@@ -258,7 +436,7 @@ export function OnboardingPage() {
           </>
         ) : null}
 
-        {step === 4 ? (
+        {step === 6 ? (
           <>
             <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
               Your goals
@@ -279,7 +457,7 @@ export function OnboardingPage() {
           </>
         ) : null}
 
-        {step === 5 ? (
+        {step === 7 ? (
           <>
             <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
               Home base
@@ -287,7 +465,12 @@ export function OnboardingPage() {
             <p className='mt-3 text-sm leading-relaxed text-[var(--text-2)]'>
               So adventures feel local and real. Share location (approximate is fine) or enter your ZIP.
             </p>
-            <button type='button' className='btn-primary mt-6' onClick={requestLocation} disabled={geoStatus === 'loading'}>
+            <button
+              type='button'
+              className='btn-primary mt-6'
+              onClick={requestLocation}
+              disabled={geoStatus === 'loading'}
+            >
               {geoStatus === 'loading' ? 'Locating…' : 'Use my location'}
             </button>
             {geoStatus === 'ok' ? (
@@ -324,10 +507,10 @@ export function OnboardingPage() {
           </>
         ) : null}
 
-        {step === 6 ? (
+        {step === 8 ? (
           <>
             <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
-              How should we keep {dogDisplay} on track?
+              How should we keep {dogDisplayLower} on track?
             </h1>
             <div className='mt-6 flex flex-col gap-2'>
               {(
@@ -369,17 +552,19 @@ export function OnboardingPage() {
         ) : null}
       </div>
 
-      <div className='mt-8'>
-        {step < 6 ? (
-          <button type='button' className='btn-primary' onClick={next} disabled={!canProceed()}>
-            Continue
+      {step !== 1 ? (
+        <div className='mt-8'>
+          <button
+            type='button'
+            className='btn-primary'
+            onClick={onPrimary}
+            disabled={!canProceed()}
+            data-testid='onboarding-primary-button'
+          >
+            {primaryLabel}
           </button>
-        ) : (
-          <button type='button' className='btn-primary' onClick={finish}>
-            Start PawStreak
-          </button>
-        )}
-      </div>
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -16,24 +16,43 @@ async function clearStorageAndOpen(page: Page) {
   await page.goto('/')
 }
 
+async function advancePrimary(page: Page) {
+  await page.getByTestId('onboarding-primary-button').click()
+}
+
 async function completeOnboarding(page: Page, options: { dogName: string; zip: string }) {
   await clearStorageAndOpen(page)
 
-  await page.getByPlaceholder("Dog's name").fill(options.dogName)
-  await page.getByRole('button', { name: 'Continue' }).click()
+  // Step 1 — Welcome / Dog Name
+  await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
+  await page.getByTestId('dog-name-input').fill(options.dogName)
+  await advancePrimary(page)
 
+  // Step 2 — First Adventure Intro
+  await expect(page.getByTestId('first-adventure-intro')).toBeVisible()
+  await advancePrimary(page)
+
+  // Step 3 — More Dog Details (skip optional fields)
+  await expect(page.getByTestId('dog-details-step')).toBeVisible()
+  await advancePrimary(page)
+
+  // Step 4 — Personality
   await page.getByRole('button', { name: /Social Butterfly/ }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
 
+  // Step 5 — Energy
   await page.getByRole('button', { name: /Steady Adventurer/ }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
 
-  await page.getByRole('button', { name: 'Continue' }).click()
+  // Step 6 — Goals (skip)
+  await advancePrimary(page)
 
+  // Step 7 — Location / ZIP
   await page.getByPlaceholder('92107').fill(options.zip)
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
 
-  await page.getByRole('button', { name: 'Start PawStreak' }).click()
+  // Step 8 — Reminders → finish
+  await advancePrimary(page)
   await expect(page).toHaveURL(/\/app/)
 }
 
@@ -41,17 +60,31 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
   await clearStorageAndOpen(page)
 
-  await page.getByPlaceholder("Dog's name").fill('TestDog')
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
+  await page.getByTestId('dog-name-input').fill('TestDog')
+  await expect(page.getByTestId('onboarding-primary-button')).toHaveText(/Meet TestDog/)
+  await advancePrimary(page)
+
+  await expect(page.getByTestId('first-adventure-intro')).toBeVisible()
+  await expect(page.getByTestId('onboarding-primary-button')).toHaveText(
+    /Build TestDog's adventure profile/,
+  )
+  await advancePrimary(page)
+
+  await expect(page.getByTestId('dog-details-step')).toBeVisible()
+  await advancePrimary(page)
+
   await page.getByRole('button', { name: /Social Butterfly/ }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
   await page.getByRole('button', { name: /Steady Adventurer/ }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
+  await advancePrimary(page) // goals (skip)
+
   await page.getByPlaceholder('92107').fill('92104')
   await expect(page.getByText('Local tuning ready for')).toBeVisible()
-  await page.getByRole('button', { name: 'Continue' }).click()
-  await page.getByRole('button', { name: 'Start PawStreak' }).click()
+  await advancePrimary(page)
+
+  await advancePrimary(page) // reminders → Start PawStreak
 
   await expect(page).toHaveURL(/\/app/)
   await expect(page.getByText('TestDog is ready. Your first adventure is waiting.')).toBeVisible()
@@ -62,21 +95,54 @@ test('fresh onboarding with unsupported ZIP 83702', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
   await clearStorageAndOpen(page)
 
-  await page.getByPlaceholder("Dog's name").fill('FallbackDog')
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await page.getByTestId('dog-name-input').fill('FallbackDog')
+  await advancePrimary(page) // welcome
+  await advancePrimary(page) // intro
+  await advancePrimary(page) // details (skip)
+
   await page.getByRole('button', { name: /Social Butterfly/ }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
   await page.getByRole('button', { name: /Steady Adventurer/ }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await advancePrimary(page)
+  await advancePrimary(page) // goals
+
   await page.getByPlaceholder('92107').fill('83702')
   await expect(page.getByText('Local adventure tuning is coming soon for your area')).toBeVisible()
-  await page.getByRole('button', { name: 'Continue' }).click()
-  await page.getByRole('button', { name: 'Start PawStreak' }).click()
+  await advancePrimary(page)
+
+  await advancePrimary(page) // finish
 
   await expect(page).toHaveURL(/\/app/)
   await expect(page.getByRole('button', { name: /Start today's adventure/ })).toBeVisible()
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
+})
+
+test('welcome step button label updates with name + Google fallback note', async ({ page }) => {
+  await clearStorageAndOpen(page)
+
+  await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
+  await expect(page.getByTestId('onboarding-primary-button')).toHaveText(/Let's go/)
+
+  await page.getByTestId('dog-name-input').fill('Bailey')
+  await expect(page.getByTestId('onboarding-primary-button')).toHaveText(/Meet Bailey/)
+
+  await page.getByTestId('onboarding-google-button').click()
+  await expect(page.getByText('Google sign-in coming soon')).toBeVisible()
+})
+
+test('empty name does not save Bailey as the dog name', async ({ page }) => {
+  await clearStorageAndOpen(page)
+
+  await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
+  // Skip the welcome step without entering a name (placeholder only).
+  await advancePrimary(page) // welcome → intro
+  await expect(page.getByTestId('first-adventure-intro')).toBeVisible()
+  await expect(page.getByText("Your dog's first adventure is waiting.")).toBeVisible()
+  await advancePrimary(page) // intro → details
+
+  // Step 3 should ask for the name again because none was entered.
+  await expect(page.getByTestId('dog-details-step')).toBeVisible()
+  await expect(page.getByTestId('dog-name-input')).toHaveValue('')
 })
 
 test('dashboard persistence after refresh', async ({ page }) => {
