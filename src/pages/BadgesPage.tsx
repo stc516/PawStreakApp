@@ -1,18 +1,27 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import { BadgeCard } from '../components/BadgeCard'
 import { BottomNav } from '../components/BottomNav'
 import { useAppState } from '../hooks/useAppState'
+import { achievementSummary } from '../lib/gamification'
 
 export function BadgesPage() {
+  const navigate = useNavigate()
   const { state } = useAppState()
-  const earned = state.badges.filter((badge) => badge.unlocked).length
-  const remaining = state.badges.length - earned
+  const achievementStats = achievementSummary(state.badges)
+  const remaining = achievementStats.total - achievementStats.earned
+
+  useEffect(() => {
+    if (!state.onboardingComplete) navigate('/', { replace: true })
+  }, [navigate, state.onboardingComplete])
 
   return (
     <section id='screen-badges' className='screen active'>
       <div className='screen-hdr'>
-        <h1>{state.dogName}&apos;s Badges</h1>
+        <h1>{state.dogName}&apos;s Achievements</h1>
         <p>
-          {earned} earned · {remaining} to discover
+          {achievementStats.earned} unlocked · {remaining} to go
         </p>
       </div>
       <div className='badges-grid'>

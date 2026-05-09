@@ -4,6 +4,7 @@ export type AppRoute = '/' | '/app' | '/adventure' | '/reward' | '/story' | '/ba
 export type VibeArchetype = 'pulse' | 'wander' | 'salt' | 'wild'
 
 export type AdventureRarity = 'common' | 'uncommon' | 'rare'
+export type AdventureCategory = 'social' | 'exploration' | 'chill' | 'chaos' | 'routine'
 
 export type DogMood = 'restless' | 'curious' | 'explorer' | 'social' | 'zoomie' | 'chill'
 
@@ -14,6 +15,7 @@ export type ZipLocale = 'generic' | 'coastal' | 'urban' | 'suburban' | 'trail'
 export interface GeneratedMission {
   title: string
   emoji: string
+  category: AdventureCategory
   estimatedMinutesMin: number
   estimatedMinutesMax: number
   /** Where / how this mission lives — vibe–location hint */
@@ -58,9 +60,47 @@ export interface BadgeDefinition {
   mystery?: boolean
 }
 
+export type DogPersonalityId = 'social' | 'trail' | 'reluctant' | 'chaos'
+
+export type DogEnergyLevel = 'endless' | 'bursts' | 'steady' | 'selective'
+
+export interface DogProfile {
+  name: string
+  breed: string
+  age: number | null
+  personality: DogPersonalityId[]
+  energyLevel: DogEnergyLevel | null
+}
+
+export interface OwnerProfile {
+  goals: string[]
+}
+
+export interface UserProfile {
+  homeLat: number | null
+  homeLng: number | null
+  homeZip: string
+}
+
+export type NotificationCadence = 'daily' | 'weekly' | 'apponly'
+
+export interface NotificationPrefs {
+  cadence: NotificationCadence
+  morningTime: string
+  eveningTime: string
+}
+
 export interface PawstreakState {
   onboardingComplete: boolean
   dogName: string
+  dogProfile: DogProfile
+  ownerProfile: OwnerProfile
+  userProfile: UserProfile
+  notificationPrefs: NotificationPrefs
+  /** True when current device location is far from saved home (ZIP center or lat/lng). */
+  isAway: boolean
+  /** Welcome ribbon after first onboarding; dismissed via dashboard. */
+  welcomeBannerDismissed: boolean
   /** Optional ZIP — empty uses generic neighborhood missions */
   zipCode: string
   /** Calendar day key (local) for mood — YYYY-MM-DD */
@@ -91,8 +131,35 @@ export interface PawstreakState {
   badges: BadgeDefinition[]
   latestCompletedAdventure: AdventureEntry | null
   latestUnlockedBadgeId: string | null
-  /** Emergency Treat (formerly streak freeze) — demo: always available until product consumes it */
+  /** Legacy safety reserve flag retained for compatibility with older local saves. */
   emergencyTreatAvailable: boolean
   /** Cached teaser line for dashboard / reward */
   tomorrowTease: string
+}
+
+export function defaultDogProfile(partial?: Partial<DogProfile>): DogProfile {
+  return {
+    name: '',
+    breed: '',
+    age: null,
+    personality: [],
+    energyLevel: null,
+    ...partial,
+  }
+}
+
+export function defaultOwnerProfile(): OwnerProfile {
+  return { goals: [] }
+}
+
+export function defaultUserProfile(): UserProfile {
+  return { homeLat: null, homeLng: null, homeZip: '' }
+}
+
+export function defaultNotificationPrefs(): NotificationPrefs {
+  return {
+    cadence: 'daily',
+    morningTime: '07:00',
+    eveningTime: '19:00',
+  }
 }

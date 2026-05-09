@@ -5,6 +5,9 @@ import { AppStateContext } from '../../lib/appStateContext'
 import { localStorageStateRepository } from '../../lib/localStorageStateRepository'
 import {
   completeAdventure,
+  completeOnboarding,
+  dismissWelcomeBanner,
+  evaluateAwayFromCoords,
   resetRewardFlow,
   rollPickForMe,
   selectVibe,
@@ -30,6 +33,28 @@ export function AppStateProvider({
     repository.save(state)
   }, [repository, state])
 
+  useEffect(() => {
+    if (!state.onboardingComplete) return
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return
+    let cancelled = false
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (cancelled) return
+        setState((s) =>
+          evaluateAwayFromCoords(s, { lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        )
+      },
+      () => {
+        if (cancelled) return
+        setState((s) => evaluateAwayFromCoords(s, null))
+      },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 12_000 },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [state.onboardingComplete])
+
   const contextValue = useMemo(
     () => ({
       state,
@@ -38,6 +63,12 @@ export function AppStateProvider({
       },
       setZipCode: (zip: string) => {
         setState((currentState) => setZipCode(currentState, zip))
+      },
+      completeOnboarding: (payload: Parameters<typeof completeOnboarding>[1]) => {
+        setState((currentState) => completeOnboarding(currentState, payload))
+      },
+      dismissWelcomeBanner: () => {
+        setState((currentState) => dismissWelcomeBanner(currentState))
       },
       rollPickForMe: () => {
         setState((currentState) => rollPickForMe(currentState))

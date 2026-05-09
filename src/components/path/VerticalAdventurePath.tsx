@@ -1,90 +1,106 @@
-import { PATH_REGIONS, type PathNodeModel, type PathNodeState } from '../../data/adventurePath'
+import { getZoneStatuses, ZONES, type ZoneId } from '../../data/adventurePath'
 
-interface VerticalAdventurePathProps {
-  nodes: PathNodeModel[]
-  states: PathNodeState[]
+interface ZoneWorldProps {
+  nodes?: unknown
+  states?: unknown
   nextRegionTease: { title: string; preview: string; nodesAway: number } | null
+  totalAdventures: number
+  onZoneSelect: (zoneId: ZoneId) => void
+  selectedZoneId: ZoneId | null
 }
 
-export function VerticalAdventurePath({ nodes, states, nextRegionTease }: VerticalAdventurePathProps) {
-  const sections = PATH_REGIONS.map((region, ri) => {
-    const offset = PATH_REGIONS.slice(0, ri).reduce((sum, r) => sum + r.count, 0)
-    return {
-      region,
-      slice: nodes.slice(offset, offset + region.count),
-      stateSlice: states.slice(offset, offset + region.count),
-    }
-  })
-
-  const totalNodes = nodes.length
+export function ZoneWorld({
+  nextRegionTease,
+  totalAdventures,
+  onZoneSelect,
+  selectedZoneId,
+}: ZoneWorldProps) {
+  const statuses = getZoneStatuses(totalAdventures)
 
   return (
-    <div className='path-column'>
+    <div className='mt-6 px-4'>
       {nextRegionTease ? (
-        <div className='path-region-tease' role='status'>
-          <span className='path-region-tease-k'>Next world</span>
-          <span className='path-region-tease-title'>{nextRegionTease.title}</span>
-          <span className='path-region-tease-sub'>
-            {nextRegionTease.nodesAway} adventure{nextRegionTease.nodesAway === 1 ? '' : 's'} away · {nextRegionTease.preview}
-          </span>
+        <div
+          className='mb-4 rounded-2xl border border-[color:rgba(255,179,71,0.3)] bg-[var(--bg-elevated)] px-4 py-3'
+          role='status'
+        >
+          <p className='text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--gold)]'>Next place</p>
+          <p className='mt-1 font-serif text-lg text-[var(--text)]'>{nextRegionTease.title}</p>
+          <p className='mt-0.5 text-xs leading-snug text-[var(--text-2)]'>{nextRegionTease.preview}</p>
+          <p className='mt-2 text-xs font-semibold text-[var(--gold)]'>
+            Unlocks in {nextRegionTease.nodesAway} adventure{nextRegionTease.nodesAway === 1 ? '' : 's'}
+          </p>
         </div>
       ) : null}
 
-      {sections.map(({ region, slice, stateSlice }) => (
-        <section key={region.id} className={`path-region ${region.themeClass}`}>
-          <div className='path-region-header'>
-            <h2 className='path-region-title'>{region.title}</h2>
-            <p className='path-region-preview'>{region.preview}</p>
-          </div>
-          <div className='path-region-nodes'>
-            {slice.map((node, i) => {
-              const st = stateSlice[i]
-              const globalIdx = node.globalIndex
-              const isGlobalLast = globalIdx >= totalNodes - 1
-              const isCurrent = st.status === 'current'
-              return (
-                <div
-                  key={globalIdx}
-                  className={`path-node-slot ${i % 2 === 0 ? 'path-node-slot--a' : 'path-node-slot--b'}`}
-                >
-                  <button
-                    type='button'
-                    className={[
-                      'path-node',
-                      `path-node--${st.status}`,
-                      node.variant === 'rare' ? 'path-node--kind-rare' : '',
-                      node.variant === 'milestone' ? 'path-node--kind-milestone' : '',
-                      st.rareGlow ? 'path-node--rare-glow' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    disabled={st.status === 'locked'}
-                    aria-current={isCurrent ? 'step' : undefined}
-                    aria-label={
-                      st.status === 'done'
-                        ? `Checkpoint ${globalIdx + 1} complete`
-                        : st.status === 'current'
-                          ? `Current checkpoint ${globalIdx + 1}`
-                          : `Locked checkpoint ${globalIdx + 1}`
-                    }
-                  >
-                    <span className='path-node-inner'>
-                      {st.status === 'done' ? (
-                        <span className='path-node-icon'>✓</span>
-                      ) : st.status === 'locked' ? (
-                        <span className='path-node-icon path-node-icon--lock'>🔒</span>
-                      ) : (
-                        <span className='path-node-icon path-node-icon--pulse'>●</span>
-                      )}
-                    </span>
-                  </button>
-                  {!isGlobalLast ? <div className='path-connector' aria-hidden /> : null}
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      ))}
+      <p className='mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-2)]'>Zones</p>
+      <div className='flex gap-2 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch]'>
+        {ZONES.map((zone) => {
+          const status = statuses[zone.id]
+          const isSelected = selectedZoneId === zone.id && status === 'open'
+          const unlockIn = Math.max(0, zone.unlocksAt - totalAdventures)
+
+          if (status === 'locked') {
+            return (
+              <div
+                key={zone.id}
+                className='flex h-14 flex-shrink-0 items-center gap-2 rounded-2xl border border-[color:rgba(255,255,255,0.07)] bg-[var(--bg-card)] px-4 opacity-[0.68]'
+              >
+                <span className='text-xl' aria-hidden>
+                  🔒
+                </span>
+                <span className='max-w-[100px] truncate text-xs font-medium text-[var(--text-2)]'>Locked</span>
+              </div>
+            )
+          }
+
+          if (status === 'teased') {
+            return (
+              <div
+                key={zone.id}
+                className='flex h-14 flex-shrink-0 flex-col justify-center rounded-2xl border border-[color:rgba(255,255,255,0.1)] bg-[var(--bg-elevated)] px-4 opacity-90'
+              >
+                <span className='flex items-center gap-2'>
+                  <span className='text-xl' aria-hidden>
+                    {zone.emoji}
+                  </span>
+                  <span className='max-w-[120px] truncate text-xs font-semibold text-[var(--text-2)]'>{zone.name}</span>
+                </span>
+                <span className='mt-0.5 pl-8 text-[10px] text-[var(--gold)]'>
+                  Unlocks in {unlockIn} adventure{unlockIn === 1 ? '' : 's'}
+                </span>
+              </div>
+            )
+          }
+
+          return (
+            <button
+              key={zone.id}
+              type='button'
+              onClick={() => onZoneSelect(zone.id)}
+              className={[
+                'flex h-14 flex-shrink-0 items-center gap-2 rounded-2xl border px-4 transition-[box-shadow,border-color]',
+                isSelected
+                  ? 'border-[var(--orange)] bg-[var(--bg-elevated)] shadow-[0_0_16px_rgba(255,107,53,0.35)]'
+                  : 'border-[color:rgba(255,255,255,0.1)] bg-[var(--bg-elevated)] hover:border-[color:rgba(255,107,53,0.45)]',
+              ].join(' ')}
+            >
+              <span className='text-xl' aria-hidden>
+                {zone.emoji}
+              </span>
+              <span className='max-w-[130px] truncate text-left text-xs font-bold text-[var(--text)]'>{zone.name}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {selectedZoneId && statuses[selectedZoneId] === 'open' ? (
+        <p className='mt-2 text-center text-[10px] font-semibold uppercase tracking-wider text-[var(--orange)]'>
+          Today&apos;s adventure
+        </p>
+      ) : null}
     </div>
   )
 }
+
+export default ZoneWorld

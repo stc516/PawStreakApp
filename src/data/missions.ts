@@ -1,7 +1,7 @@
 import type { AdventureRarity, DogMood, VibeArchetype } from '../types'
 
 export const DOG_MOODS: { id: DogMood; label: string; emoji: string; tease: string }[] = [
-  { id: 'restless', label: 'Restless', emoji: '⚡', tease: 'wants a mission with teeth' },
+  { id: 'restless', label: 'Restless', emoji: '⚡', tease: 'wants an adventure with teeth' },
   { id: 'curious', label: 'Curious', emoji: '👀', tease: 'is following every lead' },
   { id: 'explorer', label: 'Explorer Mode', emoji: '🧭', tease: 'is ready to get a little lost' },
   { id: 'social', label: 'Social Pup', emoji: '🫶', tease: 'wants to be seen and sniffed' },
@@ -41,8 +41,8 @@ const WANDER: { title: string; emoji: string }[] = [
 ]
 
 const SALT: { title: string; emoji: string }[] = [
-  { title: 'Ocean Air Mission', emoji: '🌊' },
-  { title: 'Sunset Sniff Mission', emoji: '🌅' },
+  { title: 'Ocean Air Adventure', emoji: '🌊' },
+  { title: 'Sunset Sniff Adventure', emoji: '🌅' },
   { title: 'Coronado Loop', emoji: '🏝' },
   { title: 'Boardwalk Spotlight', emoji: '🎬' },
   { title: 'Breeze & Belly Rubs', emoji: '🫧' },
@@ -57,7 +57,7 @@ const WILD: { title: string; emoji: string }[] = [
 ]
 
 const CROSS_RARE: { title: string; emoji: string }[] = [
-  { title: 'Sunset Sniff Mission', emoji: '🌅' },
+  { title: 'Sunset Sniff Adventure', emoji: '🌅' },
   { title: 'The Long Way Home', emoji: '🏡' },
   { title: 'Coronado Loop', emoji: '🏝' },
   { title: 'Sniffari', emoji: '👃' },

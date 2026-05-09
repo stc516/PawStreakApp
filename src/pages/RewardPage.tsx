@@ -6,7 +6,15 @@ import { RewardCard } from '../components/RewardCard'
 import { bondArcProgress, identityArc } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
 
-const confettiColors = ['#E85A20', '#E8A830', '#7CB87A', '#3A7AAA', '#C8503A', '#F5EFE0', '#D4A020']
+const confettiColors = [
+  'var(--orange)',
+  'var(--gold)',
+  'var(--green)',
+  'var(--blue)',
+  'var(--purple)',
+  'var(--text-2)',
+  'var(--red)',
+]
 
 export function RewardPage() {
   const navigate = useNavigate()

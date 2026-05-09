@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 import { AdventurePage } from '../pages/AdventurePage'
 import { BadgesPage } from '../pages/BadgesPage'
+import { CharacterMomentPage } from '../pages/CharacterMomentPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
 import { RewardPage } from '../pages/RewardPage'
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
     element: <AdventurePage />,
   },
   {
+    path: '/character-moment',
+    element: <CharacterMomentPage />,
+  },
+  {
     path: '/reward',
     element: <RewardPage />,
   },
@@ -30,6 +35,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/badges',
+    element: <BadgesPage />,
+  },
+  {
+    path: '/packs',
     element: <BadgesPage />,
   },
   {

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawStreak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D1117;--bg-card:#161B22;--bg-elevated:#1C2333;--bg-pill:#21262D;
+  --border:rgba(255,255,255,0.07);--border-md:rgba(255,255,255,0.12);
+  --orange:#FF6B35;--orange-dim:rgba(255,107,53,0.12);--orange-glow:rgba(255,107,53,0.3);
+  --gold:#FFB347;--gold-dim:rgba(255,179,71,0.12);--gold-glow:rgba(255,179,71,0.35);
+  --blue:#4FC3F7;--blue-dim:rgba(79,195,247,0.1);
+  --green:#34D399;--green-dim:rgba(52,211,153,0.1);
+  --purple:#A78BFA;--purple-dim:rgba(167,139,250,0.1);
+  --red:#F87171;
+  --text:#F0F4F8;--text-2:#8B949E;--text-3:#3D444D;
+  --fd:'Fraunces',serif;--fb:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:var(--fb);background:#070B10;}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:50px;overflow:hidden;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,0.06),0 60px 160px rgba(0,0,0,.9);display:flex;flex-direction:column;}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+.screen.active{opacity:1;pointer-events:all;}
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* NAV */
+.bnav{position:absolute;bottom:0;left:0;right:0;height:78px;background:rgba(13,17,23,.97);backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px;z-index:10;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--fb);padding:0;}
+.ni-icon{font-size:21px;line-height:1;}
+.ni-lbl{font-size:9px;font-weight:500;letter-spacing:.04em;color:var(--text-3);text-transform:uppercase;}
+.ni.active .ni-lbl{color:var(--orange);}
+.ni.active .ni-icon{filter:drop-shadow(0 0 7px var(--orange));}
+.ni-dot{width:4px;height:4px;border-radius:50%;background:var(--orange);}
+
+/* SHARED */
+.wm{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text);letter-spacing:.03em;}
+.wm span{color:var(--orange);}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 12px;background:rgba(13,17,23,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5;}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;}
+.p-risk{background:rgba(255,179,71,.1);color:var(--gold);border:1px solid rgba(255,179,71,.2);}
+.p-won{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+.p-rare{background:rgba(255,179,71,.1);color:var(--gold);border:1px solid rgba(255,179,71,.25);}
+.p-unc{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,195,247,.2);}
+.p-common{background:rgba(255,255,255,.05);color:var(--text-2);border:1px solid var(--border);}
+.eye{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);}
+.btn-primary{width:100%;height:52px;background:var(--orange);border:none;border-radius:14px;color:#fff;font-family:var(--fb);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px var(--orange-glow);position:relative;overflow:hidden;transition:transform .12s;}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.1),transparent);pointer-events:none;}
+.btn-ghost{width:100%;height:44px;background:transparent;border:1px solid var(--border-md);border-radius:12px;color:var(--text-2);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+
+/* MASCOT */
+.mascot{position:relative;}
+.m-ears{display:flex;justify-content:space-between;padding:0 14px;position:absolute;top:0;left:0;right:0;}
+.m-ear{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:24px solid #1C2333;}
+.m-ear.l{transform:rotate(-14deg) translateY(2px);}
+.m-ear.r{transform:rotate(14deg) translateY(2px);}
+.m-face{position:absolute;left:50%;transform:translateX(-50%);}
+.m-tail{position:absolute;animation:wag .4s ease-in-out infinite alternate;}
+@keyframes wag{from{transform:rotate(-22deg)}to{transform:rotate(22deg)}}
+@keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes charPop{from{transform:scale(.4) translateY(40px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+@keyframes cfall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(400px) rotate(720deg);opacity:0}}
+
+/* ════════════════ LOGIN ════════════════ */
+#s-login{background:radial-gradient(ellipse at 50% -10%,#1a2535 0%,var(--bg) 60%);}
+.login-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px 60px;}
+.login-mascot{position:relative;width:110px;height:110px;margin-bottom:20px;animation:charPop .6s cubic-bezier(.34,1.56,.64,1) both;}
+.login-mascot .m-face{top:12px;font-size:70px;line-height:1;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5));}
+.login-mascot .m-tail{bottom:0;right:-4px;font-size:20px;}
+.login-logo{font-family:var(--fd);font-size:36px;font-weight:800;color:var(--text);margin-bottom:5px;text-align:center;}
+.login-logo span{color:var(--orange);}
+.login-tag{font-size:13px;color:var(--text-2);text-align:center;line-height:1.6;margin-bottom:32px;font-weight:300;}
+.inp{width:100%;height:50px;background:var(--bg-elevated);border:1px solid var(--border-md);border-radius:13px;padding:0 15px;color:var(--text);font-family:var(--fb);font-size:15px;outline:none;margin-bottom:10px;transition:border-color .2s;}
+.inp:focus{border-color:rgba(255,107,53,.5);}
+.inp::placeholder{color:var(--text-3);}
+.login-divider{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--text-3);font-size:12px;}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.btn-google{width:100%;height:50px;background:var(--bg-elevated);border:1px solid var(--border-md);border-radius:13px;color:var(--text-2);font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
+
+/* ════════════════ HOME ════════════════ */
+#s-home{padding-bottom:78px;}
+.streak-badge{display:flex;align-items:center;gap:5px;background:var(--orange-dim);border:1px solid rgba(255,107,53,.2);border-radius:20px;padding:5px 10px;}
+.sb-flame{font-size:15px;animation:flamePulse 1.5s ease-in-out infinite;}
+.sb-num{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--orange);}
+
+/* Dog switcher */
+.dog-row{padding:14px 20px 4px;display:flex;gap:10px;align-items:center;}
+.dog-chip{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.dog-av{width:50px;height:50px;border-radius:15px;background:var(--bg-elevated);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;transition:all .15s;}
+.dog-av.on{border-color:var(--orange);box-shadow:0 0 14px rgba(255,107,53,.2);}
+.dog-nm{font-size:10px;font-weight:500;color:var(--text-2);}
+.dog-chip.on .dog-nm{color:var(--orange);}
+.dog-add{width:50px;height:50px;border-radius:15px;background:var(--bg-pill);border:2px dashed var(--border-md);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:var(--text-3);}
+
+/* Mascot hero */
+.hero-row{padding:10px 20px 8px;display:flex;align-items:center;gap:14px;}
+.hero-mascot{position:relative;width:64px;height:64px;flex-shrink:0;}
+.hero-mascot .m-ears{padding:0 6px;}
+.hero-mascot .m-ear{border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:15px solid #1C2333;}
+.hero-mascot .m-face{top:7px;font-size:44px;line-height:1;}
+.hero-mascot .m-tail{bottom:-2px;right:-3px;font-size:14px;}
+.hero-name{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text);line-height:1.1;}
+.hero-status{font-size:13px;color:var(--text-2);margin-top:3px;line-height:1.4;}
+.hero-status.won{color:var(--green);}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:4px 16px 12px;}
+.sm{background:var(--bg-card);border:1px solid var(--border);border-radius:11px;padding:9px 6px;text-align:center;}
+.sm-val{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--text);line-height:1;}
+.sm-lbl{font-size:9px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-top:3px;line-height:1.2;}
+
+/* Quick adventure */
+.quick-section{padding:0 16px 14px;}
+.quick-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;}
+.quick-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.quick-btn{background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;transition:all .15s;text-align:center;font-family:var(--fb);}
+.quick-btn:hover{border-color:rgba(255,107,53,.35);}
+.quick-btn.selected{border-color:var(--orange);background:var(--orange-dim);box-shadow:0 0 16px rgba(255,107,53,.1);}
+.qb-time{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text);line-height:1;}
+.qb-unit{font-size:10px;font-weight:500;color:var(--text-3);letter-spacing:.04em;margin-top:2px;}
+.qb-vibe{font-size:10px;color:var(--text-2);margin-top:4px;}
+
+/* Active pack strip */
+.active-pack-strip{margin:0 16px 12px;background:var(--bg-elevated);border-radius:14px;padding:12px 14px;border:1px solid rgba(167,139,250,.15);cursor:pointer;transition:all .15s;}
+.active-pack-strip:hover{border-color:rgba(167,139,250,.3);}
+.aps-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.aps-icon{font-size:22px;}
+.aps-name{font-size:13px;font-weight:500;color:var(--text);}
+.aps-deadline{font-size:11px;color:var(--purple);margin-left:auto;}
+.aps-bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;}
+.aps-bar-fill{height:100%;background:var(--purple);border-radius:99px;box-shadow:0 0 8px rgba(167,139,250,.4);}
+.aps-bar-label{font-size:11px;color:var(--text-2);margin-top:5px;}
+
+/* Today suggestion */
+.today-card{margin:0 16px 12px;background:var(--bg-elevated);border-radius:18px;padding:14px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.tc-glow{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,107,53,.08);filter:blur(28px);pointer-events:none;}
+.tc-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.tc-head{font-family:var(--fd);font-size:16px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:4px;}
+.tc-ctx{font-size:12px;color:var(--text-2);line-height:1.55;margin-bottom:12px;}
+.tc-ctx strong{color:var(--blue);font-weight:500;}
+
+/* Energy bar */
+.ebar{margin:0 16px 12px;background:var(--bg-card);border-radius:14px;padding:12px 14px;border:1px solid var(--border);}
+.ebar-top{display:flex;justify-content:space-between;margin-bottom:7px;}
+.ebar-lbl{font-size:12px;font-weight:500;color:var(--text-2);}
+.ebar-val{font-family:var(--fd);font-size:13px;font-weight:600;color:var(--gold);}
+.ebar-track{height:5px;background:rgba(255,255,255,.05);border-radius:99px;overflow:hidden;}
+.ebar-fill{height:100%;background:linear-gradient(to right,var(--orange),var(--gold));border-radius:99px;width:62%;box-shadow:0 0 8px rgba(255,179,71,.3);}
+.ebar-goal{font-size:11px;color:var(--text-3);margin-top:5px;}
+.ebar-goal span{color:var(--gold);}
+
+/* Recent */
+.recap{padding:0 16px 16px;}
+.recap-item{background:var(--bg-card);border-radius:13px;padding:11px 13px;border:1px solid var(--border);display:flex;align-items:center;gap:11px;}
+.ri-icon{width:38px;height:38px;border-radius:11px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.ri-info{flex:1;}
+.ri-title{font-size:13px;font-weight:500;color:var(--text);}
+.ri-meta{font-size:11px;color:var(--text-2);margin-top:1px;}
+.ri-find{font-size:11px;color:var(--blue);margin-top:3px;font-style:italic;line-height:1.35;}
+.ri-nrg{font-family:var(--fd);font-size:14px;font-weight:600;color:var(--gold);}
+
+/* ════════════════ ADVENTURE ════════════════ */
+#s-adventure{padding-bottom:78px;}
+.adv-head{padding:0 20px 12px;}
+.adv-title{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text);font-style:italic;}
+.adv-sub{font-size:13px;color:var(--text-2);margin-top:3px;}
+.local-bar{margin:0 16px 14px;background:var(--bg-elevated);border-radius:13px;padding:11px 13px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.lb-icon{font-size:17px;flex-shrink:0;}
+.lb-text{font-size:12px;color:var(--text-2);line-height:1.4;}
+.lb-text strong{color:var(--blue);font-weight:500;}
+.zones-list{padding:0 16px;display:flex;flex-direction:column;gap:9px;}
+.zone-card{background:var(--bg-card);border-radius:17px;padding:14px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.zone-card:not(.locked):hover{border-color:rgba(255,107,53,.3);}
+.zone-card.sel{border-color:var(--orange);background:rgba(255,107,53,.04);box-shadow:0 0 20px rgba(255,107,53,.08);}
+.zone-card.locked{opacity:.3;cursor:not-allowed;}
+.zc-glow{position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;filter:blur(20px);pointer-events:none;}
+.zc-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:8px;}
+.zc-emoji{width:44px;height:44px;border-radius:13px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.zc-name{font-family:var(--fd);font-size:16px;font-weight:600;color:var(--text);}
+.zc-tag{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.3;}
+.zc-spots{display:flex;gap:5px;flex-wrap:wrap;}
+.zc-spot{font-size:11px;color:var(--text-2);background:var(--bg-elevated);border:1px solid var(--border);border-radius:7px;padding:3px 7px;}
+.zc-sel-lbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-top:8px;}
+.zc-unlock{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:rgba(255,179,71,.07);color:var(--gold);border:1px solid rgba(255,179,71,.14);display:inline-flex;align-items:center;gap:4px;}
+
+/* Mission preview */
+.mp{margin:14px 16px 0;background:var(--bg-elevated);border-radius:18px;padding:16px;border:1px solid var(--border);animation:fadeUp .25s ease both;}
+.mp-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:10px;}
+.mp-emoji{font-size:38px;display:block;margin-bottom:8px;}
+.mp-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.mp-meta{font-size:12px;color:var(--text-2);margin-bottom:5px;}
+.mp-flavor{font-size:13px;color:var(--text-2);font-style:italic;margin-bottom:12px;line-height:1.5;opacity:.9;}
+.mp-rarity{margin-bottom:12px;}
+.btn-go{width:100%;height:52px;background:var(--orange);border:none;border-radius:13px;color:#fff;font-family:var(--fb);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 18px var(--orange-glow);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.btn-go::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.1),transparent);pointer-events:none;}
+.btn-go-main{font-size:15px;font-weight:600;}
+.btn-go-sub{font-size:10px;opacity:.6;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ════════════════ PACKS ════════════════ */
+#s-packs{padding-bottom:78px;}
+.packs-hero{background:linear-gradient(135deg,#1a1035 0%,#0d1117 60%);padding:24px 20px 20px;position:relative;overflow:hidden;}
+.packs-hero-glow{position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(167,139,250,.12);filter:blur(40px);pointer-events:none;}
+.packs-eyebrow{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:6px;}
+.packs-title{font-family:var(--fd);font-size:26px;font-weight:700;color:var(--text);font-style:italic;line-height:1.2;margin-bottom:4px;}
+.packs-sub{font-size:13px;color:var(--text-2);line-height:1.5;}
+
+/* Active pack */
+.active-pack-card{margin:16px 16px 0;background:var(--bg-elevated);border-radius:20px;padding:18px;border:1px solid rgba(167,139,250,.2);box-shadow:0 0 30px rgba(167,139,250,.05);}
+.apc-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin-bottom:10px;}
+.apc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.apc-icon{font-size:36px;}
+.apc-info{flex:1;}
+.apc-name{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--text);}
+.apc-deadline{font-size:12px;color:var(--text-2);margin-top:2px;}
+.apc-bar-track{height:7px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.apc-bar-fill{height:100%;background:linear-gradient(to right,var(--purple),var(--blue));border-radius:99px;width:38%;box-shadow:0 0 10px rgba(167,139,250,.35);}
+.apc-prog-text{font-size:12px;color:var(--text-2);}
+.apc-prog-text strong{color:var(--text);font-weight:500;}
+.apc-missions{margin-top:12px;display:flex;flex-direction:column;gap:7px;}
+.apc-mission{background:var(--bg-card);border-radius:11px;padding:10px 12px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.apc-mission.done{opacity:.45;}
+.apc-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border-md);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.apc-mission.done .apc-check{background:var(--green);border-color:var(--green);color:#fff;}
+.apc-m-text{font-size:13px;color:var(--text);flex:1;}
+.apc-mission.done .apc-m-text{text-decoration:line-through;color:var(--text-2);}
+.apc-m-reward{font-size:11px;color:var(--gold);}
+
+/* Browse packs */
+.browse-section{padding:20px 16px 0;}
+.browse-title{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;}
+.pack-card{background:var(--bg-card);border-radius:18px;padding:16px;border:1px solid var(--border);margin-bottom:10px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.pack-card:hover{border-color:rgba(255,255,255,.12);}
+.pack-card-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;filter:blur(24px);pointer-events:none;}
+.pc-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.pc-icon{font-size:32px;}
+.pc-info{flex:1;}
+.pc-name{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.pc-tag{font-size:12px;color:var(--text-2);line-height:1.4;}
+.pc-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.pc-chip{font-size:11px;color:var(--text-2);background:var(--bg-elevated);border:1px solid var(--border);border-radius:7px;padding:3px 8px;}
+.pc-reward{font-size:11px;color:var(--gold);background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.15);border-radius:7px;padding:3px 8px;}
+.btn-join{margin-top:12px;width:100%;height:42px;border:none;border-radius:11px;font-family:var(--fb);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-join-purple{background:var(--purple);color:#fff;box-shadow:0 4px 16px rgba(167,139,250,.25);}
+.btn-join-blue{background:var(--blue);color:#0d1117;box-shadow:0 4px 16px rgba(79,195,247,.2);}
+.btn-join-gold{background:var(--gold);color:#0d1117;box-shadow:0 4px 16px rgba(255,179,71,.25);}
+.btn-join-green{background:var(--green);color:#0d1117;box-shadow:0 4px 16px rgba(52,211,153,.2);}
+
+/* ════════════════ WALK ════════════════ */
+#s-walk{background:radial-gradient(ellipse at 50% -5%,#1a2e1a 0%,var(--bg) 60%);}
+.walk-hdr{text-align:center;padding:22px 20px 14px;}
+.walk-type{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:5px;}
+.walk-dog{font-family:var(--fd);font-size:19px;font-weight:400;color:var(--text);font-style:italic;}
+.walk-body{display:flex;flex-direction:column;align-items:center;flex:1;padding:0 20px;}
+.tw{position:relative;width:194px;height:194px;margin-bottom:22px;}
+.tw svg{position:absolute;inset:0;transform:rotate(-90deg);}
+.tt{fill:none;stroke:rgba(255,255,255,.05);stroke-width:3;}
+.tf{fill:none;stroke:var(--orange);stroke-width:3;stroke-linecap:round;stroke-dasharray:553;stroke-dashoffset:450;transition:stroke-dashoffset 1s linear;filter:drop-shadow(0 0 8px rgba(255,107,53,.55));}
+.ti{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.tt-time{font-family:var(--fd);font-size:44px;font-weight:300;color:var(--text);line-height:1;}
+.tt-nrg{font-size:13px;color:var(--gold);font-weight:500;margin-top:5px;}
+.walk-stats{display:flex;gap:34px;margin-bottom:26px;}
+.ws{text-align:center;}
+.ws-val{font-family:var(--fd);font-size:22px;font-weight:600;color:var(--text);}
+.ws-lbl{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-top:3px;}
+.walk-acts{display:flex;gap:10px;width:100%;padding-bottom:30px;}
+.btn-pause{width:52px;height:52px;border-radius:13px;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-2);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-end{flex:1;height:52px;background:var(--orange);border:none;border-radius:13px;color:#fff;font-family:var(--fb);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 18px var(--orange-glow);}
+
+/* ════════════════ CHARACTER ════════════════ */
+#s-char{background:var(--bg);cursor:pointer;}
+.char-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;position:relative;}
+.char-big{position:relative;width:152px;height:152px;margin-bottom:26px;animation:charPop .5s cubic-bezier(.34,1.56,.64,1) both;}
+.char-big .m-ears{padding:0 12px;}
+.char-big .m-ear{border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:26px solid #1C2333;}
+.char-big .m-face{top:14px;font-size:82px;line-height:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));}
+.char-big .m-tail{bottom:0;right:-6px;font-size:26px;}
+.char-won{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:8px;animation:fadeUp .4s ease .3s both;}
+.char-head{font-family:var(--fd);font-size:38px;font-weight:700;color:var(--text);text-align:center;font-style:italic;line-height:1.1;margin-bottom:6px;animation:fadeUp .4s ease .4s both;}
+.char-sub{font-size:14px;color:var(--blue);margin-bottom:26px;animation:fadeUp .4s ease .5s both;}
+.char-xp-card{background:var(--bg-card);border-radius:18px;padding:16px 40px;text-align:center;border:1px solid rgba(255,179,71,.15);box-shadow:0 0 36px rgba(255,179,71,.06);animation:fadeUp .4s ease .55s both;}
+.char-xp-num{font-family:var(--fd);font-size:52px;font-weight:800;color:var(--gold);line-height:1;}
+.char-xp-lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-top:4px;}
+.char-tap{position:absolute;bottom:106px;font-size:12px;color:var(--text-3);letter-spacing:.06em;}
+
+/* ════════════════ REWARD ════════════════ */
+#s-reward{padding-bottom:78px;}
+.rew-hero{padding:26px 20px 16px;text-align:center;position:relative;overflow:hidden;}
+.cfw{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.cp{position:absolute;border-radius:50%;animation:cfall linear forwards;}
+.rew-lbl{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:7px;}
+.rew-head{font-family:var(--fd);font-size:27px;font-weight:700;color:var(--text);font-style:italic;line-height:1.2;margin-bottom:5px;}
+.rew-head em{color:var(--orange);font-style:normal;}
+.rew-sub{font-size:13px;color:var(--text-2);}
+.rew-cards{padding:0 16px;display:flex;flex-direction:column;gap:9px;}
+.rc{background:var(--bg-card);border-radius:17px;padding:14px;border:1px solid var(--border);animation:popIn .4s ease both;}
+.rc-xp{text-align:center;padding:18px;}
+.rc-xp-num{font-family:var(--fd);font-size:50px;font-weight:800;color:var(--gold);line-height:1;}
+.rc-xp-lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-top:4px;}
+.rc-row{display:flex;align-items:center;gap:11px;}
+.rc-icon{font-size:24px;flex-shrink:0;}
+.rc-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.rc-sub{font-size:12px;color:var(--text-2);line-height:1.45;}
+.rc-disc{background:rgba(79,195,247,.05);border-color:rgba(79,195,247,.12);}
+.rc-disc-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.rc-disc-text{font-size:14px;color:var(--text);font-style:italic;line-height:1.6;font-family:var(--fd);font-weight:400;}
+.rc-tease{background:rgba(255,107,53,.04);border-color:rgba(255,107,53,.12);}
+.rc-tease .rc-title{color:var(--orange);}
+.share-inner{background:var(--bg);border-radius:13px;padding:13px;text-align:center;margin-bottom:9px;}
+.si-dog{font-family:var(--fd);font-size:20px;font-weight:600;color:var(--text);font-style:italic;}
+.si-type{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin:3px 0;}
+.si-streak{font-family:var(--fd);font-size:40px;font-weight:800;color:var(--gold);line-height:1;}
+.si-slbl{font-size:11px;color:var(--text-3);letter-spacing:.07em;}
+.si-app{font-size:10px;color:var(--text-3);margin-top:7px;letter-spacing:.1em;}
+.btn-share{width:100%;height:40px;background:var(--bg-elevated);border:1px solid var(--border-md);border-radius:11px;color:var(--text-2);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;}
+.remind-q{font-family:var(--fd);font-size:16px;font-weight:400;color:var(--text);font-style:italic;margin-bottom:10px;}
+.btn-remind{width:100%;height:42px;background:transparent;border:1px solid var(--border-md);border-radius:11px;color:var(--text-2);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-remind.set{background:var(--green-dim);border-color:rgba(52,211,153,.25);color:var(--green);}
+.btn-done{width:calc(100% - 32px);margin:8px 16px 0;height:52px;background:var(--orange);border:none;border-radius:15px;color:#fff;font-family:var(--fb);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 18px var(--orange-glow);}
+
+/* ════════════════ FINDS ════════════════ */
+#s-finds{padding-bottom:78px;}
+.finds-head{padding:18px 20px 14px;}
+.finds-title{font-family:var(--fd);font-size:24px;font-weight:700;color:var(--text);font-style:italic;}
+.finds-sub{font-size:13px;color:var(--text-2);margin-top:3px;}
+
+/* Progress highlights */
+.powerups-section{padding:0 16px 16px;}
+.pu-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pu-card{background:var(--bg-elevated);border-radius:15px;padding:13px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.pu-card:hover{border-color:rgba(255,255,255,.14);}
+.pu-card.active-pu{border-color:var(--orange);background:var(--orange-dim);}
+.pu-card.used{opacity:.3;}
+.pu-icon{font-size:26px;margin-bottom:6px;display:block;}
+.pu-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.pu-desc{font-size:11px;color:var(--text-2);line-height:1.35;}
+.pu-count{position:absolute;top:10px;right:10px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+
+/* Badges */
+.badges-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 16px 16px;}
+.bc{background:var(--bg-card);border-radius:16px;padding:14px 11px;border:1px solid var(--border);text-align:center;cursor:pointer;transition:all .15s;}
+.bc:hover{border-color:rgba(255,255,255,.1);}
+.bc.earned{border-color:rgba(255,107,53,.15);background:rgba(255,107,53,.03);}
+.bc.locked{opacity:.28;}
+.bc.mystery .bc-icon{filter:grayscale(1);opacity:.2;}
+.bc-icon{font-size:30px;display:block;margin-bottom:6px;}
+.bc-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.bc-desc{font-size:10px;color:var(--text-2);line-height:1.35;}
+.bc-photo{width:100%;height:60px;background:var(--bg-elevated);border-radius:9px;margin-top:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-3);border:1px dashed var(--border-md);}
+.bc.earned .bc-photo{border-color:rgba(255,107,53,.15);}
+
+/* ════════════════ STORY ════════════════ */
+#s-story{padding-bottom:78px;}
+.story-head{padding:18px 20px 14px;}
+.story-title{font-family:var(--fd);font-size:24px;font-weight:700;color:var(--text);font-style:italic;}
+.story-sub{font-size:13px;color:var(--text-2);margin-top:3px;}
+.story-bigs{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 16px 14px;}
+.sb{background:var(--bg-card);border-radius:14px;padding:14px;border:1px solid var(--border);}
+.sb-val{font-family:var(--fd);font-size:28px;font-weight:700;color:var(--text);line-height:1;}
+.sb-lbl{font-size:11px;color:var(--text-2);margin-top:3px;font-weight:300;}
+.tl{padding:0 16px;}
+.tl-item{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);}
+.tl-item:last-child{border-bottom:none;}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.tl-dot.common{background:var(--text-3);}
+.tl-dot.rare{background:var(--gold);box-shadow:0 0 6px rgba(255,179,71,.4);}
+.tl-dot.uncommon{background:var(--blue);box-shadow:0 0 6px rgba(79,195,247,.3);}
+.tl-c{flex:1;}
+.tl-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.tl-title{font-size:13px;font-weight:500;color:var(--text);}
+.tl-nrg{font-family:var(--fd);font-size:13px;font-weight:600;color:var(--gold);}
+.tl-meta{font-size:11px;color:var(--text-3);margin-top:2px;}
+.tl-find{font-size:12px;color:var(--blue);font-style:italic;margin-top:4px;line-height:1.35;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- ════ LOGIN ════ -->
+<div id="s-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-mascot mascot">
+      <div class="m-ears"><div class="m-ear l"></div><div class="m-ear r"></div></div>
+      <div class="m-face">🐺</div>
+      <div class="m-tail">🐾</div>
+    </div>
+    <div class="login-logo">Paw<span>Streak</span></div>
+    <div class="login-tag">Daily adventures for you and your dog.<br>Never miss a day.</div>
+    <input class="inp" placeholder="Email address" type="email">
+    <input class="inp" placeholder="Password" type="password">
+    <button class="btn-primary" onclick="go('home')">Let's go →</button>
+    <div class="login-divider">or</div>
+    <button class="btn-google" onclick="go('home')"><span style="font-size:16px;font-weight:700;">G</span> Continue with Google</button>
+  </div>
+</div>
+
+<!-- ════ HOME ════ -->
+<div id="s-home" class="screen">
+  <div class="topbar">
+    <div class="wm">Paw<span>Streak</span></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="streak-badge"><span class="sb-flame">🔥</span><span class="sb-num">4</span></div>
+      <span style="font-size:19px;cursor:pointer;color:var(--text-2);">🔔</span>
+    </div>
+  </div>
+  <div class="scroll">
+    <!-- Dog switcher -->
+    <div class="dog-row">
+      <div class="dog-chip on" id="dc-bailey">
+        <div class="dog-av on">🐺</div>
+        <span class="dog-nm">Bailey</span>
+      </div>
+      <div class="dog-chip" id="dc-meiomi" onclick="switchDog('meiomi')">
+        <div class="dog-av">🐕</div>
+        <span class="dog-nm">Meiomi</span>
+      </div>
+      <div class="dog-add">+</div>
+    </div>
+    <!-- Hero -->
+    <div class="hero-row">
+      <div class="hero-mascot mascot">
+        <div class="m-ears"><div class="m-ear l"></div><div class="m-ear r"></div></div>
+        <div class="m-face" id="hero-face">🐺</div>
+        <div class="m-tail">🐾</div>
+      </div>
+      <div>
+        <div class="hero-name" id="hero-name">Bailey</div>
+        <div class="hero-status" id="hero-status">is waiting for today's adventure.</div>
+        <div style="margin-top:6px;"><span class="pill p-risk" id="hero-pill">⚠ Streak at risk</span></div>
+      </div>
+    </div>
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="sm"><div class="sm-val">4</div><div class="sm-lbl">Streak</div></div>
+      <div class="sm"><div class="sm-val">47</div><div class="sm-lbl">Adventures</div></div>
+      <div class="sm"><div class="sm-val">38.2</div><div class="sm-lbl">Miles</div></div>
+      <div class="sm"><div class="sm-val" style="color:var(--gold);">1,840</div><div class="sm-lbl">Energy</div></div>
+    </div>
+    <!-- Quick adventure -->
+    <div class="quick-section">
+      <div class="quick-label">Quick adventure</div>
+      <div class="quick-row">
+        <div class="quick-btn" onclick="selectQuick(this,15)" id="q15">
+          <div class="qb-time">15</div>
+          <div class="qb-unit">minutes</div>
+          <div class="qb-vibe">Quick streak saver</div>
+        </div>
+        <div class="quick-btn selected" onclick="selectQuick(this,30)" id="q30">
+          <div class="qb-time">30</div>
+          <div class="qb-unit">minutes</div>
+          <div class="qb-vibe">The daily standard</div>
+        </div>
+        <div class="quick-btn" onclick="selectQuick(this,45)" id="q45">
+          <div class="qb-time">45</div>
+          <div class="qb-unit">minutes</div>
+          <div class="qb-vibe">Go the extra mile</div>
+        </div>
+      </div>
+    </div>
+    <!-- Active pack -->
+    <div class="active-pack-strip" onclick="go('packs')">
+      <div class="aps-top">
+        <span class="aps-icon">🏖️</span>
+        <span class="aps-name">Beach Month</span>
+        <span class="aps-deadline">🗓 18 days left</span>
+      </div>
+      <div class="aps-bar-track"><div class="aps-bar-fill" style="width:38%;"></div></div>
+      <div class="aps-bar-label">3 of 8 beach adventures complete · tap to view</div>
+    </div>
+    <!-- Today suggestion -->
+    <div class="today-card" style="margin-top:12px;">
+      <div class="tc-glow"></div>
+      <div class="tc-eye">Today's suggestion</div>
+      <div class="tc-head">Bailey hasn't adventured today.</div>
+      <div class="tc-ctx">Last time at the shore, <strong>Bailey found something in the tide pools.</strong> Rare slot odds are higher today. The shore counts toward Beach Month.</div>
+      <button class="btn-primary" onclick="go('adventure')">Start today's adventure →</button>
+    </div>
+    <!-- Energy bar -->
+    <div class="ebar" style="margin-top:12px;">
+      <div class="ebar-top"><span class="ebar-lbl">Adventure Energy</span><span class="ebar-val">1,840 / 3,000</span></div>
+      <div class="ebar-track"><div class="ebar-fill"></div></div>
+      <div class="ebar-goal">1,160 until <span>Trail Blazer</span> badge unlocks</div>
+    </div>
+    <!-- Recent -->
+    <div class="recap" style="margin-top:12px;">
+      <div class="eye" style="margin-bottom:8px;padding-left:2px;">Last adventure</div>
+      <div class="recap-item">
+        <div class="ri-icon">🌊</div>
+        <div class="ri-info">
+          <div class="ri-title">Shore · 34 min · 2.1 mi</div>
+          <div class="ri-meta">Yesterday · +55 energy</div>
+          <div class="ri-find">"Bailey circled the tide pools three times."</div>
+        </div>
+        <div class="ri-nrg">+55</div>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+  <nav class="bnav">
+    <button class="ni active" onclick="go('home')"><span class="ni-icon">🐾</span><span class="ni-lbl">Today</span><div class="ni-dot"></div></button>
+    <button class="ni" onclick="go('adventure')"><span class="ni-icon">🗺️</span><span class="ni-lbl">Adventure</span></button>
+    <button class="ni" onclick="go('packs')"><span class="ni-icon">🎒</span><span class="ni-lbl">Packs</span></button>
+    <button class="ni" onclick="go('finds')"><span class="ni-icon">🏅</span><span class="ni-lbl">Finds</span></button>
+    <button class="ni" onclick="go('story')"><span class="ni-icon">📖</span><span class="ni-lbl">Story</span></button>
+  </nav>
+</div>
+
+<!-- ════ ADVENTURE ════ -->
+<div id="s-adventure" class="screen">
+  <div class="topbar">
+    <button onclick="go('home')" style="background:none;border:none;color:var(--text-2);font-size:13px;cursor:pointer;font-family:var(--fb);">← Back</button>
+    <div class="wm" style="font-size:13px;">Paw<span>Streak</span></div>
+    <div style="width:50px;"></div>
+  </div>
+  <div class="scroll">
+    <div style="height:14px;"></div>
+    <div class="adv-head">
+      <div class="adv-title">Where is Bailey going?</div>
+      <div class="adv-sub">Choose a zone. Your mission generates instantly.</div>
+    </div>
+    <div class="local-bar">
+      <span class="lb-icon">📍</span>
+      <div class="lb-text">San Diego · <strong>3 dog beaches · 8 parks · Torrey Pines trails</strong></div>
+    </div>
+    <div class="zones-list">
+      <div class="zone-card" onclick="selZone(this,'🏡','The Neighborhood','Familiar ground. The story starts here.','#FF6B35','Morning routes,Block circuits')">
+        <div class="zc-glow" style="background:rgba(255,107,53,.15);"></div>
+        <div class="zc-top"><div class="zc-emoji">🏡</div><div><div class="zc-name">The Neighborhood</div><div class="zc-tag">Familiar ground. The story starts here.</div></div></div>
+        <div class="zc-spots"><span class="zc-spot">Morning routes</span><span class="zc-spot">Block circuits</span></div>
+      </div>
+      <div class="zone-card sel" onclick="selZone(this,'🌊','The Shore','Salt air. Wide open. Anything can happen.','#4FC3F7','Ocean Beach,Dog Beach,Mission Bay')">
+        <div class="zc-glow" style="background:rgba(79,195,247,.15);"></div>
+        <div class="zc-top"><div class="zc-emoji">🌊</div><div><div class="zc-name">The Shore</div><div class="zc-tag">Salt air. Wide open. Anything can happen.</div></div></div>
+        <div class="zc-spots"><span class="zc-spot">Ocean Beach</span><span class="zc-spot">Dog Beach</span><span class="zc-spot">Mission Bay</span></div>
+        <div class="zc-sel-lbl">Selected · counts toward Beach Month</div>
+      </div>
+      <div class="zone-card" onclick="selZone(this,'🌳','The Park','Grass, space, other dogs.','#34D399','Balboa Park,Morley Field,+6 more')">
+        <div class="zc-glow" style="background:rgba(52,211,153,.12);"></div>
+        <div class="zc-top"><div class="zc-emoji">🌳</div><div><div class="zc-name">The Park</div><div class="zc-tag">Grass, space, other dogs.</div></div></div>
+        <div class="zc-spots"><span class="zc-spot">Balboa Park</span><span class="zc-spot">Morley Field</span><span class="zc-spot">+6 more</span></div>
+      </div>
+      <div class="zone-card" onclick="selZone(this,'🗺️','Somewhere New','Bailey has never been here.','#FFB347','Torrey Pines,Tecolote Canyon')">
+        <div class="zc-glow" style="background:rgba(255,179,71,.1);"></div>
+        <div class="zc-top"><div class="zc-emoji">🗺️</div><div><div class="zc-name">Somewhere New</div><div class="zc-tag">Bailey has never been here.</div></div></div>
+        <div class="zc-spots"><span class="zc-spot">Torrey Pines</span><span class="zc-spot">Tecolote Canyon</span></div>
+      </div>
+      <div class="zone-card" onclick="selZone(this,'🌙','Evening Streets','Slower. Stranger. Better smells.','#A78BFA','Night routes,Quiet blocks')">
+        <div class="zc-glow" style="background:rgba(167,139,250,.1);"></div>
+        <div class="zc-top"><div class="zc-emoji">🌙</div><div><div class="zc-name">Evening Streets</div><div class="zc-tag">Slower. Stranger. Better smells.</div></div></div>
+        <div class="zc-spots"><span class="zc-spot">Night routes</span><span class="zc-spot">Quiet blocks</span></div>
+      </div>
+      <div class="zone-card locked">
+        <div class="zc-top"><div class="zc-emoji">🌿</div><div><div class="zc-name">The Wild Edge</div><div class="zc-tag">Longer. Harder. Worth it.</div></div></div>
+        <div><span class="zc-unlock">🔒 Unlocks at 20 adventures</span></div>
+      </div>
+    </div>
+    <!-- Mission preview -->
+    <div class="mp" id="mp">
+      <div class="mp-eye" id="mp-eye">Today's Shore mission</div>
+      <span class="mp-emoji" id="mp-emoji">🌅</span>
+      <div class="mp-title" id="mp-title">Tide Pool Patrol</div>
+      <div class="mp-meta" id="mp-meta">~30 min · Salt mist · big horizon</div>
+      <div class="mp-flavor" id="mp-flavor">Bailey has a nose for what the tide left behind. Let her lead.</div>
+      <div class="mp-rarity"><span class="pill p-rare" id="mp-rarity">✦ Rare slot today</span></div>
+      <button class="btn-go" onclick="go('walk')">
+        <span class="btn-go-main">Start adventure →</span>
+        <span class="btn-go-sub" id="mp-sub">Shore · ~30 min · Bailey is ready</span>
+      </button>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+  <nav class="bnav">
+    <button class="ni" onclick="go('home')"><span class="ni-icon">🐾</span><span class="ni-lbl">Today</span></button>
+    <button class="ni active" onclick="go('adventure')"><span class="ni-icon">🗺️</span><span class="ni-lbl">Adventure</span><div class="ni-dot"></div></button>
+    <button class="ni" onclick="go('packs')"><span class="ni-icon">🎒</span><span class="ni-lbl">Packs</span></button>
+    <button class="ni" onclick="go('finds')"><span class="ni-icon">🏅</span><span class="ni-lbl">Finds</span></button>
+    <button class="ni" onclick="go('story')"><span class="ni-icon">📖</span><span class="ni-lbl">Story</span></button>
+  </nav>
+</div>
+
+<!-- ════ PACKS ════ -->
+<div id="s-packs" class="screen">
+  <div class="scroll">
+    <div class="packs-hero">
+      <div class="packs-hero-glow"></div>
+      <div class="packs-eyebrow">Monthly challenges</div>
+      <div class="packs-title">Adventure Packs</div>
+      <div class="packs-sub">Pick a monthly goal. Every adventure counts toward it.</div>
+    </div>
+    <!-- Active pack -->
+    <div class="active-pack-card">
+      <div class="apc-label">Active pack · 18 days left</div>
+      <div class="apc-top">
+        <span class="apc-icon">🏖️</span>
+        <div class="apc-info">
+          <div class="apc-name">Beach Month</div>
+          <div class="apc-deadline">Hit 8 different beaches this month</div>
+        </div>
+      </div>
+      <div class="apc-bar-track"><div class="apc-bar-fill"></div></div>
+      <div class="apc-prog-text"><strong>3 of 8</strong> beach adventures complete</div>
+      <div class="apc-missions">
+        <div class="apc-mission done"><div class="apc-check">✓</div><div class="apc-m-text">Ocean Beach</div><div class="apc-m-reward">+80 energy</div></div>
+        <div class="apc-mission done"><div class="apc-check">✓</div><div class="apc-m-text">Dog Beach</div><div class="apc-m-reward">+80 energy</div></div>
+        <div class="apc-mission done"><div class="apc-check">✓</div><div class="apc-m-text">Mission Bay</div><div class="apc-m-reward">+80 energy</div></div>
+        <div class="apc-mission"><div class="apc-check"></div><div class="apc-m-text">Coronado Beach</div><div class="apc-m-reward">+80 energy</div></div>
+        <div class="apc-mission"><div class="apc-check"></div><div class="apc-m-text">La Jolla Shores</div><div class="apc-m-reward">+80 energy</div></div>
+        <div class="apc-mission"><div class="apc-check"></div><div class="apc-m-text">3 more beaches...</div><div class="apc-m-reward">+240 energy</div></div>
+      </div>
+    </div>
+    <!-- Browse -->
+    <div class="browse-section">
+      <div class="browse-title">Browse packs · start next month</div>
+      <div class="pack-card">
+        <div class="pack-card-glow" style="background:rgba(52,211,153,.15);"></div>
+        <div class="pc-top">
+          <span class="pc-icon">🌲</span>
+          <div class="pc-info">
+            <div class="pc-name">Trail Hunter</div>
+            <div class="pc-tag">Complete 8 trail adventures in 30 days. Torrey Pines, Los Peñasquitos, and more.</div>
+          </div>
+        </div>
+        <div class="pc-meta"><span class="pc-chip">8 adventures</span><span class="pc-chip">30 days</span><span class="pc-reward">🏅 Trail Blazer badge</span></div>
+        <button class="btn-join btn-join-green" onclick="joinPack(this)">Join for next month</button>
+      </div>
+      <div class="pack-card">
+        <div class="pack-card-glow" style="background:rgba(255,107,53,.12);"></div>
+        <div class="pc-top">
+          <span class="pc-icon">🔥</span>
+          <div class="pc-info">
+            <div class="pc-name">Streak Builder</div>
+            <div class="pc-tag">21 consecutive days. Any adventure counts. Just don't break it.</div>
+          </div>
+        </div>
+        <div class="pc-meta"><span class="pc-chip">21 days straight</span><span class="pc-reward">🫶 Unshakeable badge + streak progress</span></div>
+        <button class="btn-join btn-join-purple" onclick="joinPack(this)">Join for next month</button>
+      </div>
+      <div class="pack-card">
+        <div class="pack-card-glow" style="background:rgba(79,195,247,.1);"></div>
+        <div class="pc-top">
+          <span class="pc-icon">🌙</span>
+          <div class="pc-info">
+            <div class="pc-name">Night Owl</div>
+            <div class="pc-tag">6 evening adventures after 7pm this month. The streets are different at night.</div>
+          </div>
+        </div>
+        <div class="pc-meta"><span class="pc-chip">6 evening adventures</span><span class="pc-reward">🌙 Night Walker badge</span></div>
+        <button class="btn-join btn-join-blue" onclick="joinPack(this)">Join for next month</button>
+      </div>
+      <div class="pack-card">
+        <div class="pack-card-glow" style="background:rgba(255,179,71,.1);"></div>
+        <div class="pc-top">
+          <span class="pc-icon">🗺️</span>
+          <div class="pc-info">
+            <div class="pc-name">Explorer</div>
+            <div class="pc-tag">Visit 4 zones Bailey has never been to. New smells, new territory, new finds.</div>
+          </div>
+        </div>
+        <div class="pc-meta"><span class="pc-chip">4 new zones</span><span class="pc-reward">🧭 Pathfinder badge + XP rank jump</span></div>
+        <button class="btn-join btn-join-gold" onclick="joinPack(this)">Join for next month</button>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+  <nav class="bnav">
+    <button class="ni" onclick="go('home')"><span class="ni-icon">🐾</span><span class="ni-lbl">Today</span></button>
+    <button class="ni" onclick="go('adventure')"><span class="ni-icon">🗺️</span><span class="ni-lbl">Adventure</span></button>
+    <button class="ni active"><span class="ni-icon">🎒</span><span class="ni-lbl">Packs</span><div class="ni-dot"></div></button>
+    <button class="ni" onclick="go('finds')"><span class="ni-icon">🏅</span><span class="ni-lbl">Finds</span></button>
+    <button class="ni" onclick="go('story')"><span class="ni-icon">📖</span><span class="ni-lbl">Story</span></button>
+  </nav>
+</div>
+
+<!-- ════ ACTIVE WALK ════ -->
+<div id="s-walk" class="screen">
+  <div class="walk-hdr">
+    <div class="walk-type" id="wt-lbl">🌊 Shore Adventure</div>
+    <div class="walk-dog">Bailey's story is being written...</div>
+  </div>
+  <div class="walk-body">
+    <div class="tw">
+      <svg viewBox="0 0 194 194" width="194" height="194">
+        <circle class="tt" cx="97" cy="97" r="87"/>
+        <circle class="tf" id="tf" cx="97" cy="97" r="87"/>
+      </svg>
+      <div class="ti">
+        <div class="tt-time" id="wk-time">00:00</div>
+        <div class="tt-nrg" id="wk-nrg">+0 Energy</div>
+      </div>
+    </div>
+    <div class="walk-stats">
+      <div class="ws"><div class="ws-val" id="wk-dist">0.0</div><div class="ws-lbl">Miles</div></div>
+      <div class="ws"><div class="ws-val" id="wk-pace">—</div><div class="ws-lbl">Pace</div></div>
+    </div>
+    <div class="walk-acts">
+      <button class="btn-pause" id="pb" onclick="toggleP()">⏸</button>
+      <button class="btn-end" onclick="endWalk()">Wrap mission →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CHARACTER MOMENT ════ -->
+<div id="s-char" class="screen" onclick="go('reward')">
+  <div class="char-wrap">
+    <div class="char-big mascot">
+      <div class="m-ears"><div class="m-ear l"></div><div class="m-ear r"></div></div>
+      <div class="m-face" style="top:14px;font-size:80px;line-height:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));">🐺</div>
+      <div class="m-tail" style="bottom:0;right:-6px;font-size:24px;">🐾</div>
+    </div>
+    <div class="char-won">Bailey won the day</div>
+    <div class="char-head">Shore adventure<br>complete.</div>
+    <div class="char-sub">🌊 Salt air · big horizon</div>
+    <div class="char-xp-card">
+      <div class="char-xp-num" id="char-xp">+0</div>
+      <div class="char-xp-lbl">Adventure Energy</div>
+    </div>
+    <div class="char-tap">tap to continue</div>
+  </div>
+</div>
+
+<!-- ════ REWARD ════ -->
+<div id="s-reward" class="screen">
+  <div class="scroll">
+    <div class="rew-hero">
+      <div class="cfw" id="cfw"></div>
+      <div class="rew-lbl">Bailey won the day</div>
+      <div class="rew-head"><em>Bailey</em> crushed a Shore Adventure!</div>
+      <div class="rew-sub">Day 5 streak — protected 🔥</div>
+    </div>
+    <div class="rew-cards">
+      <div class="rc rc-xp" style="animation-delay:.1s"><div class="rc-xp-num">+55</div><div class="rc-xp-lbl">Adventure Energy earned</div></div>
+      <div class="rc" style="animation-delay:.2s"><div class="rc-row"><span class="rc-icon">🔥</span><div><div class="rc-title">Streak protected — 5 days</div><div class="rc-sub">2 more adventures until Unshakeable Duo badge seals</div></div></div></div>
+      <div class="rc" style="animation-delay:.22s;border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.04);"><div class="rc-row"><span class="rc-icon">🏖️</span><div><div class="rc-title" style="color:var(--purple);">Beach Month · 4 of 8</div><div class="rc-sub">4 more beach adventures to complete the pack</div></div></div></div>
+      <div class="rc rc-disc" style="animation-delay:.3s"><div class="rc-disc-lbl">What Bailey found</div><div class="rc-disc-text">"Something in the tide pools. Bailey circled it three times and looked back at you."</div></div>
+      <div class="rc rc-tease" style="animation-delay:.35s"><div class="rc-row"><span class="rc-icon">🔮</span><div><div class="rc-title">Come back tomorrow</div><div class="rc-sub">The tide pools looked different when you left. Bailey should go back.</div></div></div></div>
+      <div class="rc" style="animation-delay:.4s"><div class="share-inner"><div style="font-size:20px;margin-bottom:4px;">🐾</div><div class="si-dog">Bailey</div><div class="si-type">Shore Adventure</div><div class="si-streak">5</div><div class="si-slbl">day streak</div><div class="si-app">PawStreak</div></div><button class="btn-share">📤 Share Bailey's streak</button></div>
+      <div class="rc" style="animation-delay:.45s"><div class="remind-q">Same time tomorrow?</div><button class="btn-remind" id="rb" onclick="setR()">🔔 Remind me</button></div>
+    </div>
+    <button class="btn-done" onclick="go('home');markWon()">Done — see you tomorrow 🐾</button>
+    <div style="height:16px;"></div>
+  </div>
+  <nav class="bnav">
+    <button class="ni active"><span class="ni-icon">🐾</span><span class="ni-lbl">Today</span><div class="ni-dot"></div></button>
+    <button class="ni" onclick="go('adventure')"><span class="ni-icon">🗺️</span><span class="ni-lbl">Adventure</span></button>
+    <button class="ni" onclick="go('packs')"><span class="ni-icon">🎒</span><span class="ni-lbl">Packs</span></button>
+    <button class="ni" onclick="go('finds')"><span class="ni-icon">🏅</span><span class="ni-lbl">Finds</span></button>
+    <button class="ni" onclick="go('story')"><span class="ni-icon">📖</span><span class="ni-lbl">Story</span></button>
+  </nav>
+</div>
+
+<!-- ════ FINDS ════ -->
+<div id="s-finds" class="screen">
+  <div class="scroll">
+    <div class="finds-head"><div class="finds-title">Bailey's Finds</div><div class="finds-sub">3 achievements · 4 progress perks</div></div>
+    <!-- Progress perks -->
+    <div class="powerups-section">
+      <div class="eye" style="margin-bottom:8px;">Progress perks · fuel your next adventure</div>
+      <div class="pu-row">
+        <div class="pu-card active-pu" onclick="activatePU(this)">
+          <span class="pu-count">2</span>
+          <span class="pu-icon">⚡</span>
+          <div class="pu-name">Double Energy</div>
+          <div class="pu-desc">Next adventure earns 2× energy</div>
+        </div>
+        <div class="pu-card" onclick="activatePU(this)">
+          <span class="pu-count">1</span>
+          <span class="pu-icon">🛡</span>
+          <div class="pu-name">Streak Progress</div>
+          <div class="pu-desc">Protect one missed day automatically</div>
+        </div>
+        <div class="pu-card" onclick="activatePU(this)">
+          <span class="pu-count">1</span>
+          <span class="pu-icon">✦</span>
+          <div class="pu-name">XP Rank Jump</div>
+          <div class="pu-desc">Next mission has higher rare odds</div>
+        </div>
+        <div class="pu-card used">
+          <span class="pu-icon">🌟</span>
+          <div class="pu-name">Discovery Mode</div>
+          <div class="pu-desc">Guaranteed find next walk</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:4px;">Used · earns on 7-day streak</div>
+        </div>
+      </div>
+    </div>
+    <!-- Badges -->
+    <div style="padding:0 16px;margin-bottom:10px;"><div class="eye">Badges</div></div>
+    <div class="badges-grid">
+      <div class="bc earned"><span class="bc-icon">🐾</span><div class="bc-name">First Pawprint</div><div class="bc-desc">The day the story started.</div><div class="bc-photo">+ Add photo</div></div>
+      <div class="bc earned"><span class="bc-icon">✨</span><div class="bc-name">Three-Day Spark</div><div class="bc-desc">Momentum is a love language.</div><div class="bc-photo">+ Add photo</div></div>
+      <div class="bc earned"><span class="bc-icon">🌅</span><div class="bc-name">Salt on the Snout</div><div class="bc-desc">First salt-air mission.</div><div class="bc-photo" style="border-color:rgba(79,195,247,.2);color:var(--blue);">📸 Sand on snout</div></div>
+      <div class="bc locked"><span class="bc-icon">🫶</span><div class="bc-name">Unshakeable Duo</div><div class="bc-desc">7-day streak.</div></div>
+      <div class="bc locked"><span class="bc-icon">🧭</span><div class="bc-name">Pathfinder</div><div class="bc-desc">Wildcard vibe conquered.</div></div>
+      <div class="bc locked"><span class="bc-icon">🌲</span><div class="bc-name">Trail Blazer</div><div class="bc-desc">Complete Beach Month pack.</div></div>
+      <div class="bc mystery"><span class="bc-icon">❓</span><div class="bc-name">???</div><div class="bc-desc">Try all 4 zones.</div></div>
+      <div class="bc mystery"><span class="bc-icon">❓</span><div class="bc-name">???</div><div class="bc-desc">Keep surprising yourselves.</div></div>
+    </div>
+  </div>
+  <nav class="bnav">
+    <button class="ni" onclick="go('home')"><span class="ni-icon">🐾</span><span class="ni-lbl">Today</span></button>
+    <button class="ni" onclick="go('adventure')"><span class="ni-icon">🗺️</span><span class="ni-lbl">Adventure</span></button>
+    <button class="ni" onclick="go('packs')"><span class="ni-icon">🎒</span><span class="ni-lbl">Packs</span></button>
+    <button class="ni active"><span class="ni-icon">🏅</span><span class="ni-lbl">Finds</span><div class="ni-dot"></div></button>
+    <button class="ni" onclick="go('story')"><span class="ni-icon">📖</span><span class="ni-lbl">Story</span></button>
+  </nav>
+</div>
+
+<!-- ════ STORY ════ -->
+<div id="s-story" class="screen">
+  <div class="scroll">
+    <div class="story-head"><div class="story-title">Bailey's Story</div><div class="story-sub">47 adventures · 38.2 miles · longest streak: 9 days</div></div>
+    <div class="story-bigs">
+      <div class="sb"><div class="sb-val">47</div><div class="sb-lbl">Adventures</div></div>
+      <div class="sb"><div class="sb-val">38.2</div><div class="sb-lbl">Miles covered</div></div>
+      <div class="sb"><div class="sb-val">4</div><div class="sb-lbl">Current streak</div></div>
+      <div class="sb"><div class="sb-val">9</div><div class="sb-lbl">Longest streak</div></div>
+    </div>
+    <div class="tl" style="padding:0 16px;">
+      <div class="eye" style="margin-bottom:12px;">Recent chapter</div>
+      <div class="tl-item"><div class="tl-dot rare"></div><div class="tl-c"><div class="tl-top"><div class="tl-title">🌊 Shore Adventure</div><div class="tl-nrg">+55</div></div><div class="tl-meta">Yesterday · 34 min · 2.1 mi · <span style="color:var(--gold);">Rare</span></div><div class="tl-find">"Something in the tide pools. Bailey circled it three times."</div></div></div>
+      <div class="tl-item"><div class="tl-dot common"></div><div class="tl-c"><div class="tl-top"><div class="tl-title">🌳 Park Adventure</div><div class="tl-nrg">+44</div></div><div class="tl-meta">2 days ago · 28 min · 1.6 mi</div><div class="tl-find">"The park crew was out. Bailey was recognized."</div></div></div>
+      <div class="tl-item"><div class="tl-dot common"></div><div class="tl-c"><div class="tl-top"><div class="tl-title">🏡 Neighborhood</div><div class="tl-nrg">+27</div></div><div class="tl-meta">3 days ago · 18 min · 0.9 mi</div><div class="tl-find">"Bailey found a sunny patch she'll want to visit again."</div></div></div>
+      <div class="tl-item"><div class="tl-dot rare"></div><div class="tl-c"><div class="tl-top"><div class="tl-title">🗺️ Somewhere New</div><div class="tl-nrg">+68</div></div><div class="tl-meta">4 days ago · 45 min · 2.8 mi · <span style="color:var(--gold);">Rare</span></div><div class="tl-find">"Bailey found a smell she couldn't place. She kept returning."</div></div></div>
+      <div class="tl-item"><div class="tl-dot uncommon"></div><div class="tl-c"><div class="tl-top"><div class="tl-title">🌊 Shore Adventure</div><div class="tl-nrg">+50</div></div><div class="tl-meta">5 days ago · 30 min · 1.9 mi</div><div class="tl-find">"Salt air and a long horizon. Bailey was completely calm."</div></div></div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+  <nav class="bnav">
+    <button class="ni" onclick="go('home')"><span class="ni-icon">🐾</span><span class="ni-lbl">Today</span></button>
+    <button class="ni" onclick="go('adventure')"><span class="ni-icon">🗺️</span><span class="ni-lbl">Adventure</span></button>
+    <button class="ni" onclick="go('packs')"><span class="ni-icon">🎒</span><span class="ni-lbl">Packs</span></button>
+    <button class="ni" onclick="go('finds')"><span class="ni-icon">🏅</span><span class="ni-lbl">Finds</span></button>
+    <button class="ni active"><span class="ni-icon">📖</span><span class="ni-lbl">Story</span><div class="ni-dot"></div></button>
+  </nav>
+</div>
+
+<script>
+const S={login:'s-login',home:'s-home',adventure:'s-adventure',packs:'s-packs',walk:'s-walk',character:'s-char',reward:'s-reward',finds:'s-finds',story:'s-story'}
+function go(n){
+  Object.values(S).forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active')})
+  const e=document.getElementById(S[n]);if(e)e.classList.add('active')
+  if(n==='reward')spawnConfetti()
+  if(n==='walk'){wSecs=0;wPaused=false;clearInterval(wTimer);wTimer=setInterval(tickWalk,1000)}
+  if(n==='character')animXP()
+}
+function selectQuick(el,mins){
+  document.querySelectorAll('.quick-btn').forEach(b=>b.classList.remove('selected'))
+  el.classList.add('selected')
+  document.getElementById('mp-sub').textContent=`Quick · ~${mins} min · Bailey is ready`
+}
+function selZone(el,emoji,name,tag,color,spots){
+  document.querySelectorAll('.zone-card').forEach(c=>{c.classList.remove('sel');const s=c.querySelector('.zc-sel-lbl');if(s)s.remove()})
+  if(!el.classList.contains('locked')){
+    el.classList.add('sel')
+    const lbl=document.createElement('div');lbl.className='zc-sel-lbl';lbl.textContent='Selected · Today\'s adventure';el.appendChild(lbl)
+    document.getElementById('mp-eye').textContent=`Today's ${name} mission`
+    document.getElementById('mp-sub').textContent=`${name} · ~30 min · Bailey is ready`
+    document.getElementById('wt-lbl').textContent=emoji+' '+name+' Adventure'
+  }
+}
+function switchDog(name){
+  document.querySelectorAll('.dog-chip').forEach(c=>{c.classList.remove('on');c.querySelector('.dog-av').classList.remove('on')})
+  const el=document.getElementById('dc-'+name);if(el){el.classList.add('on');el.querySelector('.dog-av').classList.add('on')}
+  const names={bailey:{n:'Bailey',f:'🐺'},meiomi:{n:'Meiomi',f:'🐕'}}
+  const d=names[name]||names.bailey
+  document.getElementById('hero-name').textContent=d.n
+  document.getElementById('hero-face').textContent=d.f
+}
+function activatePU(el){
+  document.querySelectorAll('.pu-card').forEach(c=>c.classList.remove('active-pu'))
+  if(!el.classList.contains('used'))el.classList.add('active-pu')
+}
+function joinPack(btn){btn.textContent='✓ Queued for next month';btn.style.opacity='.6';btn.style.cursor='default';}
+let wSecs=0,wPaused=false,wTimer=null
+function tickWalk(){
+  if(wPaused)return;wSecs++
+  const m=Math.floor(wSecs/60).toString().padStart(2,'0'),s=(wSecs%60).toString().padStart(2,'0')
+  document.getElementById('wk-time').textContent=`${m}:${s}`
+  document.getElementById('wk-nrg').textContent=`+${Math.floor((wSecs/60)*5)} Energy`
+  document.getElementById('wk-dist').textContent=(wSecs*0.00042).toFixed(2)
+  document.getElementById('tf').style.strokeDashoffset=553-(553*Math.min(wSecs,3600)/3600)
+}
+function toggleP(){wPaused=!wPaused;document.getElementById('pb').textContent=wPaused?'▶':'⏸'}
+function endWalk(){
+  clearInterval(wTimer)
+  const e=Math.max(Math.floor((wSecs/60)*5),12)
+  document.getElementById('char-xp').textContent='+'+e
+  go('character');setTimeout(()=>go('reward'),2500)
+}
+function animXP(){
+  const el=document.getElementById('char-xp'),t=parseInt(el.textContent.replace('+',''))||55
+  let c=0;const inc=t/30,iv=setInterval(()=>{c+=inc;if(c>=t){el.textContent='+'+t;clearInterval(iv)}else el.textContent='+'+Math.floor(c)},800/30)
+}
+function spawnConfetti(){
+  const c=document.getElementById('cfw');if(!c)return;c.innerHTML=''
+  const cols=['#FF6B35','#FFB347','#34D399','#4FC3F7','#A78BFA']
+  for(let i=0;i<38;i++){const p=document.createElement('div');p.className='cp';const sz=5+Math.random()*6;p.style.cssText=`left:${Math.random()*100}%;top:-10px;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${1.2+Math.random()*1.8}s;animation-delay:${Math.random()*.5}s;border-radius:${Math.random()>.5?'50%':'2px'}`;c.appendChild(p)}
+}
+function setR(){const b=document.getElementById('rb');b.classList.add('set');b.textContent="✓ Reminder set — Bailey's next chapter is bookmarked"}
+function markWon(){
+  document.getElementById('hero-status').textContent='won the day. ✓'
+  document.getElementById('hero-status').className='hero-status won'
+  document.getElementById('hero-pill').className='pill p-won'
+  document.getElementById('hero-pill').textContent='✓ Won today'
+}
+</script>
+</body>
+</html>

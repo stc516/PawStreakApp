@@ -1,12 +1,17 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import { BadgeCard } from '../components/BadgeCard'
 import { BottomNav } from '../components/BottomNav'
 import { HeroCard } from '../components/HeroCard'
 import { StatCard } from '../components/StatCard'
 import { VIBE_CHIPS } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
+import { achievementSummary, buildLocalLeaderboard, leaderboardRank } from '../lib/gamification'
 import type { VibeArchetype } from '../types'
 
 export function StoryPage() {
+  const navigate = useNavigate()
   const { state } = useAppState()
   const counts = state.recentAdventures.reduce<Record<VibeArchetype, number>>(
     (acc, a) => ({ ...acc, [a.vibe]: (acc[a.vibe] ?? 0) + 1 }),
@@ -15,6 +20,13 @@ export function StoryPage() {
 
   const favorite = Object.entries(counts).sort((a, b) => b[1] - a[1])[0] as [VibeArchetype, number]
   const vibeChip = VIBE_CHIPS.find((c) => c.vibe === favorite[0]) ?? VIBE_CHIPS[0]
+  const leaderboard = buildLocalLeaderboard(state.dogName, state.totalAdventureEnergy, state.currentStreak)
+  const rank = leaderboardRank(leaderboard)
+  const achievements = achievementSummary(state.badges)
+
+  useEffect(() => {
+    if (!state.onboardingComplete) navigate('/', { replace: true })
+  }, [navigate, state.onboardingComplete])
 
   return (
     <section id='screen-story' className='screen active'>
@@ -23,15 +35,29 @@ export function StoryPage() {
           <div className='sh-eyebrow'>The story so far</div>
           <div className='sh-headline'>{state.dogName}&apos;s Adventures</div>
           <div className='sh-sub'>
-            {state.totalAdventures} missions · {state.totalGroundCovered.toFixed(1)} ground covered · longest streak:{' '}
-            {state.longestStreak} days · {state.totalAdventureEnergy} Adventure Energy banked
+            {state.totalAdventures} adventures · {state.totalGroundCovered.toFixed(1)} ground covered · longest streak:{' '}
+            {state.longestStreak} days · {state.totalAdventureEnergy} XP banked
           </div>
         </HeroCard>
 
         <div className='story-section'>
+          <div className='story-section-title'>Local standings (demo)</div>
+          <div className='fav-type-card'>
+            <div className='fav-info'>
+              <div className='fav-label'>Current XP rank</div>
+              <div className='fav-name'>#{rank}</div>
+              <div className='fav-sub'>
+                {state.totalAdventureEnergy.toLocaleString()} XP · {achievements.earned}/{achievements.total} achievements
+                unlocked
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className='story-section'>
           <div className='story-section-title'>{state.dogName}&apos;s numbers</div>
           <div className='story-big-stats'>
-            <StatCard variant='big' value={String(state.totalAdventures)} label='Missions lived' />
+            <StatCard variant='big' value={String(state.totalAdventures)} label='Adventures lived' />
             <StatCard variant='big' value={state.totalGroundCovered.toFixed(1)} label='Ground covered (story miles)' />
             <StatCard variant='big' value={String(state.currentStreak)} label='Current streak' />
             <StatCard variant='big' value={String(state.longestStreak)} label='Longest streak ever' />
@@ -41,7 +67,7 @@ export function StoryPage() {
         <div className='story-section'>
           <div className='story-section-title'>This week</div>
           <div className='story-row-stats'>
-            <StatCard variant='row' value={String(state.weekAdventures)} label='Missions logged this week' />
+            <StatCard variant='row' value={String(state.weekAdventures)} label='Adventures logged this week' />
             <StatCard variant='row' value={`${state.weekAdventures * 25}m`} label={`Rhythm with ${state.dogName}`} />
             <StatCard variant='row' value={(state.weekAdventures * 1.5).toFixed(1)} label='Ground this week' />
           </div>
@@ -78,7 +104,7 @@ export function StoryPage() {
                   {adventure.locationHint ? <> · {adventure.locationHint}</> : null}
                 </div>
                 <div className='tl-xp'>
-                  {state.dogName} banked +{adventure.adventureEnergy} Adventure Energy
+                  {state.dogName} banked +{adventure.adventureEnergy} XP toward standings and achievements
                 </div>
               </div>
             ))}
@@ -86,7 +112,7 @@ export function StoryPage() {
         </div>
 
         <div className='story-section' style={{ paddingBottom: '1.5rem' }}>
-          <div className='story-section-title'>Moments & badges</div>
+          <div className='story-section-title'>Moments & achievements</div>
           <div className='badges-mini'>
             {state.badges.map((badge) => (
               <BadgeCard

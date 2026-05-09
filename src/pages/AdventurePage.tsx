@@ -1,8 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { AdventureShareCard } from '../components/adventure/AdventureShareCard'
 import { missionTimeLabel } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
+import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
+import { shareAdventure } from '../lib/shareAdventure'
+import { calculateAdventureXp } from '../lib/xp'
+
+interface CompletionViewState {
+  title: string
+  locationHint: string
+  category: 'social' | 'exploration' | 'chill' | 'chaos' | 'routine'
+  rarity: 'common' | 'uncommon' | 'rare'
+  flavor: string
+  emoji: string
+  streakAfterCompletion: number
+  completedAt: string
+}
 
 export function AdventurePage() {
   const navigate = useNavigate()
@@ -10,6 +25,12 @@ export function AdventurePage() {
   const m = state.generatedMission
   const [walkSeconds, setWalkSeconds] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [completionModal, setCompletionModal] = useState<CompletionViewState | null>(null)
+  const [shareStatus, setShareStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!state.onboardingComplete) navigate('/', { replace: true })
+  }, [navigate, state.onboardingComplete])
 
   useEffect(() => {
     if (paused) return
@@ -25,7 +46,14 @@ export function AdventurePage() {
     return `${mins}:${secs}`
   }, [walkSeconds])
 
-  const walkEnergy = Math.floor((walkSeconds / 60) * 5)
+  const xpBreakdown = useMemo(
+    () =>
+      calculateAdventureXp({
+        walkSeconds,
+        rarity: m.rarity,
+      }),
+    [m.rarity, walkSeconds],
+  )
   const walkGround = (walkSeconds * 0.00042).toFixed(2)
   const pace = useMemo(() => {
     const dist = Number.parseFloat(walkGround)
@@ -36,11 +64,28 @@ export function AdventurePage() {
 
   const timerOffset = 565 - (565 * Math.min(walkSeconds, 3600)) / 3600
 
+  async function handleShareAdventure() {
+    if (!completionModal) return
+    try {
+      const result = await shareAdventure({
+        dogName: state.dogName,
+        title: completionModal.title,
+        category: completionModal.category,
+        streak: completionModal.streakAfterCompletion,
+        locationHint: completionModal.locationHint,
+        flavor: completionModal.flavor,
+      })
+      setShareStatus(result === 'shared' ? 'Shared successfully.' : 'Copied summary to clipboard.')
+    } catch {
+      setShareStatus('Could not share from this device yet.')
+    }
+  }
+
   return (
     <section id='screen-walk' className='screen active'>
       <div className='walk-hdr'>
         <div className='walk-type-lbl'>
-          {m.emoji} {m.title}
+          {m.emoji} {visibleAdventureTitle(m.title, state.isAway)}
         </div>
         <div className='walk-dog-lbl'>{state.dogName}&apos;s story is being written...</div>
         <div className='walk-mission-meta'>
@@ -58,7 +103,10 @@ export function AdventurePage() {
           </svg>
           <div className='timer-center'>
             <div className='timer-time'>{walkTime}</div>
-            <div className='timer-xp'>+{walkEnergy} Adventure Energy</div>
+            <div className='timer-xp'>+{xpBreakdown.xp} Adventure XP</div>
+            {m.rarity !== 'common' ? (
+              <div className='mt-1 text-[11px] font-medium text-[var(--gold)]'>Includes rarity bonus</div>
+            ) : null}
           </div>
         </div>
         <div className='walk-stats-row'>
@@ -80,13 +128,72 @@ export function AdventurePage() {
           type='button'
           className='btn-end'
           onClick={() => {
+            const completionSnapshot: CompletionViewState = {
+              title: visibleAdventureTitle(m.title, state.isAway),
+              locationHint: m.locationHint,
+              category: m.category,
+              rarity: m.rarity,
+              flavor: m.flavor,
+              emoji: m.emoji,
+              streakAfterCompletion: state.currentStreak + 1,
+              completedAt: new Date().toISOString(),
+            }
             completeAdventure(walkSeconds)
-            navigate('/reward')
+            setPaused(true)
+            setCompletionModal(completionSnapshot)
+            setShareStatus(null)
           }}
         >
-          Wrap mission →
+          Wrap adventure →
         </button>
       </div>
+      {completionModal ? (
+        <div className='adventure-complete-modal-backdrop' role='dialog' aria-modal='true' aria-label='Adventure complete'>
+          <div className={`adventure-complete-modal rarity-${completionModal.rarity}`}>
+            <div className='adventure-complete-kicker'>{state.dogName} completed:</div>
+            <h2 className='adventure-complete-title'>{completionModal.title}</h2>
+            <div className='adventure-complete-meta'>
+              <span className='adventure-complete-chip'>{completionModal.category}</span>
+              <span>{completionModal.locationHint}</span>
+            </div>
+            <div className='adventure-complete-streak'>🔥 Day {completionModal.streakAfterCompletion} streak</div>
+            <AdventureShareCard
+              dogName={state.dogName}
+              title={completionModal.title}
+              neighborhoodOrLocation={completionModal.locationHint}
+              category={completionModal.category}
+              streak={completionModal.streakAfterCompletion}
+              timestamp={completionModal.completedAt}
+              flavor={completionModal.flavor}
+              rarity={completionModal.rarity}
+              emoji={completionModal.emoji}
+            />
+            <div className='adventure-complete-actions'>
+              <button type='button' className='btn-share' onClick={handleShareAdventure}>
+                Share Adventure
+              </button>
+              <button
+                type='button'
+                className='btn-ghost'
+                onClick={() => setShareStatus('Photo capture is coming soon.')}
+              >
+                Take Photo
+              </button>
+              <button
+                type='button'
+                className='btn-done'
+                onClick={() => {
+                  setCompletionModal(null)
+                  navigate('/character-moment')
+                }}
+              >
+                Done
+              </button>
+            </div>
+            {shareStatus ? <p className='adventure-complete-feedback'>{shareStatus}</p> : null}
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

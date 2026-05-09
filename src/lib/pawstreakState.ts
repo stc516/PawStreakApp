@@ -1,6 +1,24 @@
 import { generateLocalizedMission, flattenMission, normalizeZip, refreshTomorrowTease } from '../data/localAdventureEngine'
 import { moodForDay } from '../data/missions'
-import type { AdventureEntry, BadgeDefinition, GeneratedMission, PawstreakState, VibeArchetype } from '../types'
+import { calculateAdventureXp } from './xp'
+import type {
+  AdventureEntry,
+  BadgeDefinition,
+  DogProfile,
+  GeneratedMission,
+  NotificationPrefs,
+  OwnerProfile,
+  PawstreakState,
+  UserProfile,
+  VibeArchetype,
+} from '../types'
+import {
+  defaultDogProfile,
+  defaultNotificationPrefs,
+  defaultOwnerProfile,
+  defaultUserProfile,
+} from '../types'
+import { getEnvironmentForZip, haversineKm } from '../data/zipEnvironments'
 
 const STORAGE_KEY = 'pawstreak_demo_state_v4'
 
@@ -11,7 +29,7 @@ function localDayKey(d = new Date()) {
 const defaultBadges: BadgeDefinition[] = [
   { id: 'first-step', name: 'First Pawprint', icon: '🐾', description: "The day the story started — you said yes to your dog's day.", unlocked: true },
   { id: 'three-day-streak', name: 'Three-Day Spark', icon: '✨', description: 'Three days in a row. Momentum is a love language.', unlocked: true },
-  { id: 'beach-dog', name: 'Salt on the Snout', icon: '🌅', description: 'Big sky energy — first salt-air mission logged.', unlocked: true },
+  { id: 'beach-dog', name: 'Salt on the Snout', icon: '🌅', description: 'Big sky XP — first salt-air adventure logged.', unlocked: true },
   {
     id: 'week-warrior',
     name: 'Unshakeable Duo',
@@ -24,7 +42,7 @@ const defaultBadges: BadgeDefinition[] = [
     id: 'park-regular',
     name: 'Professional Sniffer',
     icon: '🌿',
-    description: 'Five wander missions — nose earned its résumé.',
+    description: 'Five wander adventures — nose earned its résumé.',
     unlocked: false,
   },
   { id: 'mystery-one', name: 'Renaissance Dog', icon: '🎭', description: 'All four vibes sampled — range unlocked.', unlocked: false, mystery: true },
@@ -37,7 +55,7 @@ function seedEntries(): AdventureEntry[] {
     {
       id: 'a-1',
       vibe: 'salt',
-      missionTitle: 'Ocean Air Mission',
+      missionTitle: 'Ocean Air Adventure',
       emoji: '🌊',
       rarity: 'uncommon',
       adventureEnergy: 55,
@@ -45,7 +63,7 @@ function seedEntries(): AdventureEntry[] {
       groundCovered: 2.1,
       completedAt: ago(1),
       locationHint: 'Salt mist · big horizon',
-      missionDescription: 'Let Bailey ride the breeze.',
+      missionDescription: 'Let the salt air carry you both.',
       estimatedMinutesMin: 25,
       estimatedMinutesMax: 42,
     },
@@ -94,7 +112,7 @@ function seedEntries(): AdventureEntry[] {
     {
       id: 'a-5',
       vibe: 'salt',
-      missionTitle: 'Sunset Sniff Mission',
+      missionTitle: 'Sunset Sniff Adventure',
       emoji: '🌅',
       rarity: 'uncommon',
       adventureEnergy: 50,
@@ -134,13 +152,14 @@ function legacyMissionFromState(parsed: Record<string, unknown>): GeneratedMissi
   return {
     title,
     emoji,
+    category: 'routine',
     estimatedMinutesMin: 20,
     estimatedMinutesMax: 35,
     locationHint: 'Your neighborhood',
     idealMoods: ['curious', 'chill'],
     moodMatchesToday: true,
     rarity: (rarity as GeneratedMission['rarity']) ?? 'common',
-    description: typeof flavor === 'string' ? flavor : `Today’s mission for your pup.`,
+    description: typeof flavor === 'string' ? flavor : `Today’s adventure for your pup.`,
     flavor: typeof flavor === 'string' ? flavor : '',
     vibe: (vibe as GeneratedMission['vibe']) ?? 'pulse',
   }
@@ -149,19 +168,25 @@ function legacyMissionFromState(parsed: Record<string, unknown>): GeneratedMissi
 const moodToday = localDayKey()
 
 const selectionSeed = initialSelection({
-  dogName: 'Bailey',
+  dogName: 'Your dog',
   currentStreak: 4,
   pickNonce: 0,
-  dogMood: moodForDay('Bailey', moodToday),
+  dogMood: moodForDay('Your dog', moodToday),
   zipCode: '',
 })
 
 const initialState: PawstreakState = {
   onboardingComplete: false,
-  dogName: 'Bailey',
+  dogName: 'Your dog',
+  dogProfile: defaultDogProfile({ name: 'Your dog' }),
+  ownerProfile: defaultOwnerProfile(),
+  userProfile: defaultUserProfile(),
+  notificationPrefs: defaultNotificationPrefs(),
+  isAway: false,
+  welcomeBannerDismissed: true,
   zipCode: '',
   moodDayKey: moodToday,
-  dogMood: moodForDay('Bailey', moodToday),
+  dogMood: moodForDay('Your dog', moodToday),
   currentStreak: 4,
   longestStreak: 9,
   totalAdventures: 47,
@@ -184,7 +209,7 @@ const initialState: PawstreakState = {
   latestCompletedAdventure: null,
   latestUnlockedBadgeId: null,
   emergencyTreatAvailable: true,
-  tomorrowTease: refreshTomorrowTease({ dogName: 'Bailey', zipCode: '' }),
+  tomorrowTease: refreshTomorrowTease({ dogName: 'Your dog', zipCode: '' }),
 }
 
 function isBrowser() {
@@ -252,7 +277,7 @@ function migrateLegacy(parsed: Record<string, unknown>): Partial<PawstreakState>
       return {
         id: String(a.id ?? crypto.randomUUID()),
         vibe,
-        missionTitle: typeof a.missionTitle === 'string' ? a.missionTitle : String(a.name ?? 'Mission'),
+        missionTitle: typeof a.missionTitle === 'string' ? a.missionTitle : String(a.name ?? 'Adventure'),
         emoji: typeof a.emoji === 'string' ? a.emoji : '🐾',
         rarity: (a.rarity as AdventureEntry['rarity']) ?? 'common',
         adventureEnergy: energy,
@@ -301,7 +326,85 @@ export function loadPawstreakState(): PawstreakState {
   }
 }
 
+function resolveHomeCoords(state: PawstreakState): { lat: number; lng: number } | null {
+  const { homeLat, homeLng, homeZip } = state.userProfile
+  if (
+    typeof homeLat === 'number' &&
+    typeof homeLng === 'number' &&
+    Number.isFinite(homeLat) &&
+    Number.isFinite(homeLng)
+  ) {
+    return { lat: homeLat, lng: homeLng }
+  }
+  const zip = normalizeZip(homeZip || state.zipCode || '')
+  if (!zip) return null
+  const env = getEnvironmentForZip(zip)
+  if (!env) return null
+  return { lat: env.latCenter, lng: env.lngCenter }
+}
+
+const AWAY_THRESHOLD_KM = 25
+
+/** Compare current GPS to home (saved coords or ZIP center). */
+export function evaluateAwayFromCoords(
+  state: PawstreakState,
+  coords: { lat: number; lng: number } | null,
+): PawstreakState {
+  if (!state.onboardingComplete) return { ...state, isAway: false }
+  const home = resolveHomeCoords(state)
+  if (!home || !coords) return { ...state, isAway: false }
+  const km = haversineKm(coords.lat, coords.lng, home.lat, home.lng)
+  return { ...state, isAway: km > AWAY_THRESHOLD_KM }
+}
+
+function ensureNestedState(merged: PawstreakState) {
+  if (!merged.dogProfile || typeof merged.dogProfile !== 'object') {
+    merged.dogProfile = defaultDogProfile({ name: merged.dogName })
+  } else {
+    merged.dogProfile = {
+      ...defaultDogProfile(),
+      ...merged.dogProfile,
+      name: merged.dogProfile.name || merged.dogName,
+    }
+  }
+
+  if (!merged.ownerProfile || typeof merged.ownerProfile !== 'object') {
+    merged.ownerProfile = defaultOwnerProfile()
+  } else if (!Array.isArray(merged.ownerProfile.goals)) {
+    merged.ownerProfile.goals = []
+  }
+
+  if (!merged.userProfile || typeof merged.userProfile !== 'object') {
+    merged.userProfile = defaultUserProfile()
+  } else {
+    merged.userProfile = {
+      ...defaultUserProfile(),
+      ...merged.userProfile,
+      homeZip:
+        typeof merged.userProfile.homeZip === 'string'
+          ? normalizeZip(merged.userProfile.homeZip)
+          : normalizeZip(merged.zipCode ?? ''),
+    }
+  }
+
+  if (!merged.notificationPrefs || typeof merged.notificationPrefs !== 'object') {
+    merged.notificationPrefs = defaultNotificationPrefs()
+  } else {
+    merged.notificationPrefs = {
+      ...defaultNotificationPrefs(),
+      ...merged.notificationPrefs,
+    }
+  }
+
+  if (typeof merged.isAway !== 'boolean') merged.isAway = false
+
+  if (typeof merged.welcomeBannerDismissed !== 'boolean') {
+    merged.welcomeBannerDismissed = merged.onboardingComplete === true
+  }
+}
+
 function patchLoadedState(merged: PawstreakState) {
+  ensureNestedState(merged)
   const todayKey = localDayKey()
   if (merged.moodDayKey !== todayKey) {
     merged.moodDayKey = todayKey
@@ -348,14 +451,65 @@ export function setDogName(state: PawstreakState, name: string, zipCodeRaw?: str
   const next = {
     ...state,
     dogName,
+    dogProfile: { ...state.dogProfile, name: dogName },
     zipCode,
-    onboardingComplete: true,
     moodDayKey: dayKey,
     dogMood,
     pickNonce,
     tomorrowTease: refreshTomorrowTease({ dogName, zipCode }),
   }
   return { ...next, ...initialSelection({ ...next, dogName, dogMood, zipCode }) }
+}
+
+export function completeOnboarding(
+  state: PawstreakState,
+  payload: {
+    dogProfile: DogProfile
+    ownerProfile: OwnerProfile
+    userProfile: UserProfile
+    notificationPrefs: NotificationPrefs
+  },
+): PawstreakState {
+  const dogName = payload.dogProfile.name.trim() || 'Your dog'
+  const zipCode = normalizeZip(payload.userProfile.homeZip || '')
+  const dayKey = localDayKey()
+  const dogMood = moodForDay(dogName, dayKey)
+  const pickNonce = state.pickNonce + 1
+  const dogProfile: DogProfile = { ...payload.dogProfile, name: dogName }
+  const userProfile: UserProfile = { ...payload.userProfile, homeZip: zipCode }
+
+  const next: PawstreakState = {
+    ...state,
+    dogName,
+    dogProfile,
+    ownerProfile: payload.ownerProfile,
+    userProfile,
+    notificationPrefs: payload.notificationPrefs,
+    onboardingComplete: true,
+    welcomeBannerDismissed: false,
+    zipCode,
+    moodDayKey: dayKey,
+    dogMood,
+    pickNonce,
+    tomorrowTease: refreshTomorrowTease({ dogName, zipCode }),
+  }
+
+  const generatedMission = generateLocalizedMission({
+    zipCode,
+    dogName,
+    dogMood,
+    streak: next.currentStreak,
+    nonce: `onboard|${pickNonce}`,
+  })
+  return {
+    ...next,
+    generatedMission,
+    ...flattenMission(generatedMission),
+  }
+}
+
+export function dismissWelcomeBanner(state: PawstreakState): PawstreakState {
+  return { ...state, welcomeBannerDismissed: true }
 }
 
 export function setZipCode(state: PawstreakState, zipCodeRaw: string): PawstreakState {
@@ -371,6 +525,7 @@ export function setZipCode(state: PawstreakState, zipCodeRaw: string): Pawstreak
   return {
     ...state,
     zipCode,
+    userProfile: { ...state.userProfile, homeZip: zipCode },
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
@@ -439,11 +594,13 @@ function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent
 }
 
 export function completeAdventure(state: PawstreakState, walkSeconds: number): PawstreakState {
-  const minutes = Math.max(1, Math.floor(walkSeconds / 60))
-  const ground = Number((walkSeconds * 0.00042).toFixed(1))
-  const base = Math.max(Math.floor(minutes * 5 + ground * 10), 12)
-  const rarityMultiplier = state.generatedMission.rarity === 'rare' ? 1.25 : state.generatedMission.rarity === 'uncommon' ? 1.12 : 1
-  const adventureEnergy = Math.floor(base * rarityMultiplier)
+  const xpBreakdown = calculateAdventureXp({
+    walkSeconds,
+    rarity: state.generatedMission.rarity,
+  })
+  const minutes = xpBreakdown.minutes
+  const ground = xpBreakdown.ground
+  const adventureEnergy = xpBreakdown.xp
   const nextStreak = state.currentStreak + 1
   const gm = state.generatedMission
 

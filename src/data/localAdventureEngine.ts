@@ -1,6 +1,15 @@
-import type { AdventureRarity, DogMood, GeneratedMission, PawstreakState, VibeArchetype, ZipLocale } from '../types'
+import type {
+  AdventureCategory,
+  AdventureRarity,
+  DogMood,
+  GeneratedMission,
+  PawstreakState,
+  VibeArchetype,
+  ZipLocale,
+} from '../types'
 
 import { flavorForMission, hashString, tomorrowRarePossible } from './missions'
+import { resolveUserEnvironment } from '../lib/resolveUserEnvironment'
 
 // --- ZIP → locale (no APIs; heuristic groups & prefixes) ---
 
@@ -79,8 +88,8 @@ function pickFrom<T>(list: T[], seed: string): T {
   return list[hashString(seed) % list.length]
 }
 
-function rollRarity(seed: string, streak: number, spicyBoost: boolean): AdventureRarity {
-  const roll = (hashString(`${seed}|rarity`) % 100) + (streak >= 5 ? 4 : 0) + (spicyBoost ? 5 : 0)
+function rollRarity(seed: string, streak: number, streakMomentumBonus: boolean): AdventureRarity {
+  const roll = (hashString(`${seed}|rarity`) % 100) + (streak >= 5 ? 4 : 0) + (streakMomentumBonus ? 5 : 0)
   if (roll >= 93) return 'rare'
   if (roll >= 73) return 'uncommon'
   return 'common'
@@ -134,6 +143,7 @@ export function rollVibeForLocale(nonce: string, locale: ZipLocale): VibeArchety
 type Template = {
   title: string
   emoji: string
+  category: AdventureCategory
   vibe: VibeArchetype
   estMin: number
   estMax: number
@@ -142,70 +152,117 @@ type Template = {
 }
 
 const GENERIC: Template[] = [
-  { title: 'Coffee Walk', emoji: '☕', vibe: 'pulse', estMin: 12, estMax: 22, locationHint: 'Café loop · your blocks', idealMoods: ['chill', 'social', 'curious'] },
-  { title: 'Treat Run', emoji: '🍖', vibe: 'pulse', estMin: 10, estMax: 18, locationHint: 'Quick win near home', idealMoods: ['restless', 'zoomie'] },
-  { title: 'Golden Hour Mission', emoji: '🌇', vibe: 'pulse', estMin: 20, estMax: 32, locationHint: 'Best light on your route', idealMoods: ['chill', 'curious'] },
-  { title: 'Neighborhood Patrol', emoji: '🐕', vibe: 'pulse', estMin: 15, estMax: 28, locationHint: 'Familiar streets, fresh intent', idealMoods: ['curious', 'social'] },
-  { title: 'Sniffari', emoji: '👃', vibe: 'wander', estMin: 25, estMax: 40, locationHint: 'Nose-led, no script', idealMoods: ['curious', 'explorer'] },
-  { title: 'Long Way Home', emoji: '🏡', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Extra blocks, same door', idealMoods: ['chill', 'explorer'] },
-  { title: 'Quiet Street Loop', emoji: '🌙', vibe: 'wander', estMin: 20, estMax: 35, locationHint: 'Low traffic, high smells', idealMoods: ['chill', 'curious'] },
-  { title: 'New Smells Route', emoji: '✨', vibe: 'wander', estMin: 25, estMax: 40, locationHint: 'A street you usually skip', idealMoods: ['curious', 'explorer'] },
-  { title: 'Sunset Sniff Mission', emoji: '🌅', vibe: 'salt', estMin: 25, estMax: 38, locationHint: 'Sky-first stroll', idealMoods: ['chill', 'social'] },
-  { title: 'Ocean Air Reset', emoji: '🌬️', vibe: 'salt', estMin: 22, estMax: 36, locationHint: 'Breeze in the lungs', idealMoods: ['restless', 'chill'] },
-  { title: 'Chaos Energy Burn', emoji: '🌀', vibe: 'wild', estMin: 18, estMax: 30, locationHint: 'Main-character pace', idealMoods: ['zoomie', 'restless'] },
-  { title: 'Mystery Route', emoji: '🎲', vibe: 'wild', estMin: 20, estMax: 45, locationHint: 'Dice picks the turns', idealMoods: ['explorer', 'zoomie'] },
+  { title: 'Coffee Crawl', emoji: '☕', category: 'social', vibe: 'pulse', estMin: 15, estMax: 30, locationHint: 'Café loop · your blocks', idealMoods: ['chill', 'social', 'curious'] },
+  { title: 'Brewery Run', emoji: '🍺', category: 'social', vibe: 'pulse', estMin: 20, estMax: 36, locationHint: 'Patio-to-patio energy', idealMoods: ['social', 'restless'] },
+  { title: 'Patio Hang', emoji: '🪑', category: 'social', vibe: 'pulse', estMin: 18, estMax: 34, locationHint: 'People watching optional', idealMoods: ['social', 'chill'] },
+  { title: 'Farmers Market Morning', emoji: '🥕', category: 'social', vibe: 'pulse', estMin: 25, estMax: 42, locationHint: 'Fresh smells in every lane', idealMoods: ['social', 'curious'] },
+  { title: 'Dog Park Meetup', emoji: '🐕‍🦺', category: 'social', vibe: 'pulse', estMin: 18, estMax: 34, locationHint: 'Familiar faces, new stories', idealMoods: ['social', 'zoomie'] },
+  { title: 'Bring-a-Friend Walk', emoji: '👫', category: 'social', vibe: 'pulse', estMin: 22, estMax: 38, locationHint: 'Shared route, shared laughs', idealMoods: ['social', 'chill'] },
+  { title: 'Somewhere New', emoji: '🗺️', category: 'exploration', vibe: 'wander', estMin: 26, estMax: 45, locationHint: 'A street you usually skip', idealMoods: ['curious', 'explorer'] },
+  { title: 'Sunset Adventure', emoji: '🌅', category: 'exploration', vibe: 'salt', estMin: 25, estMax: 40, locationHint: 'Sky-first stroll', idealMoods: ['chill', 'social'] },
+  { title: 'Scenic Walk', emoji: '🌄', category: 'exploration', vibe: 'wander', estMin: 24, estMax: 42, locationHint: 'Views before speed', idealMoods: ['explorer', 'chill'] },
+  { title: 'New Neighborhood Night', emoji: '🌙', category: 'exploration', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Different lights, different vibes', idealMoods: ['curious', 'explorer'] },
+  { title: 'Slow Sunday', emoji: '☁️', category: 'chill', vibe: 'wander', estMin: 18, estMax: 30, locationHint: 'Low pace, high connection', idealMoods: ['chill'] },
+  { title: 'Picnic Adventure', emoji: '🧺', category: 'chill', vibe: 'pulse', estMin: 20, estMax: 36, locationHint: 'Bench break and soft vibes', idealMoods: ['chill', 'social'] },
+  { title: 'Window Shopping Walk', emoji: '🪟', category: 'chill', vibe: 'pulse', estMin: 15, estMax: 28, locationHint: 'Gentle loop, curious stops', idealMoods: ['chill', 'curious'] },
+  { title: 'Let the Dog Choose', emoji: '🐾', category: 'chaos', vibe: 'wild', estMin: 18, estMax: 34, locationHint: 'Follow the nose, no notes', idealMoods: ['zoomie', 'curious'] },
+  { title: 'Random Direction Walk', emoji: '🧭', category: 'chaos', vibe: 'wild', estMin: 20, estMax: 40, locationHint: 'Left-right coin flip rules', idealMoods: ['restless', 'explorer'] },
+  { title: 'Sniffari Mode', emoji: '👃', category: 'chaos', vibe: 'wild', estMin: 22, estMax: 42, locationHint: 'Scent quests only', idealMoods: ['curious', 'zoomie'] },
+  { title: 'Neighborhood Patrol', emoji: '🏡', category: 'routine', vibe: 'pulse', estMin: 15, estMax: 28, locationHint: 'Familiar streets, fresh intent', idealMoods: ['curious', 'social'] },
+  { title: 'Treat Run', emoji: '🍖', category: 'routine', vibe: 'pulse', estMin: 10, estMax: 18, locationHint: 'Quick win near home', idealMoods: ['restless', 'zoomie'] },
+  { title: 'Long Way Home', emoji: '🚶', category: 'routine', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Extra blocks, same door', idealMoods: ['chill', 'explorer'] },
 ]
 
 const COASTAL: Template[] = [
-  { title: 'Harbor Patrol', emoji: '⚓', vibe: 'salt', estMin: 22, estMax: 38, locationHint: 'Marina air · gulls overhead', idealMoods: ['curious', 'social'] },
-  { title: 'Ocean Air Mission', emoji: '🌊', vibe: 'salt', estMin: 25, estMax: 42, locationHint: 'Salt mist · big horizon', idealMoods: ['chill', 'explorer'] },
-  { title: 'Sunset Sniff Mission', emoji: '🌅', vibe: 'salt', estMin: 28, estMax: 40, locationHint: 'Best before sunset', idealMoods: ['chill', 'social'] },
-  { title: 'Boardwalk Glow', emoji: '🛼', vibe: 'salt', estMin: 20, estMax: 34, locationHint: 'People watching optional', idealMoods: ['social', 'zoomie'] },
-  { title: 'Coronado Loop', emoji: '🏝️', vibe: 'pulse', estMin: 35, estMax: 55, locationHint: 'Island pace · wide sidewalks', idealMoods: ['explorer', 'chill'] },
-  { title: 'Coffee Walk', emoji: '☕', vibe: 'pulse', estMin: 14, estMax: 26, locationHint: 'Coastal café orbit', idealMoods: ['chill', 'social'] },
-  { title: 'Beach Access Bypass', emoji: '🦀', vibe: 'wander', estMin: 25, estMax: 45, locationHint: 'Sand nearby · paws decide', idealMoods: ['explorer', 'curious'] },
-  { title: 'Sniffari', emoji: '👃', vibe: 'wander', estMin: 28, estMax: 42, locationHint: 'Tide-line curiosity', idealMoods: ['curious', 'explorer'] },
-  { title: 'Golden Hour Walk', emoji: '🟠', vibe: 'pulse', estMin: 22, estMax: 35, locationHint: 'Warm light on wet pavement', idealMoods: ['chill', 'social'] },
-  { title: 'Chaos Goblin Energy Burn', emoji: '🧨', vibe: 'wild', estMin: 18, estMax: 32, locationHint: 'Seagull chaos tolerated', idealMoods: ['zoomie', 'restless'] },
+  { title: 'Harbor Patrol', emoji: '⚓', category: 'exploration', vibe: 'salt', estMin: 22, estMax: 38, locationHint: 'Marina air · gulls overhead', idealMoods: ['curious', 'social'] },
+  { title: 'Ocean Air Adventure', emoji: '🌊', category: 'exploration', vibe: 'salt', estMin: 25, estMax: 42, locationHint: 'Salt mist · big horizon', idealMoods: ['chill', 'explorer'] },
+  { title: 'Sunset Adventure', emoji: '🌅', category: 'exploration', vibe: 'salt', estMin: 28, estMax: 40, locationHint: 'Best before sunset', idealMoods: ['chill', 'social'] },
+  { title: 'Boardwalk Glow', emoji: '🛼', category: 'social', vibe: 'salt', estMin: 20, estMax: 34, locationHint: 'People watching optional', idealMoods: ['social', 'zoomie'] },
+  { title: 'Coronado Loop', emoji: '🏝️', category: 'exploration', vibe: 'pulse', estMin: 35, estMax: 55, locationHint: 'Island pace · wide sidewalks', idealMoods: ['explorer', 'chill'] },
+  { title: 'Coffee Crawl', emoji: '☕', category: 'social', vibe: 'pulse', estMin: 14, estMax: 26, locationHint: 'Coastal café orbit', idealMoods: ['chill', 'social'] },
+  { title: 'Beach Access Bypass', emoji: '🦀', category: 'exploration', vibe: 'wander', estMin: 25, estMax: 45, locationHint: 'Sand nearby · paws decide', idealMoods: ['explorer', 'curious'] },
+  { title: 'Scenic Walk', emoji: '🌄', category: 'exploration', vibe: 'wander', estMin: 28, estMax: 42, locationHint: 'Tide-line curiosity', idealMoods: ['curious', 'explorer'] },
+  { title: 'Let the Dog Choose', emoji: '🐾', category: 'chaos', vibe: 'wild', estMin: 18, estMax: 32, locationHint: 'Seagull chaos tolerated', idealMoods: ['zoomie', 'restless'] },
 ]
 
 const URBAN: Template[] = [
-  { title: 'Coffee Walk', emoji: '☕', vibe: 'pulse', estMin: 12, estMax: 22, locationHint: 'Espresso blocks · quick loops', idealMoods: ['chill', 'social'] },
-  { title: 'Mural Hunt', emoji: '🎨', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Color corners · slow rolls', idealMoods: ['curious', 'explorer'] },
-  { title: 'People-Watch Stroll', emoji: '👀', vibe: 'pulse', estMin: 18, estMax: 30, locationHint: 'Sidewalk theater', idealMoods: ['social', 'curious'] },
-  { title: 'Neighborhood Patrol', emoji: '🚶', vibe: 'pulse', estMin: 16, estMax: 28, locationHint: 'Your grid · confident pace', idealMoods: ['restless', 'social'] },
-  { title: 'Sniffari', emoji: '👃', vibe: 'wander', estMin: 24, estMax: 40, locationHint: 'Alley chemistry', idealMoods: ['curious', 'explorer'] },
-  { title: 'Long Way Home', emoji: '🏙️', vibe: 'wander', estMin: 26, estMax: 42, locationHint: 'One extra avenue', idealMoods: ['explorer', 'chill'] },
-  { title: 'Chaos Energy Burn', emoji: '💥', vibe: 'wild', estMin: 15, estMax: 28, locationHint: 'Crosswalk sprints (safely)', idealMoods: ['zoomie', 'restless'] },
+  { title: 'Coffee Crawl', emoji: '☕', category: 'social', vibe: 'pulse', estMin: 12, estMax: 22, locationHint: 'Espresso blocks · quick loops', idealMoods: ['chill', 'social'] },
+  { title: 'Mural Hunt', emoji: '🎨', category: 'exploration', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Color corners · slow rolls', idealMoods: ['curious', 'explorer'] },
+  { title: 'People-Watch Stroll', emoji: '👀', category: 'social', vibe: 'pulse', estMin: 18, estMax: 30, locationHint: 'Sidewalk theater', idealMoods: ['social', 'curious'] },
+  { title: 'Neighborhood Patrol', emoji: '🚶', category: 'routine', vibe: 'pulse', estMin: 16, estMax: 28, locationHint: 'Your grid · confident pace', idealMoods: ['restless', 'social'] },
+  { title: 'Somewhere New', emoji: '🗺️', category: 'exploration', vibe: 'wander', estMin: 24, estMax: 40, locationHint: 'Alley chemistry', idealMoods: ['curious', 'explorer'] },
+  { title: 'Window Shopping Walk', emoji: '🪟', category: 'chill', vibe: 'wander', estMin: 26, estMax: 42, locationHint: 'One extra avenue', idealMoods: ['explorer', 'chill'] },
+  { title: 'Random Direction Walk', emoji: '🧭', category: 'chaos', vibe: 'wild', estMin: 15, estMax: 28, locationHint: 'Crosswalk sprints (safely)', idealMoods: ['zoomie', 'restless'] },
 ]
 
 const SUBURBAN: Template[] = [
-  { title: 'Park Loop', emoji: '🌳', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Grass edges · kid chaos optional', idealMoods: ['social', 'chill'] },
-  { title: 'Quiet Street Sniffari', emoji: '🍃', vibe: 'wander', estMin: 22, estMax: 36, locationHint: 'Cul-de-sac chemistry', idealMoods: ['chill', 'curious'] },
-  { title: 'Long Way Home', emoji: '🏡', vibe: 'wander', estMin: 24, estMax: 40, locationHint: 'Subdivision scenic route', idealMoods: ['explorer', 'chill'] },
-  { title: 'Golden Hour Mission', emoji: '🌇', vibe: 'pulse', estMin: 18, estMax: 32, locationHint: 'Porch-light glow era', idealMoods: ['chill', 'social'] },
-  { title: 'Treat Run', emoji: '🦴', vibe: 'pulse', estMin: 10, estMax: 20, locationHint: 'Mailbox lap bonus', idealMoods: ['zoomie', 'restless'] },
-  { title: 'Neighborhood Patrol', emoji: '🐕‍🦺', vibe: 'pulse', estMin: 16, estMax: 30, locationHint: 'HOA-approved mischief', idealMoods: ['curious', 'social'] },
+  { title: 'Park Loop', emoji: '🌳', category: 'routine', vibe: 'wander', estMin: 22, estMax: 38, locationHint: 'Grass edges · kid chaos optional', idealMoods: ['social', 'chill'] },
+  { title: 'Quiet Street Sniffari', emoji: '🍃', category: 'chill', vibe: 'wander', estMin: 22, estMax: 36, locationHint: 'Cul-de-sac chemistry', idealMoods: ['chill', 'curious'] },
+  { title: 'Long Way Home', emoji: '🏡', category: 'routine', vibe: 'wander', estMin: 24, estMax: 40, locationHint: 'Subdivision scenic route', idealMoods: ['explorer', 'chill'] },
+  { title: 'Golden Hour Adventure', emoji: '🌇', category: 'exploration', vibe: 'pulse', estMin: 18, estMax: 32, locationHint: 'Porch-light glow era', idealMoods: ['chill', 'social'] },
+  { title: 'Treat Run', emoji: '🦴', category: 'routine', vibe: 'pulse', estMin: 10, estMax: 20, locationHint: 'Mailbox lap bonus', idealMoods: ['zoomie', 'restless'] },
+  { title: 'Slow Sunday', emoji: '☁️', category: 'chill', vibe: 'pulse', estMin: 16, estMax: 30, locationHint: 'HOA-approved mischief', idealMoods: ['curious', 'social'] },
 ]
 
 const TRAIL: Template[] = [
-  { title: 'Trail Pup Challenge', emoji: '🥾', vibe: 'wander', estMin: 35, estMax: 65, locationHint: 'Dirt under paws', idealMoods: ['explorer', 'restless'] },
-  { title: 'Hill Climb', emoji: '⛰️', vibe: 'wander', estMin: 30, estMax: 55, locationHint: 'Elevation as drama', idealMoods: ['restless', 'zoomie'] },
-  { title: 'Nature Sniffari', emoji: '🌲', vibe: 'wander', estMin: 32, estMax: 55, locationHint: 'Live oak gossip', idealMoods: ['curious', 'explorer'] },
-  { title: 'Summit Chaos', emoji: '🌄', vibe: 'wild', estMin: 28, estMax: 50, locationHint: 'Reward views · loose leash energy', idealMoods: ['zoomie', 'explorer'] },
-  { title: 'Coffee Walk', emoji: '☕', vibe: 'pulse', estMin: 14, estMax: 24, locationHint: 'Trailhead café orbit', idealMoods: ['chill'] },
+  { title: 'Trail Pup Challenge', emoji: '🥾', category: 'exploration', vibe: 'wander', estMin: 35, estMax: 65, locationHint: 'Dirt under paws', idealMoods: ['explorer', 'restless'] },
+  { title: 'Hill Climb', emoji: '⛰️', category: 'exploration', vibe: 'wander', estMin: 30, estMax: 55, locationHint: 'Elevation as drama', idealMoods: ['restless', 'zoomie'] },
+  { title: 'Nature Sniffari', emoji: '🌲', category: 'exploration', vibe: 'wander', estMin: 32, estMax: 55, locationHint: 'Live oak gossip', idealMoods: ['curious', 'explorer'] },
+  { title: 'Summit Chaos', emoji: '🌄', category: 'chaos', vibe: 'wild', estMin: 28, estMax: 50, locationHint: 'Reward views · loose leash energy', idealMoods: ['zoomie', 'explorer'] },
+  { title: 'Coffee Crawl', emoji: '☕', category: 'social', vibe: 'pulse', estMin: 14, estMax: 24, locationHint: 'Trailhead café orbit', idealMoods: ['chill'] },
 ]
 
 const RARE_CORE: Template[] = [
-  { title: 'Secret Sniffari', emoji: '🤫', vibe: 'wander', estMin: 30, estMax: 50, locationHint: 'Off-script smells only', idealMoods: ['curious', 'explorer'] },
-  { title: 'Full Moon Loop', emoji: '🌕', vibe: 'wild', estMin: 25, estMax: 45, locationHint: 'Tonight counts double', idealMoods: ['explorer', 'social'] },
-  { title: 'Hidden Park Mission', emoji: '🗺️', vibe: 'wander', estMin: 28, estMax: 48, locationHint: 'That gate you never opened', idealMoods: ['explorer', 'curious'] },
-  { title: 'Farmers Market Pup Walk', emoji: '🥕', vibe: 'pulse', estMin: 25, estMax: 40, locationHint: 'Snacks in the air · polite sniffing', idealMoods: ['social', 'curious'] },
+  { title: 'Secret Sniffari', emoji: '🤫', category: 'exploration', vibe: 'wander', estMin: 30, estMax: 50, locationHint: 'Off-script smells only', idealMoods: ['curious', 'explorer'] },
+  { title: 'Full Moon Loop', emoji: '🌕', category: 'chaos', vibe: 'wild', estMin: 25, estMax: 45, locationHint: 'Tonight counts double', idealMoods: ['explorer', 'social'] },
+  { title: 'Hidden Park Adventure', emoji: '🗺️', category: 'exploration', vibe: 'wander', estMin: 28, estMax: 48, locationHint: 'That gate you never opened', idealMoods: ['explorer', 'curious'] },
+  { title: 'Farmers Market Morning', emoji: '🥕', category: 'social', vibe: 'pulse', estMin: 25, estMax: 40, locationHint: 'Snacks in the air · polite sniffing', idealMoods: ['social', 'curious'] },
 ]
 
 const RARE_COASTAL_EXTRA: Template[] = [
-  { title: 'Sunrise Ocean Reset', emoji: '🌅', vibe: 'salt', estMin: 30, estMax: 50, locationHint: 'Pink sky · salt lungs', idealMoods: ['chill', 'explorer'] },
+  { title: 'Sunrise Ocean Reset', emoji: '🌅', category: 'exploration', vibe: 'salt', estMin: 30, estMax: 50, locationHint: 'Pink sky · salt lungs', idealMoods: ['chill', 'explorer'] },
 ]
+
+const ALL_CATEGORIES: AdventureCategory[] = ['social', 'exploration', 'chill', 'chaos', 'routine']
+
+function categoryWeightsForEnvironment(params: {
+  tags: string[]
+  locale: ZipLocale
+}): Record<AdventureCategory, number> {
+  const weights: Record<AdventureCategory, number> = {
+    social: 1,
+    exploration: 1,
+    chill: 1,
+    chaos: 1,
+    routine: 1,
+  }
+
+  const joined = params.tags.join(' ').toLowerCase()
+  if (/brew|patio|social|market|caf[ée]/.test(joined)) weights.social += 3
+  if (/beach|cliff|coast|harbor|ocean|boardwalk|bluff/.test(joined)) weights.exploration += 3
+  if (/hiking|nature|trail|canyon|park/.test(joined)) weights.exploration += 2
+  if (/quiet|residential|neighborhood|routine|daily/.test(joined)) {
+    weights.routine += 2
+    weights.chill += 2
+  }
+
+  if (params.locale === 'coastal') weights.exploration += 2
+  if (params.locale === 'trail') weights.exploration += 2
+  if (params.locale === 'suburban') weights.routine += 1
+
+  return weights
+}
+
+function rollCategoryForEnvironment(seed: string, weights: Record<AdventureCategory, number>): AdventureCategory {
+  const total = ALL_CATEGORIES.reduce((acc, c) => acc + Math.max(1, weights[c]), 0)
+  const roll = hashString(`${seed}|category`) % total
+  let acc = 0
+  for (const c of ALL_CATEGORIES) {
+    acc += Math.max(1, weights[c])
+    if (roll < acc) return c
+  }
+  return 'routine'
+}
 
 function poolForLocale(locale: ZipLocale): Template[] {
   switch (locale) {
@@ -282,6 +339,13 @@ export type GenerateMissionParams = {
 export function generateLocalizedMission(params: GenerateMissionParams): GeneratedMission {
   const { zipCode, dogName, dogMood, streak, nonce, fixedVibe } = params
   const locale = localeFromZip(zipCode)
+  const envResolution = resolveUserEnvironment(zipCode)
+  const environmentTags =
+    envResolution.source === 'handcrafted'
+      ? envResolution.environment.environmentTags
+      : envResolution.environment.environmentTags
+  const categoryWeights = categoryWeightsForEnvironment({ tags: environmentTags, locale })
+  const preferredCategory = rollCategoryForEnvironment(nonce, categoryWeights)
   const pool = poolForLocale(locale)
 
   const rarity = rollRarity(`${nonce}|roll`, streak, Boolean(fixedVibe && fixedVibe === 'wild'))
@@ -290,6 +354,8 @@ export function generateLocalizedMission(params: GenerateMissionParams): Generat
 
   if (rarity === 'rare') {
     let rarePool = rarePoolForLocale(locale)
+    const categoryRare = rarePool.filter((t) => t.category === preferredCategory)
+    if (categoryRare.length > 0) rarePool = categoryRare
     if (fixedVibe) {
       const byVibe = rarePool.filter((t) => t.vibe === fixedVibe)
       if (byVibe.length > 0) rarePool = byVibe
@@ -297,8 +363,10 @@ export function generateLocalizedMission(params: GenerateMissionParams): Generat
     template = pickFrom(rarePool, `${nonce}|rare`)
   } else {
     const vibe = fixedVibe ?? rollVibeForLocale(`${nonce}|pick`, locale)
-    const filtered = pool.filter((t) => t.vibe === vibe)
-    const usePool = filtered.length > 0 ? filtered : pool.filter((t) => t.vibe === 'pulse')
+    const categoryPool = pool.filter((t) => t.category === preferredCategory)
+    const filtered = categoryPool.filter((t) => t.vibe === vibe)
+    const fallbackByVibe = pool.filter((t) => t.vibe === vibe)
+    const usePool = filtered.length > 0 ? filtered : fallbackByVibe.length > 0 ? fallbackByVibe : pool.filter((t) => t.vibe === 'pulse')
     template = pickFrom(usePool.length > 0 ? usePool : pool, `${nonce}|${vibe}|${rarity}`)
   }
 
@@ -322,6 +390,7 @@ export function generateLocalizedMission(params: GenerateMissionParams): Generat
   return {
     title: template.title,
     emoji: template.emoji,
+    category: template.category,
     estimatedMinutesMin: template.estMin,
     estimatedMinutesMax: template.estMax,
     locationHint: template.locationHint,
@@ -358,16 +427,16 @@ export function refreshTomorrowTease(input: { dogName: string; zipCode: string; 
   const newRoute = hashString(`${zipCode}|route`) % 5 === 0
 
   if (rareTomorrow && newRoute) {
-    return `${dogName} may unlock a new route tomorrow — rare missions are in the air.`
+    return `${dogName} may unlock a new route tomorrow — rare adventures are in the air.`
   }
   if (rareTomorrow) {
-    return `Rare mission possible tomorrow. Come back for the roll.`
+    return `Rare adventure possible tomorrow. Come back for the roll.`
   }
   const localeHint = localeLabel(locale)
   const lines = [
-    `Tomorrow’s mission unlocks later tonight — a fresh ${localeHint} surprise drops at midnight.`,
+    `Tomorrow’s adventure unlocks later tonight — a fresh ${localeHint} surprise drops at midnight.`,
     `Tomorrow’s board resets at midnight. ${dogName}’s next chapter is loading.`,
-    `Clock’s ticking — tomorrow’s mission unlocks with the new day.`,
+    `Clock’s ticking — tomorrow’s adventure unlocks with the new day.`,
     `Stay curious: ${dogName} gets a new route script tomorrow.`,
   ]
   return lines[variant] ?? lines[0]
