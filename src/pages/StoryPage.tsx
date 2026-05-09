@@ -29,7 +29,11 @@ export function StoryPage() {
   }, [navigate, state.onboardingComplete])
 
   return (
-    <section id='screen-story' className='screen active'>
+    <section
+      id='screen-story'
+      className='screen active'
+      style={{ paddingBottom: 'calc(var(--bn-h, 78px) + var(--safe-bot, 0px))' }}
+    >
       <div className='story-scroll'>
         <HeroCard radialClassName='sh-radial'>
           <div className='sh-eyebrow'>The story so far</div>
@@ -89,26 +93,38 @@ export function StoryPage() {
 
         <div className='story-section'>
           <div className='story-section-title'>Recent chapters</div>
-          <div className='timeline'>
-            <div className='tl-line' />
-            {state.recentAdventures.slice(0, 5).map((adventure) => (
-              <div key={adventure.id} className='tl-item'>
-                <div className='tl-dot' />
-                <div className='tl-type'>
-                  {adventure.emoji} {adventure.missionTitle}{' '}
-                  <span className={`tl-rarity rarity-${adventure.rarity}`}>{adventure.rarity}</span>
+          {state.recentAdventures.length > 0 ? (
+            <div className='timeline'>
+              <div className='tl-line' />
+              {state.recentAdventures.slice(0, 5).map((adventure) => (
+                <div key={adventure.id} className='tl-item'>
+                  <div className='tl-dot' />
+                  <div className='tl-type'>
+                    {adventure.emoji} {adventure.missionTitle}{' '}
+                    <span className={`tl-rarity rarity-${adventure.rarity}`}>{adventure.rarity}</span>
+                  </div>
+                  <div className='tl-meta'>
+                    {new Date(adventure.completedAt).toLocaleDateString()} · {adventure.durationMinutes} min ·{' '}
+                    {adventure.groundCovered.toFixed(1)} ground
+                    {adventure.locationHint ? <> · {adventure.locationHint}</> : null}
+                  </div>
+                  <div className='tl-xp'>
+                    {state.dogName} banked +{adventure.adventureEnergy} XP toward standings and achievements
+                  </div>
                 </div>
-                <div className='tl-meta'>
-                  {new Date(adventure.completedAt).toLocaleDateString()} · {adventure.durationMinutes} min ·{' '}
-                  {adventure.groundCovered.toFixed(1)} ground
-                  {adventure.locationHint ? <> · {adventure.locationHint}</> : null}
-                </div>
-                <div className='tl-xp'>
-                  {state.dogName} banked +{adventure.adventureEnergy} XP toward standings and achievements
-                </div>
+              ))}
+            </div>
+          ) : (
+            <div className='rounded-2xl border border-dashed border-[color:var(--border-md)] bg-[var(--bg-card)] p-5 text-center'>
+              <div aria-hidden className='text-3xl'>📖</div>
+              <div className='mt-2 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
+                {state.dogName}&apos;s story starts today.
               </div>
-            ))}
-          </div>
+              <div className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
+                The first adventure becomes the first chapter.
+              </div>
+            </div>
+          )}
         </div>
 
         <div className='story-section' style={{ paddingBottom: '1.5rem' }}>

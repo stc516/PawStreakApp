@@ -3455,3 +3455,60 @@ body::before {
     padding: 24px 0;
   }
 }
+
+/* ─── Polish layer: safe areas, motion, tap feel, dynamic viewport ─── */
+
+:root {
+  --bn-h: 78px;
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+html,
+body,
+#root,
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Use the dynamic viewport unit so iOS chrome / keyboard don't crop content. */
+.screen {
+  min-height: 100dvh;
+}
+
+/* Bottom nav lives above the iOS gesture bar. */
+.ps-bottom-nav {
+  padding-bottom: var(--safe-bot);
+  height: calc(var(--bn-h) + var(--safe-bot));
+}
+
+/* Subtle "tap-able card" affordance — applied opt-in via .tap-card. */
+.tap-card {
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
+}
+.tap-card:hover {
+  transform: translateY(-1px);
+}
+.tap-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Respect users who don't want motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

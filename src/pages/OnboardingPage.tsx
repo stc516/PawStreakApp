@@ -251,8 +251,11 @@ export function OnboardingPage() {
 
   return (
     <section
-      className='screen active flex min-h-screen flex-col bg-[var(--bg)] px-5 pb-10 pt-8'
-      style={{ fontFamily: 'var(--fb), DM Sans, sans-serif' }}
+      className='screen active flex min-h-[100dvh] flex-col overflow-y-auto bg-[var(--bg)] px-5 pt-8'
+      style={{
+        fontFamily: 'var(--fb), DM Sans, sans-serif',
+        paddingBottom: 'calc(2rem + var(--safe-bot, 0px))',
+      }}
       data-testid={
         step === 1
           ? 'onboarding-welcome'

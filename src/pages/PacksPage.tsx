@@ -22,10 +22,13 @@ export function PacksPage() {
   const fresh = progress.filter((p) => p.completed === 0)
   const done = progress.filter((p) => p.isComplete)
 
+  const hasAnyAdventure = state.recentAdventures.length > 0
+
   return (
     <section
       id='screen-packs'
-      className='screen active flex min-h-screen flex-col bg-[var(--bg)] pb-24 pt-2'
+      className='screen active flex flex-col bg-[var(--bg)] pt-2'
+      style={{ paddingBottom: 'calc(var(--bn-h, 78px) + var(--safe-bot, 0px) + 1rem)' }}
     >
       <header className='px-5 pt-10'>
         <div className='text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
@@ -48,6 +51,18 @@ export function PacksPage() {
       </header>
 
       <div className='mx-auto mt-6 flex w-full max-w-[640px] flex-1 flex-col gap-6 px-5'>
+        {!hasAnyAdventure ? (
+          <div className='rounded-2xl border border-dashed border-[color:var(--border-md)] bg-[var(--bg-card)] p-5 text-center'>
+            <div aria-hidden className='text-3xl'>🌅</div>
+            <h2 className='mt-2 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
+              {state.dogName}&apos;s collection starts today.
+            </h2>
+            <p className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
+              Pick a pack below — every adventure pushes you closer to a new identity.
+            </p>
+          </div>
+        ) : null}
+
         {inProgress.length > 0 ? (
           <PackSection title='In progress' subtitle='Closest to becoming a title.'>
             {inProgress.map((p) => (

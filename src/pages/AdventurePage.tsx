@@ -119,8 +119,12 @@ export function AdventurePage() {
           </svg>
           <div className='timer-center'>
             <div className='timer-time'>{walkTime}</div>
-            <div className='timer-xp'>+{xpBreakdown.xp} Adventure XP</div>
-            {m.rarity !== 'common' ? (
+            {walkSeconds < 30 ? (
+              <div className='timer-xp text-[var(--text-2)]'>Warming up…</div>
+            ) : (
+              <div className='timer-xp'>+{xpBreakdown.xp} Adventure XP</div>
+            )}
+            {walkSeconds >= 30 && m.rarity !== 'common' ? (
               <div className='mt-1 text-[11px] font-medium text-[var(--gold)]'>Includes rarity bonus</div>
             ) : null}
           </div>

@@ -13,8 +13,11 @@ interface LegalLayoutProps {
 export function LegalLayout({ eyebrow, title, updated, children }: LegalLayoutProps) {
   return (
     <section
-      className='screen active flex min-h-screen flex-col bg-[var(--bg)] px-5 pb-16 pt-8'
-      style={{ fontFamily: 'var(--fb), DM Sans, sans-serif' }}
+      className='screen active flex flex-col bg-[var(--bg)] px-5 pt-8'
+      style={{
+        fontFamily: 'var(--fb), DM Sans, sans-serif',
+        paddingBottom: 'calc(4rem + var(--safe-bot, 0px))',
+      }}
     >
       <div className='mx-auto flex w-full max-w-[640px] flex-1 flex-col'>
         <div className='mb-2 flex items-center justify-between'>

@@ -168,7 +168,7 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   await page.getByRole('link', { name: /Finds/ }).click()
   await expect(page).toHaveURL(/\/badges/)
-  await expect(page.getByText("NavDog's Achievements")).toBeVisible()
+  await expect(page.getByText("NavDog's Finds")).toBeVisible()
 
   await page.getByRole('link', { name: /Story/ }).click()
   await expect(page).toHaveURL(/\/story/)

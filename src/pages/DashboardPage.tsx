@@ -16,6 +16,17 @@ const CATEGORY_FROM_VIBE = {
   wild: 'chaos',
 } as const
 
+function relativeDayLabel(iso: string): string {
+  const then = new Date(iso)
+  if (!Number.isFinite(then.getTime())) return 'Recently'
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const diffDays = Math.round((startOfDay(new Date()) - startOfDay(then)) / 86_400_000)
+  if (diffDays <= 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 export function DashboardPage() {
   const navigate = useNavigate()
   const { state, dismissWelcomeBanner } = useAppState()
@@ -120,7 +131,11 @@ export function DashboardPage() {
   const energyProgress = Math.min(100, Math.round((state.totalAdventureEnergy / energyGoal) * 100))
 
   return (
-    <section id='s-home' className='screen active min-h-screen pb-[78px]'>
+    <section
+      id='s-home'
+      className='screen active'
+      style={{ paddingBottom: 'calc(var(--bn-h, 78px) + var(--safe-bot, 0px))' }}
+    >
       <header className='topbar'>
         <div className='wm'>
           Paw<span>Streak</span>
@@ -313,32 +328,30 @@ export function DashboardPage() {
           </div>
         </div>
 
-        <button
-          type='button'
-          className='active-pack-strip w-[calc(100%_-_2rem)] text-left'
-          onClick={() => navigate('/packs')}
-        >
-          <div className='aps-top'>
-            <span className='aps-icon'>🏖️</span>
-            <span className='aps-name'>Beach Month</span>
-            <span className='aps-deadline'>🗓 18 days left</span>
-          </div>
-          <div className='aps-bar-track'>
-            <div className='aps-bar-fill' style={{ width: '38%' }} />
-          </div>
-          <div className='aps-bar-label'>3 of 8 beach adventures complete · XP pushes monthly pack progress</div>
-        </button>
-
         <div className='today-card mt-3'>
           <div className='tc-glow' />
           <div className='tc-eye'>Today&apos;s suggestion</div>
-          <div className='tc-head'>{state.dogName} hasn&apos;t adventured today.</div>
+          <div className='tc-head'>
+            {state.todayAdventureDone
+              ? `${state.dogName} already won today.`
+              : `${state.dogName} hasn't adventured today.`}
+          </div>
           <div className='tc-ctx'>
-            Last time at the shore, <strong>{state.dogName} found something in the tide pools.</strong> Adventures here
-            add XP toward local standings, achievements, and Beach Month progress.
+            {latest ? (
+              <>
+                Last time, <strong>{latest.missionTitle.toLowerCase()}</strong> banked +{latest.adventureEnergy} XP.
+                Today&apos;s run pushes <strong>{featuredPack.pack.title}</strong> to {featuredPack.completed + 1}/
+                {featuredPack.required}.
+              </>
+            ) : (
+              <>
+                Today&apos;s the day. <strong>{state.dogName}&apos;s story starts</strong> with the first adventure —
+                XP, packs, and identity unlock from here.
+              </>
+            )}
           </div>
           <button className='btn-primary' type='button' onClick={() => navigate('/adventure')}>
-            Start today&apos;s adventure →
+            {state.todayAdventureDone ? "Add another adventure →" : "Start today's adventure →"}
           </button>
         </div>
 
@@ -401,20 +414,38 @@ export function DashboardPage() {
 
         <div className='recap mt-3'>
           <div className='eye mb-2 pl-0.5'>Last adventure</div>
-          <div className='recap-item'>
-            <div className='ri-icon'>{latest?.emoji ?? '🌊'}</div>
-            <div className='ri-info'>
-              <div className='ri-title'>
-                {latest?.missionTitle ?? 'Shore'} · {latest?.durationMinutes ?? 34} min ·{' '}
-                {(latest?.groundCovered ?? 2.1).toFixed(1)} mi
+          {latest ? (
+            <div className='recap-item'>
+              <div className='ri-icon'>{latest.emoji}</div>
+              <div className='ri-info'>
+                <div className='ri-title'>
+                  {latest.missionTitle} · {latest.durationMinutes} min · {latest.groundCovered.toFixed(1)} mi
+                </div>
+                <div className='ri-meta'>
+                  {relativeDayLabel(latest.completedAt)} · +{latest.adventureEnergy} XP
+                </div>
+                {latest.missionDescription ? (
+                  <div className='ri-find'>&ldquo;{latest.missionDescription}&rdquo;</div>
+                ) : null}
               </div>
-              <div className='ri-meta'>Yesterday · +{latest?.adventureEnergy ?? 55} XP</div>
-              <div className='ri-find'>
-                &quot;{latest?.missionDescription ?? `${state.dogName} circled the tide pools three times.`}&quot;
-              </div>
+              <div className='ri-nrg'>+{latest.adventureEnergy}</div>
             </div>
-            <div className='ri-nrg'>+{latest?.adventureEnergy ?? 55}</div>
-          </div>
+          ) : (
+            <div className='recap-item flex items-center gap-3'>
+              <div className='ri-icon'>🌅</div>
+              <div className='ri-info'>
+                <div className='ri-title'>{state.dogName}&apos;s story starts today.</div>
+                <div className='ri-meta'>No adventures yet — the first one writes the first chapter.</div>
+              </div>
+              <button
+                type='button'
+                onClick={() => navigate('/adventure')}
+                className='shrink-0 rounded-full border border-[color:rgba(255,107,53,0.4)] bg-[var(--orange-dim)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--orange)]'
+              >
+                Begin
+              </button>
+            </div>
+          )}
         </div>
 
         <div className='h-5' />

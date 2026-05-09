@@ -17,7 +17,7 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
       data-testid={`pack-card-${pack.id}`}
       data-pack-complete={isComplete ? 'true' : 'false'}
       className={[
-        'relative flex flex-col gap-3 rounded-2xl border bg-[var(--bg-card)] p-4 transition-shadow',
+        'tap-card relative flex flex-col gap-3 rounded-2xl border bg-[var(--bg-card)] p-4',
         isComplete
           ? 'border-[color:rgba(255,107,53,0.45)] shadow-[0_0_24px_-6px_var(--orange-glow)]'
           : 'border-[color:var(--border)]',

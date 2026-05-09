@@ -13,12 +13,12 @@ export function LegalFooter({ withBottomNavSpacing = true }: LegalFooterProps) {
   return (
     <footer
       data-testid='legal-footer'
-      className={[
-        'mt-6 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--text-3)]',
-        withBottomNavSpacing ? 'pb-20' : '',
-      ]
-        .join(' ')
-        .trim()}
+      className='mt-6 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--text-3)]'
+      style={
+        withBottomNavSpacing
+          ? { paddingBottom: 'calc(var(--bn-h, 78px) + var(--safe-bot, 0px) + 0.5rem)' }
+          : undefined
+      }
     >
       <div className='flex items-center gap-4'>
         <Link

@@ -10,7 +10,10 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <nav className='fixed bottom-0 left-1/2 z-30 flex h-[78px] w-full max-w-[390px] -translate-x-1/2 items-start justify-around border-t border-[color:var(--border)] bg-[rgba(13,17,23,.97)] px-2 pt-2 backdrop-blur-[24px]'>
+    <nav
+      data-testid='bottom-nav'
+      className='ps-bottom-nav fixed bottom-0 left-1/2 z-30 flex h-[78px] w-full max-w-[390px] -translate-x-1/2 items-start justify-around border-t border-[color:var(--border)] bg-[rgba(13,17,23,.97)] px-2 pt-2 backdrop-blur-[24px]'
+    >
       {navItems.map((item) => (
         <NavLink
           key={item.label}
