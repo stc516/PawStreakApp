@@ -14,6 +14,7 @@
     "icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
+    "@sentry/react": "^10.52.0",
     "@supabase/supabase-js": "^2.105.4",
     "@tailwindcss/vite": "^4.2.4",
     "posthog-js": "^1.372.10",
