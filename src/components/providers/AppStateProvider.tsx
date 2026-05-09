@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import type { Session } from '@supabase/supabase-js'
 
 import { AppStateContext } from '../../lib/appStateContext'
 import { localStorageStateRepository } from '../../lib/localStorageStateRepository'
@@ -15,19 +16,53 @@ import {
   setReminder,
   setZipCode,
 } from '../../lib/pawstreakState'
+import { createSupabaseStateRepository } from '../../lib/supabaseStateRepository'
+import { getSupabaseClient } from '../../lib/supabaseClient'
 import type { AppStateRepository } from '../../lib/stateRepository'
 import type { PawstreakState } from '../../types'
+import { useSession } from '../../hooks/useSession'
 
 interface AppStateProviderProps {
   children: ReactNode
   repository?: AppStateRepository
 }
 
-export function AppStateProvider({
+interface AppStateSyncedProps {
+  children: ReactNode
+  repository: AppStateRepository
+  authEnabled: boolean
+  session: Session | null
+  loadingSession: boolean
+}
+
+/** Holds PawStreak app state. Remount when `key` changes so `repository.load()`
+ *  runs without a sync setState effect (React Compiler / eslint friendly). */
+function AppStateSynced({
   children,
-  repository = localStorageStateRepository,
-}: AppStateProviderProps) {
+  repository,
+  authEnabled,
+  session,
+  loadingSession,
+}: AppStateSyncedProps) {
   const [state, setState] = useState<PawstreakState>(() => repository.load())
+
+  const needsHydrate = typeof repository.hydrate === 'function'
+  const [hydrateComplete, setHydrateComplete] = useState(() => !needsHydrate)
+
+  useEffect(() => {
+    if (!repository.hydrate) return
+    let cancelled = false
+    void repository.hydrate().then((remote) => {
+      if (cancelled) return
+      if (remote) setState(remote)
+      setHydrateComplete(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [repository])
+
+  const remoteHydrated = !needsHydrate || hydrateComplete
 
   useEffect(() => {
     repository.save(state)
@@ -57,6 +92,10 @@ export function AppStateProvider({
 
   const contextValue = useMemo(
     () => ({
+      authEnabled,
+      session,
+      loadingSession,
+      remoteHydrated,
       state,
       setDogName: (name: string, zipCode?: string) => {
         setState((currentState) => setDogName(currentState, name, zipCode))
@@ -86,8 +125,43 @@ export function AppStateProvider({
         setState((currentState) => resetRewardFlow(currentState))
       },
     }),
-    [state],
+    [authEnabled, loadingSession, remoteHydrated, session, state],
   )
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>
+}
+
+export function AppStateProvider({
+  children,
+  repository: repositoryOverride,
+}: AppStateProviderProps) {
+  const { session, loading: loadingSession, authEnabled } = useSession()
+  const supabase = getSupabaseClient()
+
+  const repository = useMemo(() => {
+    if (repositoryOverride) return repositoryOverride
+    const uid = session?.user?.id
+    if (uid && supabase) {
+      return createSupabaseStateRepository({
+        supabase,
+        userId: uid,
+        email: session?.user?.email ?? null,
+      })
+    }
+    return localStorageStateRepository
+  }, [repositoryOverride, session, supabase])
+
+  const storageKey = repositoryOverride ? 'repo-override' : (session?.user?.id ?? 'local-demo')
+
+  return (
+    <AppStateSynced
+      key={storageKey}
+      repository={repository}
+      authEnabled={authEnabled}
+      session={session}
+      loadingSession={loadingSession}
+    >
+      {children}
+    </AppStateSynced>
+  )
 }

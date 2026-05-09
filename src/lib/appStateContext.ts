@@ -1,5 +1,7 @@
 import { createContext } from 'react'
 
+import type { Session } from '@supabase/supabase-js'
+
 import type {
   DogProfile,
   NotificationPrefs,
@@ -16,7 +18,18 @@ export interface CompleteOnboardingPayload {
   notificationPrefs: NotificationPrefs
 }
 
-export interface AppStateContextValue {
+export interface AuthContextSlice {
+  /** True when Supabase keys are present and accounts are possible. */
+  authEnabled: boolean
+  /** Active Supabase session, if any. Null in demo mode. */
+  session: Session | null
+  /** True while the initial session check is in flight. */
+  loadingSession: boolean
+  /** True after the remote state has been hydrated for a signed-in user. */
+  remoteHydrated: boolean
+}
+
+export interface AppStateContextValue extends AuthContextSlice {
   state: PawstreakState
   /** Optional ZIP (5 digits) — drives localized mission pools */
   setDogName: (name: string, zipCode?: string) => void

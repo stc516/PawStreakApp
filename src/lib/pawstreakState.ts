@@ -22,6 +22,16 @@ import { getEnvironmentForZip, haversineKm } from '../data/zipEnvironments'
 
 const STORAGE_KEY = 'pawstreak_demo_state_v4'
 
+/** Storage key for a signed-in Supabase user. Namespaced so multiple
+ *  accounts on the same device do not clobber each other's local cache. */
+export function userScopedStorageKey(userId: string): string {
+  return `pawstreak_user_${userId}_v4`
+}
+
+export function getInitialPawstreakState(): PawstreakState {
+  return initialState
+}
+
 function localDayKey(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
@@ -297,18 +307,18 @@ function migrateLegacy(parsed: Record<string, unknown>): Partial<PawstreakState>
   return out
 }
 
-export function loadPawstreakState(): PawstreakState {
+export function loadPawstreakState(storageKey: string = STORAGE_KEY): PawstreakState {
   if (!isBrowser()) return initialState
-  const raw = window.localStorage.getItem(STORAGE_KEY)
+  const raw = window.localStorage.getItem(storageKey)
   if (!raw) {
     const legacyRaw = window.localStorage.getItem('pawstreak_demo_state_v3')
-    if (legacyRaw) {
+    if (legacyRaw && storageKey === STORAGE_KEY) {
       try {
         const parsed = JSON.parse(legacyRaw) as Record<string, unknown>
         const migrated = migrateLegacy(parsed)
         const merged = { ...initialState, ...parsed, ...migrated } as PawstreakState
         patchLoadedState(merged)
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
+        window.localStorage.setItem(storageKey, JSON.stringify(merged))
         return merged
       } catch {
         /* fall through */
@@ -326,6 +336,15 @@ export function loadPawstreakState(): PawstreakState {
   } catch {
     return initialState
   }
+}
+
+/** Apply the same migrate + patch pipeline used on load to an arbitrary
+ *  PawstreakState payload (e.g. one fetched from Supabase). */
+export function hydratePawstreakState(parsed: Record<string, unknown>): PawstreakState {
+  const migrated = migrateLegacy(parsed)
+  const merged = { ...initialState, ...parsed, ...migrated } as PawstreakState
+  patchLoadedState(merged)
+  return merged
 }
 
 function resolveHomeCoords(state: PawstreakState): { lat: number; lng: number } | null {
@@ -445,9 +464,12 @@ function patchLoadedState(merged: PawstreakState) {
   }
 }
 
-export function savePawstreakState(nextState: PawstreakState) {
+export function savePawstreakState(
+  nextState: PawstreakState,
+  storageKey: string = STORAGE_KEY,
+) {
   if (!isBrowser()) return
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState))
+  window.localStorage.setItem(storageKey, JSON.stringify(nextState))
 }
 
 export function setDogName(state: PawstreakState, name: string, zipCodeRaw?: string): PawstreakState {
