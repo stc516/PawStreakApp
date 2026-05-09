@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
+import { MascotBadge } from '../components/mascot/MascotBadge'
 import { PackCard } from '../components/PackCard'
 import { useAppState } from '../hooks/useAppState'
 import { deriveAllProgress, summarizePacks } from '../lib/monthlyPacks'
@@ -53,8 +54,10 @@ export function PacksPage() {
       <div className='mx-auto mt-6 flex w-full max-w-[640px] flex-1 flex-col gap-6 px-5'>
         {!hasAnyAdventure ? (
           <div className='rounded-2xl border border-dashed border-[color:var(--border-md)] bg-[var(--bg-card)] p-5 text-center'>
-            <div aria-hidden className='text-3xl'>🌅</div>
-            <h2 className='mt-2 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
+            <div className='flex justify-center'>
+              <MascotBadge mascot='duo' size='md' />
+            </div>
+            <h2 className='mt-3 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
               {state.dogName}&apos;s collection starts today.
             </h2>
             <p className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>

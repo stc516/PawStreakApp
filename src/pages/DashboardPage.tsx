@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
+import { MascotBadge } from '../components/mascot/MascotBadge'
 import { PackCard } from '../components/PackCard'
 import { useAppState } from '../hooks/useAppState'
 import { personalityExtrasLabel, primaryPersonalityLabel } from '../lib/dogIdentity'
@@ -432,7 +433,7 @@ export function DashboardPage() {
             </div>
           ) : (
             <div className='recap-item flex items-center gap-3'>
-              <div className='ri-icon'>🌅</div>
+              <MascotBadge mascot='bailey' size='sm' />
               <div className='ri-info'>
                 <div className='ri-title'>{state.dogName}&apos;s story starts today.</div>
                 <div className='ri-meta'>No adventures yet — the first one writes the first chapter.</div>

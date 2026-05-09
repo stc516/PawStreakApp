@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { BadgeCard } from '../components/BadgeCard'
 import { BottomNav } from '../components/BottomNav'
 import { HeroCard } from '../components/HeroCard'
+import { MascotBadge } from '../components/mascot/MascotBadge'
 import { StatCard } from '../components/StatCard'
 import { VIBE_CHIPS } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
@@ -116,8 +117,10 @@ export function StoryPage() {
             </div>
           ) : (
             <div className='rounded-2xl border border-dashed border-[color:var(--border-md)] bg-[var(--bg-card)] p-5 text-center'>
-              <div aria-hidden className='text-3xl'>📖</div>
-              <div className='mt-2 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
+              <div className='flex justify-center'>
+                <MascotBadge mascot='meiomi' size='md' />
+              </div>
+              <div className='mt-3 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
                 {state.dogName}&apos;s story starts today.
               </div>
               <div className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
