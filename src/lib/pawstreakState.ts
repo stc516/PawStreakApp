@@ -210,6 +210,8 @@ const initialState: PawstreakState = {
   latestUnlockedBadgeId: null,
   emergencyTreatAvailable: true,
   tomorrowTease: refreshTomorrowTease({ dogName: 'Your dog', zipCode: '' }),
+  demoStartedAt: null,
+  hasAccount: false,
 }
 
 function isBrowser() {
@@ -435,6 +437,12 @@ function patchLoadedState(merged: PawstreakState) {
   if (typeof merged.zipCode !== 'string') {
     merged.zipCode = ''
   }
+  if (typeof merged.demoStartedAt !== 'string' && merged.demoStartedAt !== null) {
+    merged.demoStartedAt = merged.onboardingComplete ? new Date().toISOString() : null
+  }
+  if (typeof merged.hasAccount !== 'boolean') {
+    merged.hasAccount = false
+  }
 }
 
 export function savePawstreakState(nextState: PawstreakState) {
@@ -492,6 +500,7 @@ export function completeOnboarding(
     dogMood,
     pickNonce,
     tomorrowTease: refreshTomorrowTease({ dogName, zipCode }),
+    demoStartedAt: state.demoStartedAt ?? new Date().toISOString(),
   }
 
   const generatedMission = generateLocalizedMission({

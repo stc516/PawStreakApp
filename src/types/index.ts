@@ -135,7 +135,15 @@ export interface PawstreakState {
   emergencyTreatAvailable: boolean
   /** Cached teaser line for dashboard / reward */
   tomorrowTease: string
+  /** ISO timestamp when the demo (no-account) experience started. Null until onboarding completes. */
+  demoStartedAt: string | null
+  /** True once the user has signed up (set by Supabase repository in Phase 3). */
+  hasAccount: boolean
 }
+
+/** How long a brand-new user can use the app without signing up. */
+export const DEMO_TRIAL_DAYS = 3
+export const DEMO_TRIAL_MS = DEMO_TRIAL_DAYS * 24 * 60 * 60 * 1000
 
 export function defaultDogProfile(partial?: Partial<DogProfile>): DogProfile {
   return {

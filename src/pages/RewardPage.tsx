@@ -97,7 +97,7 @@ Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down 
       <div className='rew-body'>
         <RewardCard className='xp-pop' delayMs={150}>
           <div className='xp-num'>+{latest?.adventureEnergy ?? 0}</div>
-          <div className='xp-lbl'>Adventure Energy earned</div>
+          <div className='xp-lbl'>Adventure XP earned</div>
         </RewardCard>
         <RewardCard className='streak-protected' delayMs={250}>
           <div className='sp-icon'>🔥</div>
