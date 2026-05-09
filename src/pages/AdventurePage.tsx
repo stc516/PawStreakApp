@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { AdventureShareCard } from '../components/adventure/AdventureShareCard'
@@ -6,6 +6,7 @@ import { missionTimeLabel } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
 import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
 import { shareAdventure } from '../lib/shareAdventure'
+import { track } from '../lib/analytics'
 import { calculateAdventureXp } from '../lib/xp'
 
 interface CompletionViewState {
@@ -31,6 +32,20 @@ export function AdventurePage() {
   useEffect(() => {
     if (!state.onboardingComplete) navigate('/', { replace: true })
   }, [navigate, state.onboardingComplete])
+
+  // Track adventure_started exactly once per visit to /adventure.
+  // Uses a ref so StrictMode double-invokes don't double-fire.
+  const startedFiredRef = useRef(false)
+  useEffect(() => {
+    if (!state.onboardingComplete) return
+    if (startedFiredRef.current) return
+    startedFiredRef.current = true
+    track('adventure_started', {
+      adventure_category: m.category,
+      adventure_rarity: m.rarity,
+      is_away: state.isAway,
+    })
+  }, [state.onboardingComplete, m.category, m.rarity, state.isAway])
 
   useEffect(() => {
     if (paused) return
@@ -71,6 +86,7 @@ export function AdventurePage() {
         dogName: state.dogName,
         title: completionModal.title,
         category: completionModal.category,
+        rarity: completionModal.rarity,
         streak: completionModal.streakAfterCompletion,
         locationHint: completionModal.locationHint,
         flavor: completionModal.flavor,
@@ -139,6 +155,13 @@ export function AdventurePage() {
               completedAt: new Date().toISOString(),
             }
             completeAdventure(walkSeconds)
+            track('adventure_completed', {
+              adventure_category: m.category,
+              adventure_rarity: m.rarity,
+              xp_earned: xpBreakdown.xp,
+              streak_count: completionSnapshot.streakAfterCompletion,
+              is_away: state.isAway,
+            })
             setPaused(true)
             setCompletionModal(completionSnapshot)
             setShareStatus(null)

@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getEnvironmentForCoords } from '../data/zipEnvironments'
 import { normalizeZip } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
+import { track } from '../lib/analytics'
 import { resolveUserEnvironment } from '../lib/resolveUserEnvironment'
 import type {
   DogEnergyLevel,
@@ -82,9 +83,18 @@ export function OnboardingPage() {
 
   const [googleNote, setGoogleNote] = useState<string | null>(null)
 
+  const startedFiredRef = useRef(false)
+  const dogCreatedFiredRef = useRef(false)
+  const lastZipReportedRef = useRef<string>('')
+
   useEffect(() => {
     if (state.onboardingComplete) {
       navigate('/app')
+      return
+    }
+    if (!startedFiredRef.current) {
+      startedFiredRef.current = true
+      track('onboarding_started', { onboarding_step: 1 })
     }
   }, [navigate, state.onboardingComplete])
 
@@ -93,6 +103,26 @@ export function OnboardingPage() {
     const t = window.setTimeout(() => setGoogleNote(null), 4500)
     return () => window.clearTimeout(t)
   }, [googleNote])
+
+  // Fire ZIP-entered events at most once per distinct 5-digit value, only
+  // when the user is actually on the location step. We send the
+  // `environment_primary` bucket (e.g. coastal/urban/etc.) but never the
+  // ZIP itself or coordinates.
+  useEffect(() => {
+    if (step !== 7) return
+    const normalized = normalizeZip(homeZip)
+    if (normalized.length !== 5) return
+    if (lastZipReportedRef.current === normalized) return
+    lastZipReportedRef.current = normalized
+    const resolution = resolveUserEnvironment(normalized)
+    if (resolution.source === 'handcrafted') {
+      track('zip_supported_entered', {
+        environment_primary: resolution.environment.environmentPrimary,
+      })
+    } else {
+      track('zip_unsupported_entered', {})
+    }
+  }, [homeZip, step])
 
   function togglePersonality(id: DogPersonalityId) {
     setPersonality((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]))
@@ -145,6 +175,14 @@ export function OnboardingPage() {
 
   function next() {
     if (!canProceed()) return
+    // Fire dog_profile_created the first time we leave step 1 with a name.
+    if (step === 1 && trimmedName && !dogCreatedFiredRef.current) {
+      dogCreatedFiredRef.current = true
+      track('dog_profile_created', {
+        has_breed: breed.trim().length > 0,
+        has_age: ageRaw.trim().length > 0,
+      })
+    }
     if (step < TOTAL_STEPS) setStep((s) => s + 1)
   }
 
@@ -156,6 +194,9 @@ export function OnboardingPage() {
     if (!canProceed()) return
     const ageParsed = ageRaw.trim() === '' ? null : Number.parseInt(ageRaw, 10)
     const age = ageParsed != null && !Number.isNaN(ageParsed) && ageParsed >= 0 ? ageParsed : null
+    const finalZip = normalizeZip(homeZip)
+    const finalResolution = resolveUserEnvironment(finalZip)
+    const zipSupported = finalResolution.source === 'handcrafted'
 
     completeOnboarding({
       dogProfile: {
@@ -169,13 +210,18 @@ export function OnboardingPage() {
       userProfile: {
         homeLat,
         homeLng,
-        homeZip: normalizeZip(homeZip),
+        homeZip: finalZip,
       },
       notificationPrefs: {
         cadence,
         morningTime,
         eveningTime,
       },
+    })
+    track('onboarding_completed', {
+      reminder_cadence: cadence,
+      zip_supported: zipSupported,
+      environment_primary: finalResolution.environment.environmentPrimary,
     })
     navigate('/app')
   }

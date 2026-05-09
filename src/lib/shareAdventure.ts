@@ -1,4 +1,5 @@
-import type { AdventureCategory } from '../types'
+import { track } from './analytics'
+import type { AdventureCategory, AdventureRarity } from '../types'
 
 const CATEGORY_LABELS: Record<AdventureCategory, string> = {
   social: 'Social',
@@ -15,6 +16,8 @@ interface ShareAdventurePayload {
   streak: number
   locationHint?: string
   flavor?: string
+  /** Optional analytics-only — never included in the shared text. */
+  rarity?: AdventureRarity
 }
 
 function buildShareText(payload: ShareAdventurePayload): string {
@@ -37,11 +40,22 @@ export async function shareAdventure(payload: ShareAdventurePayload): Promise<'s
       title: `${payload.dogName}'s Adventure`,
       text,
     })
+    track('adventure_shared', {
+      adventure_category: payload.category,
+      adventure_rarity: payload.rarity,
+      method: 'native',
+    })
     return 'shared'
   }
 
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    track('share_fallback_used', { reason: 'no_native_share' })
     await navigator.clipboard.writeText(text)
+    track('adventure_shared', {
+      adventure_category: payload.category,
+      adventure_rarity: payload.rarity,
+      method: 'clipboard',
+    })
     return 'copied'
   }
 
