@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
+import { PackCard } from '../components/PackCard'
 import { useAppState } from '../hooks/useAppState'
 import { personalityExtrasLabel, primaryPersonalityLabel } from '../lib/dogIdentity'
 import { achievementSummary, buildLocalLeaderboard, leaderboardRank } from '../lib/gamification'
+import { deriveAllProgress, pickFeaturedPack, summarizePacks } from '../lib/monthlyPacks'
 
 const CATEGORY_FROM_VIBE = {
   pulse: 'social',
@@ -111,6 +113,9 @@ export function DashboardPage() {
   )
   const yourRank = useMemo(() => leaderboardRank(leaderboard), [leaderboard])
   const achievements = useMemo(() => achievementSummary(state.badges), [state.badges])
+  const packProgress = useMemo(() => deriveAllProgress(state.recentAdventures), [state.recentAdventures])
+  const featuredPack = useMemo(() => pickFeaturedPack(packProgress), [packProgress])
+  const packSummary = useMemo(() => summarizePacks(packProgress), [packProgress])
   const energyGoal = 3000
   const energyProgress = Math.min(100, Math.round((state.totalAdventureEnergy / energyGoal) * 100))
 
@@ -377,6 +382,21 @@ export function DashboardPage() {
           <div className='mt-2 text-[11px] text-[var(--text-2)]'>
             Achievements: {achievements.earned}/{achievements.total} unlocked · monthly packs climb with each XP run
           </div>
+        </div>
+
+        <div className='mx-4 mt-3' data-testid='dashboard-featured-pack'>
+          <div className='mb-2 flex items-end justify-between pl-0.5'>
+            <div className='eye'>This month&apos;s pack</div>
+            <button
+              type='button'
+              onClick={() => navigate('/packs')}
+              className='text-[11px] uppercase tracking-[0.14em] text-[var(--text-3)] transition-colors hover:text-[var(--text-2)]'
+              data-testid='dashboard-featured-pack-cta'
+            >
+              See all · {packSummary.completed}/{packSummary.total}
+            </button>
+          </div>
+          <PackCard progress={featuredPack} variant='featured' />
         </div>
 
         <div className='recap mt-3'>

@@ -221,6 +221,19 @@ test('Share Adventure fallback/native flow does not crash', async ({ page }) => 
   await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
 })
 
+test('monthly packs render on dashboard and dedicated /packs page', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'PackDog', zip: '92104' })
+
+  await expect(page.getByTestId('dashboard-featured-pack')).toBeVisible()
+  await page.getByTestId('dashboard-featured-pack-cta').click()
+
+  await expect(page).toHaveURL(/\/packs$/)
+  await expect(page.getByRole('heading', { name: 'Monthly Packs' })).toBeVisible()
+  await expect(page.getByTestId('pack-card-coastal-dog')).toBeVisible()
+  await expect(page.getByTestId('pack-card-patio-pup')).toBeVisible()
+  await expect(page.getByTestId('pack-card-neighborhood-explorer')).toBeVisible()
+})
+
 test('legal pages render and footer links navigate', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'LegalDog', zip: '92104' })
 
