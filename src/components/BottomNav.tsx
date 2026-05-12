@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom'
 const navItems = [
   { to: '/app', emoji: '🐾', label: 'Today' },
   { to: '/adventure', emoji: '🗺️', label: 'Adventure' },
+  { to: '/wild', emoji: '🏆', label: 'The Wild' },
   { to: '/packs', emoji: '🎒', label: 'Packs' },
-  { to: '/badges', emoji: '🏅', label: 'Finds' },
   { to: '/story', emoji: '📖', label: 'Story' },
 ] as const
 

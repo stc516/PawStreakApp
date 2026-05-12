@@ -6,6 +6,7 @@ import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePro
 import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
+import { LevelProgressCard } from '../components/LevelProgressCard'
 import { MascotBadge } from '../components/mascot/MascotBadge'
 import { PackCard } from '../components/PackCard'
 import { useAppState } from '../hooks/useAppState'
@@ -131,8 +132,6 @@ export function DashboardPage() {
   const packProgress = useMemo(() => deriveAllProgress(state.recentAdventures), [state.recentAdventures])
   const featuredPack = useMemo(() => pickFeaturedPack(packProgress), [packProgress])
   const packSummary = useMemo(() => summarizePacks(packProgress), [packProgress])
-  const energyGoal = 3000
-  const energyProgress = Math.min(100, Math.round((state.totalAdventureEnergy / energyGoal) * 100))
 
   return (
     <section
@@ -279,7 +278,17 @@ export function DashboardPage() {
         </div>
 
         <div className='mx-4 mt-3'>
-          <div className='mb-2 text-[10px] uppercase tracking-[0.14em] text-[var(--text-3)]'>Milestones</div>
+          <div className='mb-2 flex items-end justify-between pl-0.5'>
+            <div className='text-[10px] uppercase tracking-[0.14em] text-[var(--text-3)]'>Milestones</div>
+            <button
+              type='button'
+              data-testid='dashboard-finds-cta'
+              onClick={() => navigate('/badges')}
+              className='text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)] transition-colors hover:text-[var(--text-2)]'
+            >
+              See finds · {achievements.earned}/{achievements.total}
+            </button>
+          </div>
           <div className='grid grid-cols-2 gap-2'>
             {milestones.map((milestone) => (
               <div
@@ -362,18 +371,29 @@ export function DashboardPage() {
           </button>
         </div>
 
-        <div className='ebar mt-3'>
-          <div className='ebar-top'>
-            <span className='ebar-lbl'>Adventure XP</span>
-            <span className='ebar-val'>
-              {state.totalAdventureEnergy.toLocaleString()} / {energyGoal.toLocaleString()}
+        <div className='mx-4 mt-3'>
+          <button
+            type='button'
+            data-testid='dashboard-level-card'
+            onClick={() => navigate('/wild')}
+            className='block w-full text-left'
+            aria-label='Open The Wild'
+          >
+            <LevelProgressCard xp={state.totalAdventureEnergy} />
+          </button>
+          <div className='mt-2 flex items-center justify-between px-1 text-[11px] text-[var(--text-2)]'>
+            <span>
+              Rank #{yourRank} in local pack · next find:{' '}
+              <span className='text-[var(--text)]'>{achievements.nextAchievementName}</span>
             </span>
-          </div>
-          <div className='ebar-track'>
-            <div className='ebar-fill' style={{ width: `${energyProgress}%` }} />
-          </div>
-          <div className='ebar-goal'>
-            XP Rank #{yourRank} · next achievement: <span>{achievements.nextAchievementName}</span>
+            <button
+              type='button'
+              onClick={() => navigate('/wild')}
+              className='text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--orange)] transition-colors hover:brightness-110'
+              data-testid='dashboard-the-wild-cta'
+            >
+              The Wild →
+            </button>
           </div>
         </div>
 

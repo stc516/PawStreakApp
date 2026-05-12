@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { LevelProgressCard } from '../components/LevelProgressCard'
 import { ProgressBar } from '../components/ProgressBar'
 import { RewardCard } from '../components/RewardCard'
 import { bondArcProgress, identityArc } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
+import { didLevelUp, getCurrentLevel } from '../utils/xpLevels'
 
 const confettiColors = [
   'var(--orange)',
@@ -23,6 +25,13 @@ export function RewardPage() {
   const latest = state.latestCompletedAdventure
   const bond = bondArcProgress(state.currentStreak)
   const identity = identityArc(state.totalAdventureEnergy, state.currentStreak)
+
+  // Derive previous XP using the just-completed adventure energy. This is safe
+  // because XP math itself is untouched — we're only inferring what the user
+  // had *before* this adventure landed in `totalAdventureEnergy`.
+  const previousXp = Math.max(0, state.totalAdventureEnergy - (latest?.adventureEnergy ?? 0))
+  const leveledUp = didLevelUp(previousXp, state.totalAdventureEnergy)
+  const currentTier = getCurrentLevel(state.totalAdventureEnergy)
 
   const unlockedBadge = state.latestUnlockedBadgeId
     ? state.badges.find((b) => b.id === state.latestUnlockedBadgeId)
@@ -98,6 +107,19 @@ Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down 
         <RewardCard className='xp-pop' delayMs={150}>
           <div className='xp-num'>+{latest?.adventureEnergy ?? 0}</div>
           <div className='xp-lbl'>Adventure XP earned</div>
+        </RewardCard>
+        <RewardCard delayMs={200}>
+          <LevelProgressCard
+            xp={state.totalAdventureEnergy}
+            variant='compact'
+            footnote={
+              leveledUp
+                ? `\u2B06\uFE0F ${state.dogName} reached ${currentTier.current.name}!`
+                : currentTier.isMaxLevel
+                  ? undefined
+                  : `${currentTier.current.icon} ${currentTier.current.name} \u00B7 ${currentTier.xpToNext.toLocaleString()} XP until ${currentTier.next?.name}`
+            }
+          />
         </RewardCard>
         <RewardCard className='streak-protected' delayMs={250}>
           <div className='sp-icon'>🔥</div>

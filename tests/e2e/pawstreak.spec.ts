@@ -163,10 +163,16 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   // Adventure screen has no bottom nav; return to dashboard to exercise tab links.
   await page.goto('/app')
+  await page.getByRole('link', { name: /The Wild/ }).click()
+  await expect(page).toHaveURL(/\/wild/)
+  await expect(page.getByTestId('wild-page')).toBeVisible()
+
   await page.getByRole('link', { name: /Packs/ }).click()
   await expect(page).toHaveURL(/\/packs/)
 
-  await page.getByRole('link', { name: /Finds/ }).click()
+  // Finds is no longer in the bottom nav; reach it via the dashboard CTA.
+  await page.goto('/app')
+  await page.getByTestId('dashboard-finds-cta').click()
   await expect(page).toHaveURL(/\/badges/)
   await expect(page.getByText("NavDog's Finds")).toBeVisible()
 
@@ -176,6 +182,39 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   await page.getByRole('link', { name: /Today/ }).click()
   await expect(page).toHaveURL(/\/app/)
+})
+
+test('dashboard level card renders and links to The Wild', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'LevelDog', zip: '92104' })
+
+  const levelCard = page.getByTestId('dashboard-level-card')
+  await expect(levelCard).toBeVisible()
+  const levelName = await page.getByTestId('level-progress-card-name').first().textContent()
+  expect(['Pup', 'Scout', 'Trailblazer', 'Expedition', 'Legend']).toContain(levelName?.trim() ?? '')
+  await expect(page.getByTestId('level-progress-card-bar').first()).toBeVisible()
+
+  await levelCard.click()
+  await expect(page).toHaveURL(/\/wild$/)
+})
+
+test('The Wild page shows current league + league ladder', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'WildDog', zip: '92104' })
+
+  await page.goto('/wild')
+  await expect(page.getByTestId('wild-page')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'The Wild' })).toBeVisible()
+  await expect(page.getByText(/Your rank updates weekly/)).toBeVisible()
+
+  await expect(page.getByTestId('wild-current-card')).toContainText('WildDog')
+
+  for (let level = 1; level <= 5; level += 1) {
+    await expect(page.getByTestId(`wild-tier-${level}`)).toBeVisible()
+  }
+  // Exactly one tier should be the user's current tier, whichever the seed lands on.
+  const currentTiers = page.locator('[data-testid^="wild-tier-"][data-current="true"]')
+  await expect(currentTiers).toHaveCount(1)
+
+  await expect(page.getByTestId('wild-coming-soon')).toBeVisible()
 })
 
 test('adventure generation and completion modal appears', async ({ page }) => {

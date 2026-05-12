@@ -11,6 +11,7 @@ import { PrivacyPage } from '../pages/PrivacyPage'
 import { RewardPage } from '../pages/RewardPage'
 import { StoryPage } from '../pages/StoryPage'
 import { TermsPage } from '../pages/TermsPage'
+import { TheWildPage } from '../pages/TheWildPage'
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
   {
     path: '/account',
     element: <AccountPage />,
+  },
+  {
+    path: '/wild',
+    element: <TheWildPage />,
   },
   {
     path: '*',
