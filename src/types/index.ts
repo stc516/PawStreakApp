@@ -139,6 +139,13 @@ export interface PawstreakState {
   demoStartedAt: string | null
   /** True once the user has signed up (set by Supabase repository in Phase 3). */
   hasAccount: boolean
+  /** ISO timestamp the dashboard "Save progress" nudge was last dismissed.
+   *  Used so we can re-surface it after meaningful events (e.g. a fresh
+   *  adventure completion) even if the user X'd it earlier. */
+  nudgeDismissedAt: string | null
+  /** ISO timestamp the post-first-adventure save prompt was acknowledged.
+   *  Tracked separately so we never spam the prompt twice. */
+  firstAdventurePromptSeenAt: string | null
 }
 
 /** How long a brand-new user can use the app without signing up. */

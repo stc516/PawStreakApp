@@ -222,6 +222,8 @@ const initialState: PawstreakState = {
   tomorrowTease: refreshTomorrowTease({ dogName: 'Your dog', zipCode: '' }),
   demoStartedAt: null,
   hasAccount: false,
+  nudgeDismissedAt: null,
+  firstAdventurePromptSeenAt: null,
 }
 
 function isBrowser() {
@@ -462,6 +464,15 @@ function patchLoadedState(merged: PawstreakState) {
   if (typeof merged.hasAccount !== 'boolean') {
     merged.hasAccount = false
   }
+  if (typeof merged.nudgeDismissedAt !== 'string' && merged.nudgeDismissedAt !== null) {
+    merged.nudgeDismissedAt = null
+  }
+  if (
+    typeof merged.firstAdventurePromptSeenAt !== 'string' &&
+    merged.firstAdventurePromptSeenAt !== null
+  ) {
+    merged.firstAdventurePromptSeenAt = null
+  }
 }
 
 export function savePawstreakState(
@@ -680,4 +691,12 @@ export function setReminder(state: PawstreakState, value: boolean): PawstreakSta
 
 export function resetRewardFlow(state: PawstreakState): PawstreakState {
   return { ...state, latestUnlockedBadgeId: null }
+}
+
+export function dismissSaveNudge(state: PawstreakState): PawstreakState {
+  return { ...state, nudgeDismissedAt: new Date().toISOString() }
+}
+
+export function markFirstAdventurePromptSeen(state: PawstreakState): PawstreakState {
+  return { ...state, firstAdventurePromptSeenAt: new Date().toISOString() }
 }

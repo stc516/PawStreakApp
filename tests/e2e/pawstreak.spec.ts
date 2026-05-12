@@ -234,6 +234,62 @@ test('monthly packs render on dashboard and dedicated /packs page', async ({ pag
   await expect(page.getByTestId('pack-card-neighborhood-explorer')).toBeVisible()
 })
 
+test('account status chip routes to /account in coming-soon mode', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'AccountDog', zip: '92104' })
+
+  const chip = page.getByTestId('account-status-chip')
+  await expect(chip).toBeVisible()
+  await expect(chip).toHaveAttribute('data-state', 'local')
+  await chip.click()
+
+  await expect(page).toHaveURL(/\/account$/)
+  await expect(page.getByTestId('account-page')).toBeVisible()
+  await expect(page.getByTestId('account-auth-not-configured')).toBeVisible()
+
+  // Form is rendered but inputs are disabled when Supabase isn't configured.
+  await expect(page.getByTestId('account-email-input')).toBeDisabled()
+  await expect(page.getByTestId('account-password-submit')).toBeDisabled()
+  await expect(page.getByTestId('account-magic-link')).toBeDisabled()
+
+  await page.getByTestId('account-back').click()
+  await expect(page).toHaveURL(/\/app$/)
+})
+
+test('save-progress nudge appears, dismisses, and re-surfaces after an adventure', async ({
+  page,
+}) => {
+  await completeOnboarding(page, { dogName: 'NudgeDog', zip: '92104' })
+
+  const nudge = page.getByTestId('save-progress-nudge')
+  await expect(nudge).toBeVisible()
+  await expect(page.getByTestId('save-progress-nudge-cta')).toBeVisible()
+
+  await page.getByTestId('save-progress-nudge-dismiss').click()
+  await expect(nudge).toHaveCount(0)
+
+  // Run a quick adventure → meaningful event → nudge should resurface on dashboard.
+  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByRole('button', { name: /Wrap adventure/ }).click()
+  await page.getByRole('button', { name: 'Done' }).click()
+  // Through character moment + reward, then back to dashboard.
+  await page.goto('/app')
+  await expect(page.getByTestId('save-progress-nudge')).toBeVisible()
+})
+
+test('post-adventure save prompt appears after first completed adventure', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'PromptDog', zip: '92104' })
+
+  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByRole('button', { name: /Wrap adventure/ }).click()
+  await page.getByRole('button', { name: 'Done' }).click()
+  await page.goto('/app')
+
+  const prompt = page.getByTestId('post-adventure-save-prompt')
+  await expect(prompt).toBeVisible()
+  await page.getByTestId('post-adventure-save-prompt-later').click()
+  await expect(prompt).toHaveCount(0)
+})
+
 test('legal pages render and footer links navigate', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'LegalDog', zip: '92104' })
 

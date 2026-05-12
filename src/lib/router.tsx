@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
+import { AccountPage } from '../pages/AccountPage'
 import { AdventurePage } from '../pages/AdventurePage'
 import { BadgesPage } from '../pages/BadgesPage'
 import { CharacterMomentPage } from '../pages/CharacterMomentPage'
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
   {
     path: '/terms',
     element: <TermsPage />,
+  },
+  {
+    path: '/account',
+    element: <AccountPage />,
   },
   {
     path: '*',

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { AccountStatusChip } from '../components/auth/AccountStatusChip'
+import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePrompt'
+import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { MascotBadge } from '../components/mascot/MascotBadge'
@@ -141,7 +144,8 @@ export function DashboardPage() {
         <div className='wm'>
           Paw<span>Streak</span>
         </div>
-        <div className='flex items-center gap-2.5'>
+        <div className='flex items-center gap-2'>
+          <AccountStatusChip />
           <div className='streak-badge'>
             <span className='sb-flame'>🔥</span>
             <span className='sb-num'>{state.currentStreak}</span>
@@ -151,6 +155,8 @@ export function DashboardPage() {
       </header>
 
       <div className='scroll'>
+        <PostAdventureSavePrompt />
+        <SaveProgressNudge />
         {!state.welcomeBannerDismissed ? (
           <div className='mx-4 mb-3 mt-3 rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] px-4 py-3'>
             <div className='flex items-start justify-between gap-3'>

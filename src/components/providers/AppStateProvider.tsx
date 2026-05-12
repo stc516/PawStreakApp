@@ -7,8 +7,10 @@ import { localStorageStateRepository } from '../../lib/localStorageStateReposito
 import {
   completeAdventure,
   completeOnboarding,
+  dismissSaveNudge,
   dismissWelcomeBanner,
   evaluateAwayFromCoords,
+  markFirstAdventurePromptSeen,
   resetRewardFlow,
   rollPickForMe,
   selectVibe,
@@ -123,6 +125,12 @@ function AppStateSynced({
       },
       resetRewardFlow: () => {
         setState((currentState) => resetRewardFlow(currentState))
+      },
+      dismissSaveNudge: () => {
+        setState((currentState) => dismissSaveNudge(currentState))
+      },
+      markFirstAdventurePromptSeen: () => {
+        setState((currentState) => markFirstAdventurePromptSeen(currentState))
       },
     }),
     [authEnabled, loadingSession, remoteHydrated, session, state],
