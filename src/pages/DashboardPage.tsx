@@ -6,20 +6,11 @@ import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePro
 import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
-import { LevelProgressCard } from '../components/LevelProgressCard'
 import { MascotBadge } from '../components/mascot/MascotBadge'
 import { PackCard } from '../components/PackCard'
 import { useAppState } from '../hooks/useAppState'
-import { personalityExtrasLabel, primaryPersonalityLabel } from '../lib/dogIdentity'
-import { achievementSummary, buildLocalLeaderboard, leaderboardRank } from '../lib/gamification'
 import { deriveAllProgress, pickFeaturedPack, summarizePacks } from '../lib/monthlyPacks'
-
-const CATEGORY_FROM_VIBE = {
-  pulse: 'social',
-  wander: 'exploration',
-  salt: 'chill',
-  wild: 'chaos',
-} as const
+import { buildPlaceIdentity } from '../lib/placeIdentity'
 
 function relativeDayLabel(iso: string): string {
   const then = new Date(iso)
@@ -34,7 +25,7 @@ function relativeDayLabel(iso: string): string {
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const { state, dismissWelcomeBanner } = useAppState()
+  const { state, dismissWelcomeBanner, rollPickForMe } = useAppState()
   const [awayDismissed, setAwayDismissed] = useState(false)
 
   useEffect(() => {
@@ -48,86 +39,16 @@ export function DashboardPage() {
   }, [state.isAway])
 
   const latest = useMemo(() => state.latestCompletedAdventure ?? state.recentAdventures[0] ?? null, [state])
-  const primaryPersonality = useMemo(
-    () => primaryPersonalityLabel(state.dogProfile.personality),
-    [state.dogProfile.personality],
-  )
-  const personalityExtra = useMemo(
-    () => personalityExtrasLabel(state.dogProfile.personality),
-    [state.dogProfile.personality],
-  )
-  const recap = useMemo(() => {
-    const anchorTime = state.recentAdventures.reduce((maxTime, entry) => {
-      const entryTime = new Date(entry.completedAt).getTime()
-      return Number.isFinite(entryTime) ? Math.max(maxTime, entryTime) : maxTime
-    }, 0)
-    const weekEntries = state.recentAdventures.filter((entry) => {
-      const t = new Date(entry.completedAt).getTime()
-      return Number.isFinite(t) && anchorTime - t <= 7 * 24 * 60 * 60 * 1000
-    })
-    const totalWeek = weekEntries.length
-    const categoryCounts = new Map<string, number>()
-    const placeSet = new Set<string>()
-
-    for (const entry of weekEntries) {
-      const category = CATEGORY_FROM_VIBE[entry.vibe] ?? 'routine'
-      categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1)
-      if (entry.locationHint) placeSet.add(entry.locationHint.trim().toLowerCase())
+  const place = useMemo(() => buildPlaceIdentity(state), [state])
+  const memoryAtlas = useMemo(() => {
+    const places = new Set(
+      state.recentAdventures.map((entry) => entry.locationHint?.trim()).filter((value): value is string => Boolean(value)),
+    )
+    return {
+      knownPlaces: places.size,
+      lastPlace: latest?.locationHint ?? place.locationLine,
     }
-
-    const topCategory =
-      [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? (totalWeek > 0 ? 'routine' : 'exploration')
-    const topCategoryLabel = `${topCategory[0].toUpperCase()}${topCategory.slice(1)}`
-    const newPlaces = placeSet.size
-
-    let summary = `${state.dogName} had a ${topCategory} week.`
-    if (totalWeek === 0) summary = `${state.dogName} is ready to kick off this week.`
-    else if (totalWeek === 1) summary = `${state.dogName} made a strong first move this week.`
-
-    return { totalWeek, topCategoryLabel, newPlaces, summary }
-  }, [state.dogName, state.recentAdventures])
-  const milestones = useMemo(() => {
-    const socialCount = state.recentAdventures.filter((entry) => CATEGORY_FROM_VIBE[entry.vibe] === 'social').length
-    const uniqueAreas = new Set(
-      state.recentAdventures.map((entry) => entry.locationHint?.trim().toLowerCase()).filter(Boolean),
-    ).size
-
-    return [
-      {
-        id: 'first',
-        label: 'First Adventure',
-        done: state.totalAdventures >= 1,
-        hint: state.totalAdventures >= 1 ? 'Unlocked' : 'Start your first story beat',
-      },
-      {
-        id: 'streak',
-        label: '7 Day Streak',
-        done: state.currentStreak >= 7,
-        hint:
-          state.currentStreak >= 7
-            ? 'Streak milestone hit'
-            : `${Math.max(0, 7 - state.currentStreak)} more day${7 - state.currentStreak === 1 ? '' : 's'}`,
-      },
-      {
-        id: 'social',
-        label: '5 Social Adventures',
-        done: socialCount >= 5,
-        hint: socialCount >= 5 ? 'XP rank bump unlocked' : `${Math.max(0, 5 - socialCount)} more social adventures`,
-      },
-      {
-        id: 'areas',
-        label: 'New Area Explored',
-        done: uniqueAreas >= 2,
-        hint: uniqueAreas >= 2 ? `${uniqueAreas} places discovered` : 'Try a new neighborhood route',
-      },
-    ]
-  }, [state.currentStreak, state.recentAdventures, state.totalAdventures])
-  const leaderboard = useMemo(
-    () => buildLocalLeaderboard(state.dogName, state.totalAdventureEnergy, state.currentStreak),
-    [state.currentStreak, state.dogName, state.totalAdventureEnergy],
-  )
-  const yourRank = useMemo(() => leaderboardRank(leaderboard), [leaderboard])
-  const achievements = useMemo(() => achievementSummary(state.badges), [state.badges])
+  }, [latest?.locationHint, place.locationLine, state.recentAdventures])
   const packProgress = useMemo(() => deriveAllProgress(state.recentAdventures), [state.recentAdventures])
   const featuredPack = useMemo(() => pickFeaturedPack(packProgress), [packProgress])
   const packSummary = useMemo(() => summarizePacks(packProgress), [packProgress])
@@ -142,14 +63,7 @@ export function DashboardPage() {
         <div className='wm'>
           Paw<span>Streak</span>
         </div>
-        <div className='flex items-center gap-2'>
-          <AccountStatusChip />
-          <div className='streak-badge'>
-            <span className='sb-flame'>🔥</span>
-            <span className='sb-num'>{state.currentStreak}</span>
-          </div>
-          <span className='text-[19px] text-[var(--text-2)]'>🔔</span>
-        </div>
+        <AccountStatusChip />
       </header>
 
       <div className='scroll'>
@@ -191,248 +105,163 @@ export function DashboardPage() {
           </div>
         ) : null}
 
-        <div className='dog-row'>
-          <div className='dog-chip on'>
-            <div className='dog-av on'>🐕</div>
-            <span className='dog-nm'>{state.dogName}</span>
-            <span className='rounded-full border border-[color:var(--border-md)] bg-[var(--bg-card)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--purple)]'>
-              {primaryPersonality}
-            </span>
+        <section className='mx-4 mt-4 rounded-[28px] bg-[radial-gradient(circle_at_80%_0%,rgba(79,195,247,0.18),transparent_34%),linear-gradient(165deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-5 shadow-[0_24px_58px_rgba(0,0,0,0.36)]' data-testid='dashboard-today-card'>
+          <div className='flex items-start gap-4'>
+            <div className='grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[var(--bg-elevated)] text-[34px] shadow-[0_12px_32px_rgba(0,0,0,0.35)]'>
+              🐕
+            </div>
+            <div className='min-w-0'>
+              <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
+                Today&apos;s world
+              </div>
+              <h1 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[29px] font-semibold italic leading-[1.05] text-[var(--text)]'>
+                {state.dogName} in {place.worldName}
+              </h1>
+              <p
+                data-testid='dashboard-hero-status'
+                className={`mt-2 text-[14px] leading-relaxed ${state.todayAdventureDone ? 'text-[var(--green)]' : 'text-[var(--text-2)]'}`}
+              >
+                {state.todayAdventureDone
+                  ? `${state.dogName} had a great day here.`
+                  : `${state.dogName} is ready for a great day here.`}
+              </p>
+            </div>
           </div>
-          <button className='dog-add' type='button'>
-            +
-          </button>
-        </div>
 
-        <div className='hero-row'>
-          <div className='hero-mascot mascot'>
-            <div className='m-ears'>
-              <div className='m-ear l' />
-              <div className='m-ear r' />
+          <div className='mt-5 rounded-3xl bg-[rgba(255,255,255,0.045)] p-4'>
+            <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--orange)]'>
+              Adventure opening
             </div>
-            <div className='m-face'>🐕</div>
-            <div className='m-tail'>🐾</div>
-          </div>
-          <div>
-            <div className='hero-name'>{state.dogName}</div>
-            <div
-              data-testid='dashboard-hero-status'
-              className={`hero-status ${state.todayAdventureDone ? 'won' : ''}`}
-            >
-              {state.todayAdventureDone
-                ? 'had a great day. ✓'
-                : 'is ready for a great day.'}
-            </div>
-            <div className='mt-1 text-[12px] text-[var(--text-2)]'>
-              {primaryPersonality}
-              {personalityExtra ? <span className='ml-1 text-[var(--text-3)]'>{personalityExtra}</span> : null}
-            </div>
-            <div className='mt-1.5'>
-              <span className={`pill ${state.todayAdventureDone ? 'p-won' : 'p-risk'}`}>
-                {state.todayAdventureDone ? '✓ A good day' : '🐾 Day waiting'}
+            <div className='mt-1 flex items-start gap-3'>
+              <span className='text-[30px]' aria-hidden>
+                {state.generatedMission.emoji}
               </span>
+              <div>
+                <div className='font-[family-name:var(--fd),Fraunces,serif] text-[22px] leading-tight text-[var(--text)]'>
+                  {state.generatedMission.title}
+                </div>
+                <p className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
+                  {place.atmosphere} {place.discoveryPrompt}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ─── PRIMARY: today's adventure CTA — emotional center ─── */}
-        <div className='today-card mt-3' data-testid='dashboard-today-card'>
-          <div className='tc-glow' />
-          <div className='tc-eye'>Today&apos;s adventure</div>
-          <div className='tc-head'>
-            {state.todayAdventureDone
-              ? `${state.dogName} already had a great day.`
-              : `Give ${state.dogName} a great day.`}
-          </div>
-          <div className='tc-ctx'>
-            {latest ? (
-              <>
-                Last time, <strong>{latest.missionTitle.toLowerCase()}</strong>
-                {latest.locationHint ? (
-                  <>
-                    {' '}
-                    around <strong>{latest.locationHint}</strong>
-                  </>
-                ) : null}
-                . What does {state.dogName} get to do today?
-              </>
-            ) : (
-              <>
-                Every dog deserves a great day.{' '}
-                <strong>{state.dogName}&apos;s first story</strong> starts with one walk out the door.
-              </>
-            )}
+          <div className='mt-4 flex gap-2'>
+            <button
+              className='btn-primary'
+              type='button'
+              data-testid='dashboard-start-adventure-cta'
+              onClick={() => navigate('/adventure')}
+            >
+              Enter today&apos;s adventure →
+            </button>
           </div>
           <button
-            className='btn-primary'
             type='button'
-            data-testid='dashboard-start-adventure-cta'
-            onClick={() => navigate('/adventure')}
+            onClick={rollPickForMe}
+            className='mt-3 w-full rounded-2xl border border-[color:var(--border)] bg-transparent px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--text-2)]'
           >
-            {state.todayAdventureDone ? 'Add another adventure →' : `Start ${state.dogName}\u2019s day →`}
+            Let the world pick a different route
           </button>
-        </div>
+        </section>
 
-        {/* ─── MEMORY: last adventure recap (emotional anchor) ─── */}
-        <div className='recap mt-3'>
-          <div className='eye mb-2 pl-0.5'>Last adventure</div>
+        <section className='mx-4 mt-4 rounded-[24px] bg-[var(--bg-card)] p-4' data-testid='dashboard-memory-atlas'>
+          <div className='flex items-center justify-between gap-3'>
+            <div>
+              <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
+                Memory atlas
+              </div>
+              <h2 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[20px] font-semibold italic text-[var(--text)]'>
+                {memoryAtlas.knownPlaces > 0
+                  ? `${state.dogName} knows ${memoryAtlas.knownPlaces} ${place.atlasNoun}.`
+                  : `${state.dogName}'s map starts today.`}
+              </h2>
+            </div>
+            <button
+              type='button'
+              onClick={() => navigate('/story')}
+              className='shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]'
+            >
+              Open atlas
+            </button>
+          </div>
           {latest ? (
-            <div className='recap-item'>
-              <div className='ri-icon'>{latest.emoji}</div>
-              <div className='ri-info'>
-                <div className='ri-title'>
-                  {latest.missionTitle} · {latest.durationMinutes} min · {latest.groundCovered.toFixed(1)} mi
+            <div className='mt-4 flex gap-3'>
+              <div className='grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--bg-elevated)] text-[24px]'>
+                {latest.emoji}
+              </div>
+              <div className='min-w-0'>
+                <div className='text-[13px] font-semibold text-[var(--text)]'>
+                  {latest.missionTitle} · {memoryAtlas.lastPlace}
                 </div>
-                <div className='ri-meta'>{relativeDayLabel(latest.completedAt)}</div>
-                {latest.memoryText ? (
-                  <div className='ri-find'>&ldquo;{latest.memoryText}&rdquo;</div>
-                ) : latest.missionDescription ? (
-                  <div className='ri-find'>&ldquo;{latest.missionDescription}&rdquo;</div>
-                ) : null}
+                <div className='mt-0.5 text-[11px] text-[var(--text-3)]'>{relativeDayLabel(latest.completedAt)}</div>
+                <p className='mt-2 text-[13px] italic leading-relaxed text-[var(--text-2)]'>
+                  &ldquo;{latest.memoryText || latest.missionDescription || `${state.dogName} added another place to the story.`}&rdquo;
+                </p>
               </div>
             </div>
           ) : (
-            <div className='recap-item flex items-center gap-3'>
+            <div className='mt-4 flex items-center gap-3 rounded-2xl bg-[var(--bg-elevated)] p-3'>
               <MascotBadge mascot='bailey' size='sm' />
-              <div className='ri-info'>
-                <div className='ri-title'>{state.dogName}&apos;s story starts today.</div>
-                <div className='ri-meta'>Every dog deserves a great day — let&apos;s make today the first.</div>
-              </div>
-              <button
-                type='button'
-                onClick={() => navigate('/adventure')}
-                className='shrink-0 rounded-full border border-[color:rgba(255,107,53,0.4)] bg-[var(--orange-dim)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--orange)]'
-              >
-                Begin
-              </button>
+              <p className='text-[13px] leading-relaxed text-[var(--text-2)]'>
+                No memories yet. The first doorway, park edge, or sidewalk corner can become chapter one.
+              </p>
             </div>
           )}
-        </div>
+        </section>
 
-        {/* ─── EMOTIONAL: weekly recap (story summary) ─── */}
-        <div className='mx-4 mt-3 rounded-2xl border border-[color:var(--border)] bg-[linear-gradient(155deg,rgba(22,27,34,0.98),rgba(12,18,28,0.97))] p-4 shadow-[0_16px_36px_rgba(0,0,0,0.28)]'>
-          <div className='text-[10px] uppercase tracking-[0.14em] text-[var(--text-3)]'>This week with {state.dogName}</div>
-          <div className='mt-1 font-[var(--fd)] text-[20px] text-[var(--text)]'>{recap.summary}</div>
-          <div className='mt-3 grid grid-cols-2 gap-2'>
-            <div className='rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] p-2.5'>
-              <div className='text-[18px] font-semibold text-[var(--text)]'>{recap.totalWeek}</div>
-              <div className='text-[10px] uppercase tracking-[0.08em] text-[var(--text-3)]'>Adventures together</div>
-            </div>
-            <div className='rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] p-2.5'>
-              <div className='text-[18px] font-semibold text-[var(--blue)]'>{recap.topCategoryLabel}</div>
-              <div className='text-[10px] uppercase tracking-[0.08em] text-[var(--text-3)]'>Favorite vibe</div>
-            </div>
-            <div className='rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] p-2.5'>
-              <div className='text-[18px] font-semibold text-[var(--gold)]'>{recap.newPlaces}</div>
-              <div className='text-[10px] uppercase tracking-[0.08em] text-[var(--text-3)]'>New places</div>
-            </div>
-            <div className='rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] p-2.5'>
-              <div className='text-[18px] font-semibold text-[var(--green)]'>{state.currentStreak}</div>
-              <div className='text-[10px] uppercase tracking-[0.08em] text-[var(--text-3)]'>Good days in a row</div>
-            </div>
-          </div>
-          <div className='mt-3 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-md)] bg-[var(--bg-pill)] px-3 py-1 text-[11px] text-[var(--text-2)]'>
-            <span className='text-[var(--purple)]'>{state.dogName} is:</span> {primaryPersonality}
-            {personalityExtra ? <span className='text-[var(--text-3)]'>{personalityExtra}</span> : null}
-          </div>
-        </div>
-
-        {/* ─── COLLECTION: featured pack ─── */}
-        <div className='mx-4 mt-3' data-testid='dashboard-featured-pack'>
+        <section className='mx-4 mt-4' data-testid='dashboard-featured-pack'>
           <div className='mb-2 flex items-end justify-between pl-0.5'>
-            <div className='eye'>This month&apos;s pack</div>
+            <div>
+              <div className='eye'>World region opening</div>
+              <div className='mt-0.5 text-[12px] text-[var(--text-2)]'>
+                Packs are identities {state.dogName} can grow into.
+              </div>
+            </div>
             <button
               type='button'
               onClick={() => navigate('/packs')}
               className='text-[11px] uppercase tracking-[0.14em] text-[var(--text-3)] transition-colors hover:text-[var(--text-2)]'
               data-testid='dashboard-featured-pack-cta'
             >
-              See all · {packSummary.completed}/{packSummary.total}
+              Regions · {packSummary.completed}/{packSummary.total}
             </button>
           </div>
           <PackCard progress={featuredPack} variant='featured' />
-        </div>
+        </section>
 
-        {/* ─── MILESTONES + FINDS (small) ─── */}
-        <div className='mx-4 mt-3'>
-          <div className='mb-2 flex items-end justify-between pl-0.5'>
-            <div className='text-[10px] uppercase tracking-[0.14em] text-[var(--text-3)]'>Milestones</div>
-            <button
-              type='button'
-              data-testid='dashboard-finds-cta'
-              onClick={() => navigate('/badges')}
-              className='text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)] transition-colors hover:text-[var(--text-2)]'
-            >
-              See finds · {achievements.earned}/{achievements.total}
-            </button>
-          </div>
-          <div className='grid grid-cols-2 gap-2'>
-            {milestones.map((milestone) => (
-              <div
-                key={milestone.id}
-                className={`rounded-xl border p-2.5 transition-transform duration-150 active:scale-[0.98] ${
-                  milestone.done
-                    ? 'border-[color:rgba(52,211,153,0.35)] bg-[rgba(52,211,153,0.08)]'
-                    : 'border-[color:var(--border)] bg-[var(--bg-card)]'
-                }`}
-              >
-                <div className='text-[12px] font-semibold text-[var(--text)]'>{milestone.label}</div>
-                <div className={`mt-1 text-[11px] ${milestone.done ? 'text-[var(--green)]' : 'text-[var(--text-2)]'}`}>
-                  {milestone.hint}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ─── SUPPORTING: progress / XP / level / numbers (de-emphasized) ─── */}
         <section
           data-testid='dashboard-supporting-band'
-          className='mx-4 mt-5 rounded-2xl border border-dashed border-[color:var(--border)] bg-[var(--bg-card)] p-3'
+          className='mx-4 mt-5 rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-3'
           aria-label='Supporting progress'
         >
-          <div className='mb-2 flex items-center justify-between'>
-            <div className='text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-3)]'>
-              Progress (supporting)
-            </div>
-            <button
-              type='button'
-              data-testid='dashboard-the-wild-cta'
-              onClick={() => navigate('/wild')}
-              className='text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-2)] transition-colors hover:text-[var(--text)]'
-            >
-              The Wild · rank #{yourRank} →
-            </button>
-          </div>
-          <button
-            type='button'
-            data-testid='dashboard-level-card'
-            onClick={() => navigate('/wild')}
-            className='block w-full text-left'
-            aria-label='Open The Wild'
-          >
-            <LevelProgressCard xp={state.totalAdventureEnergy} variant='compact' />
-          </button>
-          <div className='mt-3 grid grid-cols-4 gap-1.5 text-center'>
-            <div className='rounded-lg border border-[color:var(--border)] bg-[var(--bg-elevated)] p-1.5'>
-              <div className='text-[14px] font-semibold text-[var(--text)]'>{state.currentStreak}</div>
-              <div className='text-[9px] uppercase tracking-[0.1em] text-[var(--text-3)]'>Streak</div>
-            </div>
-            <div className='rounded-lg border border-[color:var(--border)] bg-[var(--bg-elevated)] p-1.5'>
-              <div className='text-[14px] font-semibold text-[var(--text)]'>{state.totalAdventures}</div>
-              <div className='text-[9px] uppercase tracking-[0.1em] text-[var(--text-3)]'>Adventures</div>
-            </div>
-            <div className='rounded-lg border border-[color:var(--border)] bg-[var(--bg-elevated)] p-1.5'>
-              <div className='text-[14px] font-semibold text-[var(--text)]'>
-                {state.totalGroundCovered.toFixed(1)}
+          <div className='flex items-center justify-between gap-3'>
+            <div>
+              <div className='text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-3)]'>
+                Supporting progress
               </div>
-              <div className='text-[9px] uppercase tracking-[0.1em] text-[var(--text-3)]'>Miles</div>
-            </div>
-            <div className='rounded-lg border border-[color:var(--border)] bg-[var(--bg-elevated)] p-1.5'>
-              <div className='text-[14px] font-semibold text-[var(--text-2)]'>
-                {state.totalAdventureEnergy.toLocaleString()}
+              <div className='mt-1 text-[12px] leading-snug text-[var(--text-2)]'>
+                Day {state.currentStreak} · {state.totalAdventures} adventures · XP stays in the background.
               </div>
-              <div className='text-[9px] uppercase tracking-[0.1em] text-[var(--text-3)]'>XP</div>
+            </div>
+            <div className='flex shrink-0 gap-2'>
+              <button
+                type='button'
+                data-testid='dashboard-finds-cta'
+                onClick={() => navigate('/badges')}
+                className='rounded-full border border-[color:var(--border)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]'
+              >
+                Finds
+              </button>
+              <button
+                type='button'
+                data-testid='dashboard-the-wild-cta'
+                onClick={() => navigate('/wild')}
+                className='rounded-full border border-[color:var(--border)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]'
+              >
+                Wild
+              </button>
             </div>
           </div>
         </section>

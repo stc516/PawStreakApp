@@ -40,7 +40,7 @@ export function CharacterMomentPage() {
     return () => window.cancelAnimationFrame(id)
   }, [])
 
-  // Animate Adventure XP count up
+  // Animate supporting progress count up after the emotional beat lands.
   useEffect(() => {
     if (energy <= 0) return undefined
     const duration = 1000
@@ -146,7 +146,7 @@ export function CharacterMomentPage() {
           padding: '0 1.5rem',
         }}
       >
-        Nice work, {state.dogName}!
+        {state.dogName} knows this place a little better.
       </p>
 
       <div
@@ -155,7 +155,7 @@ export function CharacterMomentPage() {
           textAlign: 'center',
           borderRadius: '16px',
           padding: '1.25rem 1.5rem',
-          background: 'rgba(255, 255, 255, 0.05)',
+          background: 'rgba(255, 255, 255, 0.04)',
         }}
       >
         <span
@@ -179,7 +179,7 @@ export function CharacterMomentPage() {
             fontWeight: 600,
           }}
         >
-          Adventure XP
+          supporting XP in the background
         </span>
       </div>
 

@@ -6,8 +6,8 @@ interface PackCardProps {
   variant?: 'full' | 'featured'
 }
 
-/** Premium dark pack card — icon, identity, progress bar, completed glow.
- *  No XP math is touched; xpBonusLabel is purely a display flourish. */
+/** Premium dark pack card — frames packs as discoverable regions first.
+ *  No XP math is touched; xpBonusLabel is kept as quiet supporting copy. */
 export function PackCard({ progress, variant = 'full' }: PackCardProps) {
   const { pack, completed, required, percent, isComplete, remaining } = progress
   const isFeatured = variant === 'featured'
@@ -17,7 +17,7 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
       data-testid={`pack-card-${pack.id}`}
       data-pack-complete={isComplete ? 'true' : 'false'}
       className={[
-        'tap-card relative flex flex-col gap-3 rounded-2xl border bg-[var(--bg-card)] p-4',
+        'tap-card relative flex flex-col gap-3 overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(155deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-4',
         isComplete
           ? 'border-[color:rgba(255,107,53,0.45)] shadow-[0_0_24px_-6px_var(--orange-glow)]'
           : 'border-[color:var(--border)]',
@@ -36,7 +36,7 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
         <div
           aria-hidden
           className={[
-            'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border text-2xl',
+            'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-3xl',
             isComplete
               ? 'border-[color:rgba(255,107,53,0.45)] bg-[rgba(255,107,53,0.1)] drop-shadow-[0_0_10px_var(--orange-glow)]'
               : 'border-[color:var(--border)] bg-[var(--bg-elevated)]',
@@ -45,8 +45,11 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
           {pack.icon}
         </div>
         <div className='min-w-0 flex-1'>
+          <div className='text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
+            {pack.region}
+          </div>
           <div className='flex items-center gap-2'>
-            <h3 className='font-[family-name:var(--fd),Fraunces,serif] text-[16px] font-semibold italic leading-tight text-[var(--text)]'>
+            <h3 className='font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic leading-tight text-[var(--text)]'>
               {pack.title}
             </h3>
             {isComplete ? (
@@ -62,15 +65,20 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
           <p className='mt-1 text-[12px] leading-snug text-[var(--text-2)]'>
             {pack.description}
           </p>
+          <p className='mt-2 text-[12px] italic leading-snug text-[var(--text-2)]'>
+            {pack.atmosphere}
+          </p>
         </div>
       </div>
 
       <div>
-        <div className='flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em]'>
+        <div className='flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em]'>
           <span className={isComplete ? 'text-[color:var(--orange)]' : 'text-[var(--text-3)]'}>
-            {isComplete ? 'Completed' : `${completed}/${required}`}
+            {isComplete ? 'Region known' : 'Region familiarity'}
           </span>
-          <span className='text-[var(--text-3)]'>{percent}%</span>
+          <span className='text-[var(--text-3)]'>
+            {completed}/{required}
+          </span>
         </div>
         <div className='mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-elevated)]'>
           <div
@@ -87,10 +95,10 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
           {isComplete ? (
             <span>{pack.completedFlavor}</span>
           ) : remaining === 1 ? (
-            <span>One more to unlock {pack.identity}.</span>
+            <span>One more memory to become {pack.identity}.</span>
           ) : (
             <span>
-              {remaining} more to become a {pack.identity}.
+              {remaining} more memories to become {pack.identity}.
             </span>
           )}
         </div>

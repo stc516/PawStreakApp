@@ -22,10 +22,10 @@ interface ShareAdventurePayload {
 
 function buildShareText(payload: ShareAdventurePayload): string {
   const lines = [
-    `${payload.dogName} completed:`,
+    `${payload.dogName} discovered:`,
     payload.title.toUpperCase(),
     `${payload.locationHint || 'Our neighborhood'} · ${CATEGORY_LABELS[payload.category]}`,
-    `Day ${payload.streak} streak`,
+    `Day ${payload.streak} of great days`,
   ]
   if (payload.flavor) lines.push(payload.flavor)
   lines.push('Shared from PawStreak')

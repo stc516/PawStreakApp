@@ -33,21 +33,21 @@ export function PacksPage() {
     >
       <header className='px-5 pt-10'>
         <div className='text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
-          {state.dogName}&apos;s collection
+          {state.dogName}&apos;s world map
         </div>
         <h1 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[28px] font-semibold italic leading-[1.1] text-[var(--text)]'>
-          Monthly Packs
+          World Regions
         </h1>
         <p className='mt-2 text-[13px] leading-relaxed text-[var(--text-2)]'>
-          Themed adventure sets to grow into. Finish a pack and your dog earns the title.
+          Packs are places with an identity. Every repeated adventure makes the world feel more like
+          {state.dogName}&apos;s.
         </p>
-        <div className='mt-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.14em] text-[var(--text-3)]'>
+        <div className='mt-3 text-[11px] uppercase tracking-[0.14em] text-[var(--text-3)]'>
           <span>
-            <span className='font-bold text-[color:var(--orange)]'>{summary.completed}</span> /{' '}
-            {summary.total} completed
+            <span className='font-bold text-[color:var(--orange)]'>{summary.completed}</span> / {summary.total} regions known
           </span>
-          <span aria-hidden>·</span>
-          <span>{summary.inProgress} in progress</span>
+          <span aria-hidden className='mx-2'>·</span>
+          <span>{summary.inProgress} being explored</span>
         </div>
       </header>
 
@@ -61,13 +61,13 @@ export function PacksPage() {
               {state.dogName}&apos;s collection starts today.
             </h2>
             <p className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
-              Pick a pack below — every adventure pushes you closer to a new identity.
+              Choose a region below. The first visit makes the first mark on the atlas.
             </p>
           </div>
         ) : null}
 
         {inProgress.length > 0 ? (
-          <PackSection title='In progress' subtitle='Closest to becoming a title.'>
+          <PackSection title='Being explored' subtitle='Regions your dog is beginning to know.'>
             {inProgress.map((p) => (
               <PackCard key={p.pack.id} progress={p} />
             ))}
@@ -75,7 +75,7 @@ export function PacksPage() {
         ) : null}
 
         {fresh.length > 0 ? (
-          <PackSection title='Discover' subtitle='Pick a vibe — your dog grows into it.'>
+          <PackSection title='Undiscovered regions' subtitle='World identities waiting for the right day.'>
             {fresh.map((p) => (
               <PackCard key={p.pack.id} progress={p} />
             ))}
@@ -83,7 +83,7 @@ export function PacksPage() {
         ) : null}
 
         {done.length > 0 ? (
-          <PackSection title='Completed' subtitle='Earned identities — wear them proudly.'>
+          <PackSection title='Known regions' subtitle='Earned identities — places that now feel like yours.'>
             {done.map((p) => (
               <PackCard key={p.pack.id} progress={p} />
             ))}

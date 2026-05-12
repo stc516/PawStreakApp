@@ -6,6 +6,7 @@ import { missionTimeLabel } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
 import { getAdventureMilestone, getSendOffLine } from '../lib/adventureMilestones'
 import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
+import { buildPlaceIdentity } from '../lib/placeIdentity'
 import { shareAdventure } from '../lib/shareAdventure'
 import { track } from '../lib/analytics'
 import { calculateAdventureXp } from '../lib/xp'
@@ -80,6 +81,7 @@ export function AdventurePage() {
     () => getAdventureMilestone(walkSeconds, state.dogName),
     [walkSeconds, state.dogName],
   )
+  const place = useMemo(() => buildPlaceIdentity(state), [state])
 
   const timerOffset = 565 - (565 * Math.min(walkSeconds, 3600)) / 3600
 
@@ -105,55 +107,91 @@ export function AdventurePage() {
 
   return (
     <section id='screen-walk' className='screen active' data-testid='adventure-page'>
-      <div className='walk-hdr'>
+      <div className='walk-hdr px-5 pb-4 pt-8 text-left'>
+        <button
+          type='button'
+          onClick={() => navigate('/app')}
+          className='mb-5 text-[13px] text-[var(--text-2)]'
+        >
+          ← Today
+        </button>
         <div
           data-testid='adventure-send-off'
-          className='text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--orange)]'
+          className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--orange)]'
         >
           {getSendOffLine(state.dogName)}
         </div>
-        <div className='walk-type-lbl mt-1'>
-          {m.emoji} {visibleTitle}
-        </div>
-        <div className='walk-mission-meta'>
-          <div className='wm-line'>
-            {missionTimeLabel(m)} · {m.locationHint}
-          </div>
-          <div className='wm-desc'>&ldquo;{m.description}&rdquo;</div>
-        </div>
+        <h1 className='mt-2 font-[family-name:var(--fd),Fraunces,serif] text-[34px] font-semibold italic leading-[1.02] text-[var(--text)]'>
+          Enter {place.worldName}
+        </h1>
+        <p className='mt-3 text-[14px] leading-relaxed text-[var(--text-2)]'>
+          {place.atmosphere} {state.dogName} is discovering <span className='text-[var(--text)]'>{place.locationLine}</span>.
+        </p>
       </div>
-      <div className='walk-body'>
-        <div className='timer-ring'>
-          <svg viewBox='0 0 190 190' width='190' height='190'>
-            <circle className='track' cx='95' cy='95' r='87' />
-            <circle className='fill' cx='95' cy='95' r='87' style={{ strokeDashoffset: timerOffset }} />
-          </svg>
-          <div className='timer-center'>
-            <div
-              data-testid='adventure-milestone-eyebrow'
-              className='text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--orange)]'
-            >
-              {milestone.eyebrow}
+      <div className='walk-body gap-4 px-5 py-4'>
+        <article className='w-full rounded-[28px] bg-[radial-gradient(circle_at_85%_0%,rgba(255,107,53,0.20),transparent_35%),linear-gradient(165deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-4 shadow-[0_22px_54px_rgba(0,0,0,0.38)]'>
+          <div className='flex items-start gap-3'>
+            <div className='grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[rgba(255,255,255,0.06)] text-[34px]'>
+              {m.emoji}
             </div>
-            <div className='timer-time'>{walkTime}</div>
-            <div
-              data-testid='adventure-milestone-line'
-              className='mt-1 px-2 text-center text-[12px] leading-snug text-[var(--text-2)]'
-            >
-              {milestone.line}
+            <div className='min-w-0'>
+              <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
+                Adventure unfolding
+              </div>
+              <h2 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[25px] leading-tight text-[var(--text)]'>
+                {visibleTitle}
+              </h2>
+              <p className='mt-2 text-[13px] leading-relaxed text-[var(--text-2)]'>&ldquo;{m.description}&rdquo;</p>
+            </div>
+          </div>
+          <div className='mt-4 rounded-2xl bg-[rgba(255,255,255,0.045)] px-3 py-2 text-[12px] leading-relaxed text-[var(--text-2)]'>
+            <span className='font-semibold text-[var(--blue)]'>{missionTimeLabel(m)}</span>
+            <span className='text-[var(--text-3)]'> · </span>
+            {place.microQuest}
+          </div>
+        </article>
+
+        <div className='w-full rounded-[24px] bg-[rgba(255,255,255,0.035)] p-3 text-center' aria-label='Supporting timer'>
+          <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
+            Supporting timer
+          </div>
+          <div className='mx-auto -my-7 scale-[0.72]'>
+            <div className='timer-ring'>
+              <svg viewBox='0 0 190 190' width='190' height='190'>
+                <circle className='track' cx='95' cy='95' r='87' />
+                <circle className='fill' cx='95' cy='95' r='87' style={{ strokeDashoffset: timerOffset }} />
+              </svg>
+              <div className='timer-center'>
+                <div
+                  data-testid='adventure-milestone-eyebrow'
+                  className='text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--orange)]'
+                >
+                  {milestone.eyebrow}
+                </div>
+                <div className='timer-time'>{walkTime}</div>
+                <div
+                  data-testid='adventure-milestone-line'
+                  className='mt-1 px-2 text-center text-[12px] leading-snug text-[var(--text-2)]'
+                >
+                  {milestone.line}
+                </div>
+              </div>
             </div>
           </div>
         </div>
         <div
           data-testid='adventure-memory-block'
-          className='mx-auto mt-4 w-full max-w-[340px] rounded-2xl border border-[color:var(--border)] bg-[var(--bg-card)] p-3.5'
+          className='mx-auto w-full max-w-[340px] rounded-[24px] bg-[var(--bg-card)] p-3.5'
         >
           <label
             htmlFor='adventure-memory-input'
             className='block text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-3)]'
           >
-            Memory · optional
+            Memory note · optional
           </label>
+          <p className='mt-1 text-[12px] leading-snug text-[var(--text-2)]'>
+            Capture the detail that makes this place part of {state.dogName}&apos;s atlas.
+          </p>
           <textarea
             id='adventure-memory-input'
             data-testid='adventure-memory-input'
@@ -161,8 +199,8 @@ export function AdventurePage() {
             onChange={(event) => setMemoryDraft(event.target.value)}
             rows={2}
             maxLength={240}
-            placeholder={`What made today special for ${state.dogName}?`}
-            className='mt-1.5 w-full resize-none rounded-lg border border-[color:var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-[13px] leading-snug text-[var(--text)] placeholder:text-[var(--text-3)] focus:border-[color:rgba(255,107,53,0.45)] focus:outline-none focus:ring-0'
+            placeholder={`What did ${state.dogName} notice?`}
+            className='mt-2 w-full resize-none rounded-2xl border border-[color:var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-[13px] leading-snug text-[var(--text)] placeholder:text-[var(--text-3)] focus:border-[color:rgba(255,107,53,0.45)] focus:outline-none focus:ring-0'
           />
           <div className='mt-2 flex items-center justify-between'>
             <button
@@ -232,7 +270,7 @@ export function AdventurePage() {
             className={`adventure-complete-modal rarity-${completionModal.rarity}`}
             data-testid='adventure-complete-modal'
           >
-            <div className='adventure-complete-kicker'>Today&apos;s win</div>
+            <div className='adventure-complete-kicker'>Memory saved</div>
             <h2
               data-testid='adventure-complete-headline'
               className='adventure-complete-title'
@@ -240,12 +278,12 @@ export function AdventurePage() {
               {state.dogName} had a great day.
             </h2>
             <p className='mt-1 text-[13px] italic leading-snug text-[var(--text-2)]'>
-              {state.dogName} completed{' '}
+              {state.dogName} added{' '}
               <span className='text-[var(--text)]'>{completionModal.title}</span>
               {completionModal.locationHint ? (
                 <>
                   {' '}
-                  · {completionModal.locationHint}
+                  to the atlas near {completionModal.locationHint}
                 </>
               ) : null}
               .
@@ -260,22 +298,8 @@ export function AdventurePage() {
               </div>
             ) : null}
 
-            <div className='mt-3 flex flex-wrap items-center gap-2 text-[11px]'>
-              <span
-                className='inline-flex items-center gap-1 rounded-full border border-[color:rgba(255,107,53,0.32)] bg-[var(--orange-dim)] px-2.5 py-0.5 font-semibold text-[color:var(--orange)]'
-                aria-label='Streak'
-              >
-                🔥 Day {completionModal.streakAfterCompletion}
-              </span>
-              <span
-                className='inline-flex items-center gap-1 rounded-full border border-[color:var(--border-md)] bg-[var(--bg-elevated)] px-2.5 py-0.5 font-medium text-[var(--text-2)]'
-                aria-label='XP earned'
-              >
-                +{xpBreakdown.xp} XP
-              </span>
-              <span className='inline-flex items-center gap-1 rounded-full border border-[color:var(--border-md)] bg-[var(--bg-elevated)] px-2.5 py-0.5 font-medium capitalize text-[var(--text-2)]'>
-                {completionModal.category}
-              </span>
+            <div className='mt-3 rounded-2xl bg-[rgba(255,255,255,0.045)] px-3 py-2 text-[12px] leading-relaxed text-[var(--text-2)]'>
+              Day {completionModal.streakAfterCompletion} is safe. +{xpBreakdown.xp} XP moved quietly in the background.
             </div>
 
             <AdventureShareCard

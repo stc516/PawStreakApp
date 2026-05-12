@@ -30,7 +30,7 @@ export function TheWildPage() {
     >
       <div className='screen-hdr'>
         <h1>The Wild</h1>
-        <p>Your rank updates weekly based on adventures.</p>
+        <p>A quiet progression layer behind the real adventures.</p>
       </div>
 
       <div className='scroll px-4'>
@@ -53,7 +53,7 @@ export function TheWildPage() {
                 {state.dogName} · {tier.current.name}
               </h2>
               <p className='mt-1 text-[12px] text-[var(--text-2)]'>
-                Level {tier.current.level} of {XP_LEVELS.length} · keep showing up to climb.
+                Level {tier.current.level} of {XP_LEVELS.length} · supporting progress from real memories.
               </p>
             </div>
           </div>
@@ -168,8 +168,7 @@ export function TheWildPage() {
             Weekly leagues with real competition.
           </h3>
           <p className='mt-1 text-[12px] leading-relaxed text-[var(--text-2)]'>
-            Live leagues unlock when the pack is big enough. Keep adventuring — your rank is being tracked, and you&apos;ll
-            start in the league you&apos;ve already earned.
+            Live leagues can wait. For now, The Wild stays behind the scenes while the real world carries the experience.
           </p>
         </article>
 
