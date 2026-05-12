@@ -99,10 +99,11 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
           {state.dogName} had a great day.
         </div>
         <div className='rew-headline'>
-          <em>{state.dogName}</em> completed <strong>{latest?.missionTitle ?? state.generatedMission.title}</strong>
+          <em>{state.dogName}</em> added <strong>{latest?.missionTitle ?? state.generatedMission.title}</strong>
+          {latest?.locationHint ? <> to the atlas</> : null}
         </div>
         <div className='rew-subline'>
-          Every dog deserves a great day · {identity.tagline}
+          {latest?.locationHint ? `${latest.locationHint} matters now.` : 'Every dog deserves a great day.'} · {identity.tagline}
         </div>
       </div>
       <div className='rew-body'>
@@ -149,11 +150,11 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
         <RewardCard delayMs={380}>
           <div
             data-testid='reward-progress-block'
-            className='rounded-2xl border border-[color:var(--border)] bg-[var(--bg-card)] p-3'
+            className='rounded-2xl bg-[rgba(255,255,255,0.035)] p-3'
           >
             <div className='mb-2 flex items-center justify-between'>
               <div className='text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-3)]'>
-                Progress (supporting)
+                Supporting progress
               </div>
               <div
                 data-testid='reward-xp-mini'
@@ -173,20 +174,6 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
                     : `${currentTier.current.icon} ${currentTier.current.name} \u00B7 ${currentTier.xpToNext.toLocaleString()} XP until ${currentTier.next?.name}`
               }
             />
-          </div>
-        </RewardCard>
-        <RewardCard className='streak-protected' delayMs={420}>
-          <div className='sp-icon'>🍖</div>
-          <div>
-            <div className='sp-text'>
-              Emergency Treat —{' '}
-              <strong>{state.emergencyTreatAvailable ? 'still ready' : 'already used'}</strong>
-            </div>
-            <div className='sp-sub'>
-              {state.emergencyTreatAvailable
-                ? `${state.dogName}'s cushion for hectic days is stocked.`
-                : `You'll refill this perk as you keep showing up.`}
-            </div>
           </div>
         </RewardCard>
         <RewardCard className='next-ms' delayMs={460}>

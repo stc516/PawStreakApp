@@ -5,10 +5,9 @@ import { BadgeCard } from '../components/BadgeCard'
 import { BottomNav } from '../components/BottomNav'
 import { HeroCard } from '../components/HeroCard'
 import { MascotBadge } from '../components/mascot/MascotBadge'
-import { StatCard } from '../components/StatCard'
 import { VIBE_CHIPS } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
-import { achievementSummary, buildLocalLeaderboard, leaderboardRank } from '../lib/gamification'
+import { buildPlaceIdentity } from '../lib/placeIdentity'
 import type { VibeArchetype } from '../types'
 
 export function StoryPage() {
@@ -21,9 +20,11 @@ export function StoryPage() {
 
   const favorite = Object.entries(counts).sort((a, b) => b[1] - a[1])[0] as [VibeArchetype, number]
   const vibeChip = VIBE_CHIPS.find((c) => c.vibe === favorite[0]) ?? VIBE_CHIPS[0]
-  const leaderboard = buildLocalLeaderboard(state.dogName, state.totalAdventureEnergy, state.currentStreak)
-  const rank = leaderboardRank(leaderboard)
-  const achievements = achievementSummary(state.badges)
+  const place = buildPlaceIdentity(state)
+  const knownPlaces = new Set(
+    state.recentAdventures.map((entry) => entry.locationHint?.trim()).filter((value): value is string => Boolean(value)),
+  )
+  const rememberedMoments = state.recentAdventures.filter((entry) => entry.memoryText).length
 
   useEffect(() => {
     if (!state.onboardingComplete) navigate('/', { replace: true })
@@ -37,63 +38,59 @@ export function StoryPage() {
     >
       <div className='story-scroll'>
         <HeroCard radialClassName='sh-radial'>
-          <div className='sh-eyebrow'>The story so far</div>
-          <div className='sh-headline'>{state.dogName}&apos;s Adventures</div>
+          <div className='sh-eyebrow'>Memory atlas</div>
+          <div className='sh-headline'>{state.dogName}&apos;s Known World</div>
           <div className='sh-sub'>
-            {state.totalAdventures} adventures · {state.totalGroundCovered.toFixed(1)} ground covered · longest streak:{' '}
-            {state.longestStreak} days · {state.totalAdventureEnergy} XP banked
+            {place.worldName} · {knownPlaces.size} remembered places · {rememberedMoments} written memories
           </div>
         </HeroCard>
 
         <div className='story-section'>
-          <div className='story-section-title'>Local standings (demo)</div>
+          <div className='story-section-title'>Atlas feeling</div>
           <div className='fav-type-card'>
+            <div className='fav-icon'>🗺️</div>
             <div className='fav-info'>
-              <div className='fav-label'>Current XP rank</div>
-              <div className='fav-name'>#{rank}</div>
-              <div className='fav-sub'>
-                {state.totalAdventureEnergy.toLocaleString()} XP · {achievements.earned}/{achievements.total} achievements
-                unlocked
-              </div>
+              <div className='fav-label'>Where {state.dogName} is becoming local</div>
+              <div className='fav-name'>{place.worldName}</div>
+              <div className='fav-sub'>{place.atmosphere}</div>
             </div>
           </div>
         </div>
 
         <div className='story-section'>
-          <div className='story-section-title'>{state.dogName}&apos;s numbers</div>
+          <div className='story-section-title'>Places that matter</div>
           <div className='story-big-stats'>
-            <StatCard variant='big' value={String(state.totalAdventures)} label='Adventures lived' />
-            <StatCard variant='big' value={state.totalGroundCovered.toFixed(1)} label='Ground covered (story miles)' />
-            <StatCard variant='big' value={String(state.currentStreak)} label='Current streak' />
-            <StatCard variant='big' value={String(state.longestStreak)} label='Longest streak ever' />
+            <div className='sbs-card'>
+              <div className='sbs-val'>{knownPlaces.size}</div>
+              <div className='sbs-lbl'>{place.atlasNoun} known</div>
+            </div>
+            <div className='sbs-card'>
+              <div className='sbs-val'>{state.totalAdventures}</div>
+              <div className='sbs-lbl'>days made memorable</div>
+            </div>
+          </div>
+          <div className='mt-3 rounded-2xl bg-[var(--bg-card)] p-4 text-[13px] leading-relaxed text-[var(--text-2)]'>
+            The numbers are quiet here: day {state.currentStreak} of showing up, {state.totalGroundCovered.toFixed(1)} story miles,
+            longest ritual {state.longestStreak} days.
           </div>
         </div>
 
         <div className='story-section'>
-          <div className='story-section-title'>This week</div>
-          <div className='story-row-stats'>
-            <StatCard variant='row' value={String(state.weekAdventures)} label='Adventures logged this week' />
-            <StatCard variant='row' value={`${state.weekAdventures * 25}m`} label={`Rhythm with ${state.dogName}`} />
-            <StatCard variant='row' value={(state.weekAdventures * 1.5).toFixed(1)} label='Ground this week' />
-          </div>
-        </div>
-
-        <div className='story-section'>
-          <div className='story-section-title'>Favorite vibe lately</div>
+          <div className='story-section-title'>Dog identity lately</div>
           <div className='fav-type-card'>
             <div className='fav-icon'>{vibeChip.icon}</div>
             <div className='fav-info'>
-              <div className='fav-label'>Most rolled</div>
+              <div className='fav-label'>Most repeated atmosphere</div>
               <div className='fav-name'>{vibeChip.name}</div>
               <div className='fav-sub'>
-                {favorite[1]} recent pulls · {vibeChip.blurb}
+                {favorite[1]} recent memories · {vibeChip.blurb}
               </div>
             </div>
           </div>
         </div>
 
         <div className='story-section'>
-          <div className='story-section-title'>Recent chapters</div>
+          <div className='story-section-title'>Recent atlas entries</div>
           {state.recentAdventures.length > 0 ? (
             <div className='timeline'>
               <div className='tl-line' />
@@ -102,15 +99,17 @@ export function StoryPage() {
                   <div className='tl-dot' />
                   <div className='tl-type'>
                     {adventure.emoji} {adventure.missionTitle}{' '}
-                    <span className={`tl-rarity rarity-${adventure.rarity}`}>{adventure.rarity}</span>
+                    {adventure.locationHint ? (
+                      <span className='text-[var(--text-2)]'>near {adventure.locationHint}</span>
+                    ) : null}
                   </div>
                   <div className='tl-meta'>
-                    {new Date(adventure.completedAt).toLocaleDateString()} · {adventure.durationMinutes} min ·{' '}
-                    {adventure.groundCovered.toFixed(1)} ground
-                    {adventure.locationHint ? <> · {adventure.locationHint}</> : null}
+                    {new Date(adventure.completedAt).toLocaleDateString()} · {adventure.durationMinutes} min together
                   </div>
                   <div className='tl-xp'>
-                    {state.dogName} banked +{adventure.adventureEnergy} XP toward standings and achievements
+                    {adventure.memoryText
+                      ? `“${adventure.memoryText}”`
+                      : adventure.missionDescription || `${state.dogName} learned this place a little better.`}
                   </div>
                 </div>
               ))}
@@ -124,14 +123,14 @@ export function StoryPage() {
                 {state.dogName}&apos;s story starts today.
               </div>
               <div className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
-                The first adventure becomes the first chapter.
+                The first adventure becomes the first place on the atlas.
               </div>
             </div>
           )}
         </div>
 
         <div className='story-section' style={{ paddingBottom: '1.5rem' }}>
-          <div className='story-section-title'>Moments & achievements</div>
+          <div className='story-section-title'>Quiet finds</div>
           <div className='badges-mini'>
             {state.badges.map((badge) => (
               <BadgeCard

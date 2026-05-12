@@ -41,7 +41,7 @@ export function AdventureShareCard({
     <article className={`adventure-share-card rarity-${rarity}`}>
       <div className='adventure-share-glow' />
       <div className='adventure-share-head'>
-        <div className='adventure-share-kicker'>{dogName} completed:</div>
+        <div className='adventure-share-kicker'>{dogName} discovered:</div>
         <div className='adventure-share-day'>{dayLabel}</div>
       </div>
       <div className='adventure-share-title-row'>
@@ -52,7 +52,7 @@ export function AdventureShareCard({
         <span className='adventure-share-chip'>{CATEGORY_LABELS[category]}</span>
         {neighborhoodOrLocation ? <span className='adventure-share-loc'>{neighborhoodOrLocation}</span> : null}
       </div>
-      <div className='adventure-share-streak'>Day {streak} streak</div>
+      <div className='adventure-share-streak'>Day {streak} of great days</div>
       {flavor ? <p className='adventure-share-flavor'>{flavor}</p> : null}
     </article>
   )
