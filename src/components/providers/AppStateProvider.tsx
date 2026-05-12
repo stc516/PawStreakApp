@@ -117,8 +117,8 @@ function AppStateSynced({
       selectVibe: (vibe: Parameters<typeof selectVibe>[1]) => {
         setState((currentState) => selectVibe(currentState, vibe))
       },
-      completeAdventure: (walkSeconds: number) => {
-        setState((currentState) => completeAdventure(currentState, walkSeconds))
+      completeAdventure: (walkSeconds: number, options?: { memoryText?: string }) => {
+        setState((currentState) => completeAdventure(currentState, walkSeconds, options))
       },
       setReminder: (enabled: boolean) => {
         setState((currentState) => setReminder(currentState, enabled))

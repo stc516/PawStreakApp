@@ -635,7 +635,16 @@ function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent
   return { nextBadges, latestUnlockedBadgeId }
 }
 
-export function completeAdventure(state: PawstreakState, walkSeconds: number): PawstreakState {
+export interface CompleteAdventureOptions {
+  /** Optional memory text the owner typed during the adventure. */
+  memoryText?: string
+}
+
+export function completeAdventure(
+  state: PawstreakState,
+  walkSeconds: number,
+  options: CompleteAdventureOptions = {},
+): PawstreakState {
   const xpBreakdown = calculateAdventureXp({
     walkSeconds,
     rarity: state.generatedMission.rarity,
@@ -646,6 +655,7 @@ export function completeAdventure(state: PawstreakState, walkSeconds: number): P
   const nextStreak = state.currentStreak + 1
   const gm = state.generatedMission
 
+  const trimmedMemory = options.memoryText?.trim() ?? ''
   const completed: AdventureEntry = {
     id: crypto.randomUUID(),
     vibe: gm.vibe,
@@ -660,6 +670,7 @@ export function completeAdventure(state: PawstreakState, walkSeconds: number): P
     missionDescription: gm.description,
     estimatedMinutesMin: gm.estimatedMinutesMin,
     estimatedMinutesMax: gm.estimatedMinutesMax,
+    ...(trimmedMemory ? { memoryText: trimmedMemory } : {}),
   }
 
   const nextRecent = [completed, ...state.recentAdventures].slice(0, 12)

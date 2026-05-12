@@ -49,6 +49,9 @@ export interface AdventureEntry {
   missionDescription?: string
   estimatedMinutesMin?: number
   estimatedMinutesMax?: number
+  /** Optional memory text the owner captured on the Adventure screen.
+   *  Free-form, kept local (never sent to analytics). */
+  memoryText?: string
 }
 
 export interface BadgeDefinition {

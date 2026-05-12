@@ -113,7 +113,7 @@ test('fresh onboarding with unsupported ZIP 83702', async ({ page }) => {
   await advancePrimary(page) // finish
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByRole('button', { name: /Start today's adventure/ })).toBeVisible()
+  await expect(page.getByTestId('dashboard-start-adventure-cta')).toBeVisible()
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
@@ -219,7 +219,7 @@ test('The Wild page shows current league + league ladder', async ({ page }) => {
 
 test('adventure generation and completion modal appears', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'ModalDog', zip: '92104' })
-  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByTestId('dashboard-start-adventure-cta').click()
   await expect(page).toHaveURL(/\/adventure/)
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
 
@@ -230,7 +230,7 @@ test('adventure generation and completion modal appears', async ({ page }) => {
 
 test('Share Adventure fallback/native flow does not crash', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'ShareDog', zip: '92104' })
-  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByTestId('dashboard-start-adventure-cta').click()
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
 
@@ -307,7 +307,7 @@ test('save-progress nudge appears, dismisses, and re-surfaces after an adventure
   await expect(nudge).toHaveCount(0)
 
   // Run a quick adventure → meaningful event → nudge should resurface on dashboard.
-  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByTestId('dashboard-start-adventure-cta').click()
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await page.getByRole('button', { name: 'Done' }).click()
   // Through character moment + reward, then back to dashboard.
@@ -318,7 +318,7 @@ test('save-progress nudge appears, dismisses, and re-surfaces after an adventure
 test('post-adventure save prompt appears after first completed adventure', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'PromptDog', zip: '92104' })
 
-  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByTestId('dashboard-start-adventure-cta').click()
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await page.getByRole('button', { name: 'Done' }).click()
   await page.goto('/app')
@@ -341,10 +341,37 @@ test('legal pages render and footer links navigate', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Terms of using PawStreak/ })).toBeVisible()
 })
 
+test('emotional adventure flow: memory captures and headlines stay dog-first', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'MemoryDog', zip: '92104' })
+
+  // Dashboard is dog-first, not stopwatch-first.
+  await expect(page.getByTestId('dashboard-hero-status')).toContainText('ready for a great day')
+
+  await page.getByTestId('dashboard-start-adventure-cta').click()
+  await expect(page).toHaveURL(/\/adventure/)
+  await expect(page.getByTestId('adventure-send-off')).toBeVisible()
+  await expect(page.getByTestId('adventure-milestone-eyebrow')).toBeVisible()
+
+  // Capture a memory.
+  await page.getByTestId('adventure-memory-input').fill('Chased a leaf across the whole block.')
+
+  await page.getByRole('button', { name: /Wrap adventure/ }).click()
+  await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
+  await expect(page.getByTestId('adventure-complete-headline')).toContainText('MemoryDog had a great day.')
+  await expect(page.getByTestId('adventure-complete-memory')).toContainText('Chased a leaf')
+
+  await page.getByRole('button', { name: 'Done' }).click()
+  // Character moment → reward.
+  await expect(page).toHaveURL(/\/character-moment/)
+  await page.goto('/reward')
+  await expect(page.getByTestId('reward-headline')).toContainText('MemoryDog had a great day.')
+  await expect(page.getByTestId('reward-memory-card')).toContainText('Chased a leaf')
+})
+
 test('no console errors during main flow', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
   await completeOnboarding(page, { dogName: 'ConsoleDog', zip: '92104' })
-  await page.getByRole('button', { name: /Start today's adventure/ }).click()
+  await page.getByTestId('dashboard-start-adventure-cta').click()
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/character-moment/)

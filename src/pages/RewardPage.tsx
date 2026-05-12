@@ -51,8 +51,8 @@ export function RewardPage() {
     [],
   )
 
-  const shareCopy = `${state.dogName} just protected a ${state.currentStreak}-day adventure streak 🐾🔥
-Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down tomorrow. #PawStreak`
+  const shareCopy = `${state.dogName} had a great day. 🐾
+Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : state.dogName} a story to remember. #PawStreak`
 
   async function handleShare() {
     console.log('share_clicked')
@@ -94,47 +94,88 @@ Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down 
             />
           ))}
         </div>
-        <div className='rew-mission-complete'>Mission completed</div>
-        <div className='rew-won'>{state.dogName} won the day</div>
+        <div className='rew-mission-complete'>Today&apos;s win</div>
+        <div className='rew-won' data-testid='reward-headline'>
+          {state.dogName} had a great day.
+        </div>
         <div className='rew-headline'>
           <em>{state.dogName}</em> completed <strong>{latest?.missionTitle ?? state.generatedMission.title}</strong>
         </div>
         <div className='rew-subline'>
-          Day {state.currentStreak} — streak protected · {identity.tagline}
+          Every dog deserves a great day · {identity.tagline}
         </div>
       </div>
       <div className='rew-body'>
-        <RewardCard className='xp-pop' delayMs={150}>
-          <div className='xp-num'>+{latest?.adventureEnergy ?? 0}</div>
-          <div className='xp-lbl'>Adventure XP earned</div>
-        </RewardCard>
-        <RewardCard delayMs={200}>
-          <LevelProgressCard
-            xp={state.totalAdventureEnergy}
-            variant='compact'
-            footnote={
-              leveledUp
-                ? `\u2B06\uFE0F ${state.dogName} reached ${currentTier.current.name}!`
-                : currentTier.isMaxLevel
-                  ? undefined
-                  : `${currentTier.current.icon} ${currentTier.current.name} \u00B7 ${currentTier.xpToNext.toLocaleString()} XP until ${currentTier.next?.name}`
-            }
-          />
-        </RewardCard>
-        <RewardCard className='streak-protected' delayMs={250}>
+        {latest?.memoryText ? (
+          <RewardCard className='next-ms' delayMs={120}>
+            <div
+              data-testid='reward-memory-card'
+              className='flex flex-col gap-2'
+            >
+              <div className='nm-label'>Today&apos;s memory</div>
+              <div className='font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic leading-snug text-[var(--text)]'>
+                &ldquo;{latest.memoryText}&rdquo;
+              </div>
+            </div>
+          </RewardCard>
+        ) : null}
+        <RewardCard className='streak-protected' delayMs={200}>
           <div className='sp-icon'>🔥</div>
           <div>
             <div className='sp-text'>
-              Streak protected — <strong>{state.currentStreak}</strong> days and counting.
+              {state.dogName} kept the streak alive — <strong>{state.currentStreak}</strong> good days in a row.
             </div>
             <div className='sp-sub'>
               {bond.remaining > 0
-                ? `Bond Arc: ${bond.remaining} more mission${bond.remaining === 1 ? '' : 's'} until the badge seals`
-                : 'Bond Arc: sealed — your duo levelled up'}
+                ? `${bond.remaining} more adventure${bond.remaining === 1 ? '' : 's'} until the next chapter of your bond.`
+                : 'Your bond just levelled up — a new chapter begins.'}
             </div>
           </div>
         </RewardCard>
-        <RewardCard className='streak-protected' delayMs={300}>
+        <RewardCard className='next-ms' delayMs={260}>
+          <div className='nm-label'>What&apos;s next for {state.dogName}</div>
+          <div className='nm-text'>{state.tomorrowTease}</div>
+        </RewardCard>
+        {unlockedBadge ? (
+          <RewardCard className='badge-unlock' delayMs={320}>
+            <div className='bu-icon'>{unlockedBadge.icon}</div>
+            <div className='bu-info'>
+              <div className='bu-title'>{unlockedBadge.name}</div>
+              <div className='bu-desc'>{unlockedBadge.description}</div>
+            </div>
+            <div className='bu-new'>New!</div>
+          </RewardCard>
+        ) : null}
+        <RewardCard delayMs={380}>
+          <div
+            data-testid='reward-progress-block'
+            className='rounded-2xl border border-[color:var(--border)] bg-[var(--bg-card)] p-3'
+          >
+            <div className='mb-2 flex items-center justify-between'>
+              <div className='text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-3)]'>
+                Progress (supporting)
+              </div>
+              <div
+                data-testid='reward-xp-mini'
+                className='text-[11px] font-semibold text-[var(--text-2)]'
+              >
+                +{latest?.adventureEnergy ?? 0} XP
+              </div>
+            </div>
+            <LevelProgressCard
+              xp={state.totalAdventureEnergy}
+              variant='compact'
+              footnote={
+                leveledUp
+                  ? `\u2B06\uFE0F ${state.dogName} reached ${currentTier.current.name}!`
+                  : currentTier.isMaxLevel
+                    ? undefined
+                    : `${currentTier.current.icon} ${currentTier.current.name} \u00B7 ${currentTier.xpToNext.toLocaleString()} XP until ${currentTier.next?.name}`
+              }
+            />
+          </div>
+        </RewardCard>
+        <RewardCard className='streak-protected' delayMs={420}>
           <div className='sp-icon'>🍖</div>
           <div>
             <div className='sp-text'>
@@ -148,25 +189,11 @@ Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down 
             </div>
           </div>
         </RewardCard>
-        <RewardCard className='next-ms' delayMs={340}>
-          <div className='nm-label'>Tomorrow&apos;s tease</div>
-          <div className='nm-text'>{state.tomorrowTease}</div>
-        </RewardCard>
-        {unlockedBadge ? (
-          <RewardCard className='badge-unlock' delayMs={380}>
-            <div className='bu-icon'>{unlockedBadge.icon}</div>
-            <div className='bu-info'>
-              <div className='bu-title'>{unlockedBadge.name}</div>
-              <div className='bu-desc'>{unlockedBadge.description}</div>
-            </div>
-            <div className='bu-new'>New!</div>
-          </RewardCard>
-        ) : null}
-        <RewardCard className='next-ms' delayMs={420}>
-          <div className='nm-label'>Dog identity progress</div>
+        <RewardCard className='next-ms' delayMs={460}>
+          <div className='nm-label'>Who {state.dogName} is becoming</div>
           <ProgressBar value={Math.min(state.currentStreak, bond.target)} max={bond.target} className='nm-prog' />
           <div className='nm-text'>
-            You&apos;re <span>{identity.title}</span> — next chapter loads after tomorrow&apos;s surprise mission.
+            Today, <span>{identity.title}</span>. Tomorrow, another chapter.
           </div>
         </RewardCard>
         <RewardCard className='share-wrap' delayMs={500}>
@@ -182,7 +209,7 @@ Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down 
             </div>
           </div>
           <button type='button' className='btn-share' onClick={handleShare}>
-            📤 Share {state.dogName}&apos;s streak
+            📤 Share {state.dogName}&apos;s day
           </button>
           {shareFeedback ? <p className='share-feedback'>{shareFeedback}</p> : null}
         </RewardCard>
@@ -215,7 +242,7 @@ Trying not to let ${state.dogName === 'Your dog' ? 'them' : state.dogName} down 
             navigate('/app')
           }}
         >
-          Done — see you tomorrow 🐾
+          Done — give {state.dogName} a great day tomorrow 🐾
         </button>
       </div>
     </section>
