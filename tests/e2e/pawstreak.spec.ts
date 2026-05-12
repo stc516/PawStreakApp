@@ -150,7 +150,7 @@ test('dashboard persistence after refresh', async ({ page }) => {
   await page.reload()
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.locator('.hero-name').getByText('PersistDog')).toBeVisible()
+  await expect(page.getByRole('heading', { name: /PersistDog in/ })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Dog profile' })).toHaveCount(0)
 })
 
@@ -178,22 +178,19 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   await page.getByRole('link', { name: /Story/ }).click()
   await expect(page).toHaveURL(/\/story/)
-  await expect(page.getByText("NavDog's Adventures")).toBeVisible()
+  await expect(page.getByText("NavDog's Known World")).toBeVisible()
 
   await page.getByRole('link', { name: /Today/ }).click()
   await expect(page).toHaveURL(/\/app/)
 })
 
-test('dashboard level card renders and links to The Wild', async ({ page }) => {
+test('dashboard keeps progression supporting and links to The Wild', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'LevelDog', zip: '92104' })
 
-  const levelCard = page.getByTestId('dashboard-level-card')
-  await expect(levelCard).toBeVisible()
-  const levelName = await page.getByTestId('level-progress-card-name').first().textContent()
-  expect(['Pup', 'Scout', 'Trailblazer', 'Expedition', 'Legend']).toContain(levelName?.trim() ?? '')
-  await expect(page.getByTestId('level-progress-card-bar').first()).toBeVisible()
+  await expect(page.getByTestId('dashboard-supporting-band')).toContainText('Supporting progress')
+  await expect(page.getByTestId('dashboard-supporting-band')).toContainText('XP stays in the background')
 
-  await levelCard.click()
+  await page.getByTestId('dashboard-the-wild-cta').click()
   await expect(page).toHaveURL(/\/wild$/)
 })
 
@@ -203,7 +200,7 @@ test('The Wild page shows current league + league ladder', async ({ page }) => {
   await page.goto('/wild')
   await expect(page.getByTestId('wild-page')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'The Wild' })).toBeVisible()
-  await expect(page.getByText(/Your rank updates weekly/)).toBeVisible()
+  await expect(page.getByText(/quiet progression layer/)).toBeVisible()
 
   await expect(page.getByTestId('wild-current-card')).toContainText('WildDog')
 
@@ -267,7 +264,7 @@ test('monthly packs render on dashboard and dedicated /packs page', async ({ pag
   await page.getByTestId('dashboard-featured-pack-cta').click()
 
   await expect(page).toHaveURL(/\/packs$/)
-  await expect(page.getByRole('heading', { name: 'Monthly Packs' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'World Regions' })).toBeVisible()
   await expect(page.getByTestId('pack-card-coastal-dog')).toBeVisible()
   await expect(page.getByTestId('pack-card-patio-pup')).toBeVisible()
   await expect(page.getByTestId('pack-card-neighborhood-explorer')).toBeVisible()
