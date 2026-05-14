@@ -87,7 +87,8 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
   await advancePrimary(page) // reminders → Start PawStreak
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByText(/TestDog — pick a walk/)).toBeVisible()
+  await expect(page.getByTestId('dashboard-dog-name')).toHaveText('TestDog')
+  await expect(page.getByTestId('dashboard-adventure-chips')).toBeVisible()
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
@@ -336,7 +337,7 @@ test('emotional adventure flow: memory captures and headlines stay dog-first', a
   await completeOnboarding(page, { dogName: 'MemoryDog', zip: '92104' })
 
   // Dashboard is dog-first, not stopwatch-first.
-  await expect(page.getByTestId('dashboard-hero-status')).toContainText('Ready when you are')
+  await expect(page.getByTestId('dashboard-hero-status')).toContainText('MemoryDog')
 
   await page.getByTestId('dashboard-start-adventure-cta').click()
   await expect(page).toHaveURL(/\/adventure/)
