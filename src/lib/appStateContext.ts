@@ -37,6 +37,7 @@ export interface AppStateContextValue extends AuthContextSlice {
   completeOnboarding: (payload: CompleteOnboardingPayload) => void
   dismissWelcomeBanner: () => void
   rollPickForMe: () => void
+  pickSuggestedAdventure: (index: number) => void
   selectVibe: (vibe: VibeArchetype) => void
   completeAdventure: (walkSeconds: number, options?: { memoryText?: string }) => void
   setReminder: (enabled: boolean) => void

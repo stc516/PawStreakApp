@@ -87,7 +87,7 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
   await advancePrimary(page) // reminders → Start PawStreak
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByText('TestDog is ready. Your first adventure is waiting.')).toBeVisible()
+  await expect(page.getByText(/TestDog — pick a walk/)).toBeVisible()
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
@@ -150,7 +150,7 @@ test('dashboard persistence after refresh', async ({ page }) => {
   await page.reload()
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByRole('heading', { name: /PersistDog in/ })).toBeVisible()
+  await expect(page.getByTestId('dashboard-dog-name')).toHaveText('PersistDog')
   await expect(page.getByRole('heading', { name: 'Dog profile' })).toHaveCount(0)
 })
 
@@ -176,15 +176,13 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   await page.getByRole('link', { name: /Today/ }).click()
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByTestId('dashboard-zone-previews')).toBeVisible()
-  await expect(page.getByTestId('level-progress-card')).toBeVisible()
+  await expect(page.getByTestId('dashboard-adventure-chips')).toBeVisible()
 })
 
-test('dashboard keeps progression supporting and links to The Wild', async ({ page }) => {
+test('dashboard stats row and link to progress', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'LevelDog', zip: '92104' })
 
-  await expect(page.getByTestId('dashboard-supporting-band')).toContainText('Supporting progress')
-  await expect(page.getByTestId('dashboard-supporting-band')).toContainText('XP stays in the background')
+  await expect(page.getByTestId('dashboard-stats-row')).toBeVisible()
 
   await page.getByTestId('dashboard-the-wild-cta').click()
   await expect(page).toHaveURL(/\/wild$/)
@@ -256,7 +254,7 @@ test('Share Adventure fallback/native flow does not crash', async ({ page }) => 
 test('monthly packs render on dashboard and dedicated /packs page', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'PackDog', zip: '92104' })
 
-  await expect(page.getByTestId('dashboard-featured-pack')).toBeVisible()
+  await expect(page.getByTestId('dashboard-featured-pack-cta')).toBeVisible()
   await page.getByTestId('dashboard-featured-pack-cta').click()
 
   await expect(page).toHaveURL(/\/packs$/)
@@ -338,7 +336,7 @@ test('emotional adventure flow: memory captures and headlines stay dog-first', a
   await completeOnboarding(page, { dogName: 'MemoryDog', zip: '92104' })
 
   // Dashboard is dog-first, not stopwatch-first.
-  await expect(page.getByTestId('dashboard-hero-status')).toContainText('ready for a great day')
+  await expect(page.getByTestId('dashboard-hero-status')).toContainText('Ready when you are')
 
   await page.getByTestId('dashboard-start-adventure-cta').click()
   await expect(page).toHaveURL(/\/adventure/)

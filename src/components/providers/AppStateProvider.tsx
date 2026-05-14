@@ -11,6 +11,7 @@ import {
   dismissWelcomeBanner,
   evaluateAwayFromCoords,
   markFirstAdventurePromptSeen,
+  pickSuggestedAdventure,
   resetRewardFlow,
   rollPickForMe,
   selectVibe,
@@ -113,6 +114,9 @@ function AppStateSynced({
       },
       rollPickForMe: () => {
         setState((currentState) => rollPickForMe(currentState))
+      },
+      pickSuggestedAdventure: (index: number) => {
+        setState((currentState) => pickSuggestedAdventure(currentState, index))
       },
       selectVibe: (vibe: Parameters<typeof selectVibe>[1]) => {
         setState((currentState) => selectVibe(currentState, vibe))

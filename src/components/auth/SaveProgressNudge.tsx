@@ -28,11 +28,10 @@ export function SaveProgressNudge() {
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='min-w-0 flex-1'>
-          <div className='text-[10px] font-bold uppercase tracking-[0.16em] text-[color:var(--orange)]'>
-            {isExpired ? 'Save before it slips' : 'Save your progress'}
+          <div className='text-[11px] font-semibold text-[color:var(--orange)]'>
+            {isExpired ? 'Save your story' : `Save ${state.dogName}'s story`}
           </div>
           <p className='mt-1 text-[13px] leading-snug text-[var(--text)]'>
-            <strong>{state.dogName}</strong>&apos;s streak, packs, and adventures live on this device only.{' '}
             {formatTrialStatusLine(state, decision.trial)}
           </p>
         </div>
@@ -53,7 +52,7 @@ export function SaveProgressNudge() {
           onClick={() => navigate('/account')}
           className='rounded-full bg-[color:var(--orange)] px-4 py-1.5 text-[12px] font-semibold text-[var(--bg)] shadow-[0_0_14px_-3px_var(--orange-glow)] transition-transform active:scale-[0.98]'
         >
-          Save progress →
+          Save story →
         </button>
         <span className='text-[11px] text-[var(--text-2)]'>Free · email or magic link</span>
       </div>

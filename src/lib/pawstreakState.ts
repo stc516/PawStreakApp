@@ -1,5 +1,11 @@
-import { generateLocalizedMission, flattenMission, normalizeZip, refreshTomorrowTease } from '../data/localAdventureEngine'
-import { moodForDay } from '../data/missions'
+import {
+  flattenMission,
+  missionFromQuickPick,
+  normalizeZip,
+  quickAdventurePicksForZip,
+  refreshTomorrowTease,
+} from '../data/localAdventureEngine'
+import { hashString, moodForDay } from '../data/missions'
 import { calculateAdventureXp } from './xp'
 import type {
   AdventureEntry,
@@ -37,26 +43,14 @@ function localDayKey(d = new Date()) {
 }
 
 const defaultBadges: BadgeDefinition[] = [
-  { id: 'first-step', name: 'First Pawprint', icon: '🐾', description: "The day the story started — you said yes to your dog's day.", unlocked: true },
-  { id: 'three-day-streak', name: 'Three-Day Spark', icon: '✨', description: 'Three days in a row. Momentum is a love language.', unlocked: true },
-  { id: 'beach-dog', name: 'Salt on the Snout', icon: '🌅', description: 'Big sky XP — first salt-air adventure logged.', unlocked: true },
-  {
-    id: 'week-warrior',
-    name: 'Unshakeable Duo',
-    icon: '🫶',
-    description: 'Seven-day streak: not perfection — presence.',
-    unlocked: false,
-  },
-  { id: 'explorer', name: 'Pathfinder', icon: '🧭', description: 'Wildcard vibe conquered — curiosity pays rent.', unlocked: false },
-  {
-    id: 'park-regular',
-    name: 'Professional Sniffer',
-    icon: '🌿',
-    description: 'Five wander adventures — nose earned its résumé.',
-    unlocked: false,
-  },
-  { id: 'mystery-one', name: 'Renaissance Dog', icon: '🎭', description: 'All four vibes sampled — range unlocked.', unlocked: false, mystery: true },
-  { id: 'mystery-two', name: '???', icon: '❓', description: 'Keep surprising yourselves.', unlocked: false, mystery: true },
+  { id: 'first-step', name: 'First walk', icon: '🐾', description: 'You started.', unlocked: true },
+  { id: 'three-day-streak', name: 'Three days', icon: '✨', description: 'Three walks in a row.', unlocked: true },
+  { id: 'beach-dog', name: 'Beach day', icon: '🌅', description: 'First beach-style walk.', unlocked: true },
+  { id: 'week-warrior', name: 'Week streak', icon: '🫶', description: 'Seven days in a row.', unlocked: false },
+  { id: 'explorer', name: 'Wildcard', icon: '🧭', description: 'One surprise-route walk.', unlocked: false },
+  { id: 'park-regular', name: 'Park regular', icon: '🌿', description: 'Five park-style walks.', unlocked: false },
+  { id: 'mystery-one', name: 'Sampler', icon: '🎭', description: 'Tried every vibe once.', unlocked: false, mystery: true },
+  { id: 'mystery-two', name: '???', icon: '❓', description: 'Keep walking.', unlocked: false, mystery: true },
 ]
 
 function seedEntries(): AdventureEntry[] {
@@ -65,29 +59,29 @@ function seedEntries(): AdventureEntry[] {
     {
       id: 'a-1',
       vibe: 'salt',
-      missionTitle: 'Ocean Air Adventure',
-      emoji: '🌊',
+      missionTitle: 'Sunset Walk',
+      emoji: '🌅',
       rarity: 'uncommon',
       adventureEnergy: 55,
       durationMinutes: 34,
       groundCovered: 2.1,
       completedAt: ago(1),
-      locationHint: 'Salt mist · big horizon',
-      missionDescription: 'Let the salt air carry you both.',
+      locationHint: 'Mission Bay',
+      missionDescription: '',
       estimatedMinutesMin: 25,
       estimatedMinutesMax: 42,
     },
     {
       id: 'a-2',
       vibe: 'wander',
-      missionTitle: 'Sniffari',
-      emoji: '👃',
+      missionTitle: 'Park Day',
+      emoji: '🌳',
       rarity: 'common',
       adventureEnergy: 44,
       durationMinutes: 28,
       groundCovered: 1.6,
       completedAt: ago(2),
-      locationHint: 'Nose-led, no script',
+      locationHint: 'Local park',
       estimatedMinutesMin: 25,
       estimatedMinutesMax: 40,
     },
@@ -101,35 +95,35 @@ function seedEntries(): AdventureEntry[] {
       durationMinutes: 18,
       groundCovered: 0.9,
       completedAt: ago(3),
-      locationHint: 'Café loop · your blocks',
+      locationHint: 'Your block',
       estimatedMinutesMin: 12,
       estimatedMinutesMax: 22,
     },
     {
       id: 'a-4',
       vibe: 'wild',
-      missionTitle: 'Mystery Route',
+      missionTitle: 'Explore new',
       emoji: '🎲',
       rarity: 'rare',
       adventureEnergy: 68,
       durationMinutes: 45,
       groundCovered: 2.8,
       completedAt: ago(4),
-      locationHint: 'Dice picks the turns',
+      locationHint: 'New block',
       estimatedMinutesMin: 20,
       estimatedMinutesMax: 45,
     },
     {
       id: 'a-5',
       vibe: 'salt',
-      missionTitle: 'Sunset Sniff Adventure',
+      missionTitle: 'Sunset Walk',
       emoji: '🌅',
       rarity: 'uncommon',
       adventureEnergy: 50,
       durationMinutes: 30,
       groundCovered: 1.9,
       completedAt: ago(5),
-      locationHint: 'Sky-first stroll',
+      locationHint: 'Waterfront',
       estimatedMinutesMin: 25,
       estimatedMinutesMax: 38,
     },
@@ -139,8 +133,10 @@ function seedEntries(): AdventureEntry[] {
 function initialSelection(
   state: Pick<PawstreakState, 'dogName' | 'currentStreak' | 'pickNonce' | 'dogMood' | 'zipCode'>,
 ): Pick<PawstreakState, 'generatedMission' | 'selectedVibe' | 'selectedMissionTitle' | 'selectedEmoji' | 'selectedRarity' | 'selectedFlavor'> {
-  const generatedMission = generateLocalizedMission({
-    zipCode: state.zipCode ?? '',
+  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
+  const idx = hashString(`init|${state.pickNonce}`) % Math.max(1, picks.length)
+  const generatedMission = missionFromQuickPick({
+    pick: picks[idx],
     dogName: state.dogName,
     dogMood: state.dogMood,
     streak: state.currentStreak,
@@ -536,8 +532,10 @@ export function completeOnboarding(
     demoStartedAt: state.demoStartedAt ?? new Date().toISOString(),
   }
 
-  const generatedMission = generateLocalizedMission({
-    zipCode,
+  const picks = quickAdventurePicksForZip(zipCode)
+  const idx = hashString(`onboard|${pickNonce}`) % Math.max(1, picks.length)
+  const generatedMission = missionFromQuickPick({
+    pick: picks[idx],
     dogName,
     dogMood,
     streak: next.currentStreak,
@@ -557,8 +555,10 @@ export function dismissWelcomeBanner(state: PawstreakState): PawstreakState {
 export function setZipCode(state: PawstreakState, zipCodeRaw: string): PawstreakState {
   const zipCode = normalizeZip(zipCodeRaw)
   const pickNonce = state.pickNonce + 1
-  const generatedMission = generateLocalizedMission({
-    zipCode,
+  const picks = quickAdventurePicksForZip(zipCode)
+  const idx = hashString(`zip|${pickNonce}`) % Math.max(1, picks.length)
+  const generatedMission = missionFromQuickPick({
+    pick: picks[idx],
     dogName: state.dogName,
     dogMood: state.dogMood,
     streak: state.currentStreak,
@@ -577,8 +577,10 @@ export function setZipCode(state: PawstreakState, zipCodeRaw: string): Pawstreak
 
 export function rollPickForMe(state: PawstreakState): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const generatedMission = generateLocalizedMission({
-    zipCode: state.zipCode ?? '',
+  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
+  const idx = hashString(`pick|${pickNonce}`) % Math.max(1, picks.length)
+  const generatedMission = missionFromQuickPick({
+    pick: picks[idx],
     dogName: state.dogName,
     dogMood: state.dogMood,
     streak: state.currentStreak,
@@ -595,13 +597,38 @@ export function rollPickForMe(state: PawstreakState): PawstreakState {
 
 export function selectVibe(state: PawstreakState, vibe: VibeArchetype): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const generatedMission = generateLocalizedMission({
-    zipCode: state.zipCode ?? '',
+  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
+  const matches = picks.map((p, i) => ({ p, i })).filter((x) => x.p.vibe === vibe)
+  const idx =
+    matches.length > 0
+      ? matches[hashString(`vibe|${pickNonce}`) % matches.length].i
+      : hashString(`vibe|${pickNonce}`) % Math.max(1, picks.length)
+  const generatedMission = missionFromQuickPick({
+    pick: picks[idx],
     dogName: state.dogName,
     dogMood: state.dogMood,
     streak: state.currentStreak,
     nonce: `vibe|${pickNonce}|${vibe}`,
-    fixedVibe: vibe,
+  })
+  return {
+    ...state,
+    pickNonce,
+    generatedMission,
+    ...flattenMission(generatedMission),
+    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
+  }
+}
+
+export function pickSuggestedAdventure(state: PawstreakState, index: number): PawstreakState {
+  const pickNonce = state.pickNonce + 1
+  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
+  const pick = picks[index % Math.max(1, picks.length)]
+  const generatedMission = missionFromQuickPick({
+    pick,
+    dogName: state.dogName,
+    dogMood: state.dogMood,
+    streak: state.currentStreak,
+    nonce: `chip|${pickNonce}|${pick.id}`,
   })
   return {
     ...state,

@@ -97,48 +97,10 @@ function rollRarity(seed: string, streak: number, forceSpicy: boolean): Adventur
 }
 
 export function flavorForMission(params: { mood: DogMood; title: string; dogName: string; rarity: AdventureRarity }) {
-  const { mood, title, dogName, rarity } = params
-  const hooks: Record<DogMood, string[]> = {
-    restless: [
-      `${dogName} doesn’t want “fine.” ${dogName} wants GO.`,
-      'Tiny chaos is medicine.',
-      'Translation: run it out before dinner judges us.',
-    ],
-    curious: [
-      'Follow curiosity like it pays rent.',
-      'Sniff first. Narrative later.',
-      `${dogName} has questions only pavement can answer.`,
-    ],
-    explorer: [
-      'New corners > old routines.',
-      `${dogName} is auditioning for National Geographic (household division).`,
-      'Discovery mode: polite mayhem.',
-    ],
-    social: [
-      `${dogName} wants witnesses.`,
-      'Community vibes. Tail diplomacy.',
-      'Say hi like it’s a skill tree.',
-    ],
-    zoomie: [
-      'Physics optional.',
-      `${dogName} has velocity opinions.`,
-      'If nothing breaks, did we even adventure?',
-    ],
-    chill: [
-      'Soft goals. Big feelings.',
-      `${dogName} rewards patience with pure loyalty.`,
-      'Low stakes. High heart.',
-    ],
-  }
-
-  const rarityNotes: Record<AdventureRarity, string> = {
-    common: 'Solid pick — warmth beats perfection.',
-    uncommon: 'Spicy enough to remember.',
-    rare: 'Rare pull — this one glows.',
-  }
-
-  const picked = pickFrom(hooks[mood], `${title}|${dogName}|${mood}`)
-  return `${picked} ${rarityNotes[rarity]}`
+  const { rarity } = params
+  if (rarity === 'rare') return 'Big walk energy.'
+  if (rarity === 'uncommon') return 'Solid pick.'
+  return 'Have fun out there.'
 }
 
 export function rollMission(params: {
@@ -169,13 +131,10 @@ export function tomorrowRarePossible(dogName: string, today = new Date()) {
 }
 
 export function identityArc(totalEnergy: number, streak: number) {
-  if (streak >= 14 && totalEnergy >= 800)
-    return { title: 'Neighborhood Legend', tagline: 'your bond shows up in strangers’ smiles' }
-  if (streak >= 7 || totalEnergy >= 400)
-    return { title: 'Trailblazer Duo', tagline: `${streak}-day streak — the ritual is real` }
-  if (totalEnergy >= 120)
-    return { title: 'Adventure Partner', tagline: 'consistent mischief, dependable heart' }
-  return { title: 'Story Starter', tagline: 'early chapters hit different' }
+  if (streak >= 14 && totalEnergy >= 800) return { title: 'Regulars', tagline: 'You show up.' }
+  if (streak >= 7 || totalEnergy >= 400) return { title: 'In rhythm', tagline: `${streak}-day streak` }
+  if (totalEnergy >= 120) return { title: 'Building', tagline: 'Nice momentum' }
+  return { title: 'Starting out', tagline: 'Every walk counts' }
 }
 
 export function bondArcProgress(streak: number) {
