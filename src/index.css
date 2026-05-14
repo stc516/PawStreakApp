@@ -136,7 +136,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px 12px;
+  padding: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)) 20px 12px;
   background: rgba(13, 17, 23, 0.9);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -718,8 +718,10 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   font-family: var(--fb);
+  background-color: var(--bg);
   background: var(--bg);
   color: var(--text);
+  color-scheme: dark;
 }
 
 body {
@@ -1352,7 +1354,7 @@ body::before {
 
 .walk-hdr {
   width: 100%;
-  padding: 3rem 1.5rem 1.5rem;
+  padding: max(3rem, calc(env(safe-area-inset-top, 0px) + 2rem)) 1.5rem 1.5rem;
   background: radial-gradient(ellipse at 50% 0%, rgba(255, 107, 53, 0.14) 0%, var(--bark) 72%);
   text-align: center;
 }
@@ -2169,8 +2171,8 @@ body::before {
 .badges-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 11px;
-  padding: 1.25rem 1.5rem 80px;
+  gap: 14px;
+  padding: 1.5rem 1.5rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .badge-card {

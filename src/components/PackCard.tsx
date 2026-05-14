@@ -17,11 +17,11 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
       data-testid={`pack-card-${pack.id}`}
       data-pack-complete={isComplete ? 'true' : 'false'}
       className={[
-        'tap-card relative flex flex-col gap-3 overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(155deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-4',
+        'tap-card relative flex flex-col gap-4 overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(155deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))]',
         isComplete
           ? 'border-[color:rgba(255,107,53,0.45)] shadow-[0_0_24px_-6px_var(--orange-glow)]'
           : 'border-[color:var(--border)]',
-        isFeatured ? 'p-4' : '',
+        isFeatured ? 'p-5' : 'p-4',
       ]
         .join(' ')
         .trim()}

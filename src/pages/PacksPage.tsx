@@ -51,7 +51,7 @@ export function PacksPage() {
         </div>
       </header>
 
-      <div className='mx-auto mt-6 flex w-full max-w-[640px] flex-1 flex-col gap-6 px-5'>
+      <div className='mx-auto mt-8 flex w-full max-w-[640px] flex-1 flex-col gap-8 px-5'>
         {!hasAnyAdventure ? (
           <div className='rounded-2xl border border-dashed border-[color:var(--border-md)] bg-[var(--bg-card)] p-5 text-center'>
             <div className='flex justify-center'>
@@ -105,14 +105,14 @@ interface PackSectionProps {
 
 function PackSection({ title, subtitle, children }: PackSectionProps) {
   return (
-    <section className='flex flex-col gap-3' data-testid={`packs-section-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+    <section className='flex flex-col gap-4' data-testid={`packs-section-${title.toLowerCase().replace(/\s+/g, '-')}`}>
       <div>
         <div className='text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-3)]'>
           {title}
         </div>
-        <div className='text-[12px] text-[var(--text-2)]'>{subtitle}</div>
+        <div className='mt-1 text-[12px] leading-relaxed text-[var(--text-2)]'>{subtitle}</div>
       </div>
-      <div className='flex flex-col gap-3'>{children}</div>
+      <div className='flex flex-col gap-4'>{children}</div>
     </section>
   )
 }

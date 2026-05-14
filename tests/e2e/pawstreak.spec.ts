@@ -163,16 +163,10 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   // Adventure screen has no bottom nav; return to dashboard to exercise tab links.
   await page.goto('/app')
-  await page.getByRole('link', { name: /The Wild/ }).click()
-  await expect(page).toHaveURL(/\/wild/)
-  await expect(page.getByTestId('wild-page')).toBeVisible()
-
   await page.getByRole('link', { name: /Packs/ }).click()
   await expect(page).toHaveURL(/\/packs/)
 
-  // Finds is no longer in the bottom nav; reach it via the dashboard CTA.
-  await page.goto('/app')
-  await page.getByTestId('dashboard-finds-cta').click()
+  await page.getByRole('link', { name: /Finds/ }).click()
   await expect(page).toHaveURL(/\/badges/)
   await expect(page.getByText("NavDog's Finds")).toBeVisible()
 
@@ -182,6 +176,8 @@ test('tab navigation works without blank screens', async ({ page }) => {
 
   await page.getByRole('link', { name: /Today/ }).click()
   await expect(page).toHaveURL(/\/app/)
+  await expect(page.getByTestId('dashboard-zone-previews')).toBeVisible()
+  await expect(page.getByTestId('level-progress-card')).toBeVisible()
 })
 
 test('dashboard keeps progression supporting and links to The Wild', async ({ page }) => {

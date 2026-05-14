@@ -7,7 +7,9 @@ import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { MascotBadge } from '../components/mascot/MascotBadge'
+import { LevelProgressCard } from '../components/LevelProgressCard'
 import { PackCard } from '../components/PackCard'
+import { VIBE_CHIPS } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
 import { deriveAllProgress, pickFeaturedPack, summarizePacks } from '../lib/monthlyPacks'
 import { buildPlaceIdentity } from '../lib/placeIdentity'
@@ -70,7 +72,7 @@ export function DashboardPage() {
         <PostAdventureSavePrompt />
         <SaveProgressNudge />
         {!state.welcomeBannerDismissed ? (
-          <div className='mx-4 mb-3 mt-3 rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] px-4 py-3'>
+          <div className='mx-5 mb-4 mt-4 rounded-xl border border-[color:var(--border)] bg-[var(--bg-card)] px-4 py-3'>
             <div className='flex items-start justify-between gap-3'>
               <p className='text-sm leading-snug text-[var(--text)]'>
                 <strong>{state.dogName}</strong> is ready. Your first adventure is waiting.
@@ -88,7 +90,7 @@ export function DashboardPage() {
         ) : null}
 
         {state.isAway && !awayDismissed ? (
-          <div className='mx-4 mb-3 mt-1 rounded-xl border border-[color:rgba(79,195,247,0.35)] bg-[var(--bg-elevated)] px-4 py-3'>
+          <div className='mx-5 mb-4 mt-2 rounded-xl border border-[color:rgba(79,195,247,0.35)] bg-[var(--bg-elevated)] px-4 py-3'>
             <div className='flex items-start justify-between gap-3'>
               <p className='text-sm leading-snug text-[var(--text)]'>
                 Looks like <strong>{state.dogName}</strong> is outside their usual territory. New ground. New adventures.
@@ -105,21 +107,24 @@ export function DashboardPage() {
           </div>
         ) : null}
 
-        <section className='mx-4 mt-4 rounded-[28px] bg-[radial-gradient(circle_at_80%_0%,rgba(79,195,247,0.18),transparent_34%),linear-gradient(165deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-5 shadow-[0_24px_58px_rgba(0,0,0,0.36)]' data-testid='dashboard-today-card'>
+        <section
+          className='mx-5 mt-5 rounded-[28px] bg-[radial-gradient(circle_at_80%_0%,rgba(79,195,247,0.18),transparent_34%),linear-gradient(165deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-6 pb-5 shadow-[0_24px_58px_rgba(0,0,0,0.36)]'
+          data-testid='dashboard-today-card'
+        >
           <div className='flex items-start gap-4'>
-            <div className='grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[var(--bg-elevated)] text-[34px] shadow-[0_12px_32px_rgba(0,0,0,0.35)]'>
+            <div className='grid h-[72px] w-[72px] shrink-0 place-items-center rounded-3xl bg-[var(--bg-elevated)] text-[38px] shadow-[0_12px_32px_rgba(0,0,0,0.35)]'>
               🐕
             </div>
             <div className='min-w-0'>
               <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
                 Today&apos;s world
               </div>
-              <h1 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[29px] font-semibold italic leading-[1.05] text-[var(--text)]'>
+              <h1 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[30px] font-semibold italic leading-[1.05] text-[var(--text)]'>
                 {state.dogName} in {place.worldName}
               </h1>
               <p
                 data-testid='dashboard-hero-status'
-                className={`mt-2 text-[14px] leading-relaxed ${state.todayAdventureDone ? 'text-[var(--green)]' : 'text-[var(--text-2)]'}`}
+                className={`mt-2 text-[15px] leading-relaxed ${state.todayAdventureDone ? 'text-[var(--green)]' : 'text-[var(--text-2)]'}`}
               >
                 {state.todayAdventureDone
                   ? `${state.dogName} had a great day here.`
@@ -128,26 +133,43 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className='mt-5 rounded-3xl bg-[rgba(255,255,255,0.045)] p-4'>
-            <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--orange)]'>
-              Adventure opening
+          <div className='mt-6 flex flex-col gap-4'>
+            <div
+              className='flex min-h-[56px] min-w-0 flex-1 flex-col justify-center rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.04)] px-4 py-3'
+              data-testid='dashboard-streak-chip'
+            >
+              <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>Streak</div>
+              <div className='mt-1 flex items-baseline gap-2 font-[family-name:var(--fd),Fraunces,serif] text-[26px] font-semibold italic leading-none text-[var(--text)]'>
+                <span aria-hidden>🔥</span>
+                {state.currentStreak}
+                <span className='text-[13px] font-normal not-italic text-[var(--text-2)]'>days showing up</span>
+              </div>
             </div>
-            <div className='mt-1 flex items-start gap-3'>
-              <span className='text-[30px]' aria-hidden>
+            <div className='min-w-0 w-full'>
+              <LevelProgressCard xp={state.totalAdventureEnergy} variant='compact' />
+            </div>
+          </div>
+
+          <div className='mt-6 rounded-[22px] bg-[rgba(255,255,255,0.055)] p-5 ring-1 ring-[color:rgba(255,107,53,0.12)]'>
+            <div className='text-[10px] font-bold uppercase tracking-[0.2em] text-[color:var(--orange)]'>
+              Today&apos;s featured adventure
+            </div>
+            <div className='mt-3 flex items-start gap-3'>
+              <span className='text-[36px] leading-none' aria-hidden>
                 {state.generatedMission.emoji}
               </span>
-              <div>
-                <div className='font-[family-name:var(--fd),Fraunces,serif] text-[22px] leading-tight text-[var(--text)]'>
+              <div className='min-w-0'>
+                <div className='font-[family-name:var(--fd),Fraunces,serif] text-[24px] font-semibold leading-[1.12] text-[var(--text)]'>
                   {state.generatedMission.title}
                 </div>
-                <p className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
+                <p className='mt-2 text-[14px] leading-relaxed text-[var(--text-2)]'>
                   {place.atmosphere} {place.discoveryPrompt}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className='mt-4 flex gap-2'>
+          <div className='mt-6 flex flex-col gap-2'>
             <button
               className='btn-primary'
               type='button'
@@ -156,17 +178,40 @@ export function DashboardPage() {
             >
               Enter today&apos;s adventure →
             </button>
+            <button
+              type='button'
+              onClick={rollPickForMe}
+              className='w-full rounded-2xl border border-[color:var(--border)] bg-transparent px-4 py-3.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--text-2)] transition-colors hover:border-[color:var(--border-md)] hover:text-[var(--text)]'
+            >
+              Roll another adventure
+            </button>
           </div>
-          <button
-            type='button'
-            onClick={rollPickForMe}
-            className='mt-3 w-full rounded-2xl border border-[color:var(--border)] bg-transparent px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--text-2)]'
-          >
-            Let the world pick a different route
-          </button>
+
+          <div className='mt-6' data-testid='dashboard-zone-previews'>
+            <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>Zone tones</div>
+            <p className='mt-1 text-[12px] leading-snug text-[var(--text-2)]'>
+              Atmospheres that quietly shape what shows up in the draw.
+            </p>
+            <div className='-mx-1 mt-3 flex gap-2 overflow-x-auto pb-1 pt-0.5'>
+              {VIBE_CHIPS.map((chip) => (
+                <button
+                  key={chip.vibe}
+                  type='button'
+                  onClick={() => navigate('/adventure')}
+                  className='shrink-0 rounded-2xl border border-[color:var(--border)] bg-[var(--bg-card)] px-3 py-2.5 text-left transition-colors hover:border-[color:rgba(255,107,53,0.35)]'
+                >
+                  <div className='text-lg leading-none' aria-hidden>
+                    {chip.icon}
+                  </div>
+                  <div className='mt-1 text-[11px] font-semibold text-[var(--text)]'>{chip.name}</div>
+                  <div className='mt-0.5 max-w-[140px] text-[10px] leading-snug text-[var(--text-3)]'>{chip.blurb}</div>
+                </button>
+              ))}
+            </div>
+          </div>
         </section>
 
-        <section className='mx-4 mt-4 rounded-[24px] bg-[var(--bg-card)] p-4' data-testid='dashboard-memory-atlas'>
+        <section className='mx-5 mt-6 rounded-[24px] bg-[var(--bg-card)] p-5' data-testid='dashboard-memory-atlas'>
           <div className='flex items-center justify-between gap-3'>
             <div>
               <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
@@ -211,7 +256,7 @@ export function DashboardPage() {
           )}
         </section>
 
-        <section className='mx-4 mt-4' data-testid='dashboard-featured-pack'>
+        <section className='mx-5 mt-6' data-testid='dashboard-featured-pack'>
           <div className='mb-2 flex items-end justify-between pl-0.5'>
             <div>
               <div className='eye'>World region opening</div>
@@ -232,8 +277,19 @@ export function DashboardPage() {
         </section>
 
         <section
+          data-testid='dashboard-tomorrow-tease'
+          className='mx-5 mt-6 rounded-2xl border border-[color:rgba(167,139,250,0.22)] bg-[linear-gradient(135deg,rgba(167,139,250,0.08),transparent_55%)] px-5 py-4'
+        >
+          <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--purple)]'>Tomorrow</div>
+          <p className='mt-2 text-[14px] leading-relaxed text-[var(--text-2)]'>
+            Another beat in <span className='text-[var(--text)]'>{place.worldName}</span> — same dog, new light. The ritual
+            continues.
+          </p>
+        </section>
+
+        <section
           data-testid='dashboard-supporting-band'
-          className='mx-4 mt-5 rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-3'
+          className='mx-5 mt-6 rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4'
           aria-label='Supporting progress'
         >
           <div className='flex items-center justify-between gap-3'>

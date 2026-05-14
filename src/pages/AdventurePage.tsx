@@ -107,7 +107,10 @@ export function AdventurePage() {
 
   return (
     <section id='screen-walk' className='screen active' data-testid='adventure-page'>
-      <div className='walk-hdr px-5 pb-4 pt-8 text-left'>
+      <div
+        className='walk-hdr px-5 pb-4 text-left'
+        style={{ paddingTop: 'max(2rem, calc(env(safe-area-inset-top, 0px) + 1.25rem))' }}
+      >
         <button
           type='button'
           onClick={() => navigate('/app')}
