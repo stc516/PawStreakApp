@@ -84,21 +84,8 @@ export function evaluateFirstAdventurePrompt(
 export function formatTrialStatusLine(state: PawstreakState, trial: DemoTrialStatus): string {
   if (!trial.inDemo) return 'Saved across devices.'
   if (!state.demoStartedAt) {
-    return 'Your dog\u2019s story lives on this device for now.'
+    return 'Stories stay on this phone until you save.'
   }
-  if (trial.expired) return 'Demo time\u2019s up \u2014 save your story before it slips away.'
-  if (trial.daysRemaining === 0 && trial.hoursRemaining > 0) {
-    return `Less than a day left \u2014 ${plural(trial.hoursRemaining, 'hour', 'hours')} to save your progress.`
-  }
-  if (trial.daysRemaining === 0) {
-    return 'Demo trial is on its final hours.'
-  }
-  if (trial.daysRemaining === 1) {
-    return '1 day left in your demo trial.'
-  }
-  return `${trial.daysRemaining} days left in your demo trial.`
-}
-
-function plural(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`
+  if (trial.expired) return 'Save to keep your walks and streak.'
+  return 'Save anytime — takes a minute.'
 }

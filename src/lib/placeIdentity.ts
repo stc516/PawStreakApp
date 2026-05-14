@@ -11,47 +11,47 @@ type PlaceTone = {
 
 const PLACE_TONES: Record<ZipLocale, PlaceTone> = {
   coastal: {
-    worldName: 'the Salt-Air Loop',
-    atmosphere: 'Salt air, open sky, slow horizons.',
-    discoveryPrompt: 'Notice one smell the ocean carried in today.',
-    atlasNoun: 'coastal corners',
+    worldName: 'near the coast',
+    atmosphere: '',
+    discoveryPrompt: '',
+    atlasNoun: 'spots',
   },
   urban: {
-    worldName: 'the City Blocks',
-    atmosphere: 'Crosswalk rhythm, cafe doors, sidewalk stories.',
-    discoveryPrompt: 'Let your dog pick one storefront or corner to study.',
-    atlasNoun: 'city corners',
+    worldName: 'in town',
+    atmosphere: '',
+    discoveryPrompt: '',
+    atlasNoun: 'blocks',
   },
   suburban: {
-    worldName: 'the Home-Turf Maze',
-    atmosphere: 'Shade trees, mailbox trails, familiar turns with new evidence.',
-    discoveryPrompt: 'Take one block you usually skip.',
-    atlasNoun: 'home-turf routes',
+    worldName: 'around home',
+    atmosphere: '',
+    discoveryPrompt: '',
+    atlasNoun: 'loops',
   },
   trail: {
-    worldName: 'the Trail Edge',
-    atmosphere: 'Dirt under paws, green quiet, bigger breaths.',
-    discoveryPrompt: 'Pause when your dog finds the first wild smell.',
-    atlasNoun: 'trail marks',
+    worldName: 'near trails',
+    atmosphere: '',
+    discoveryPrompt: '',
+    atlasNoun: 'trails',
   },
   generic: {
-    worldName: 'the Neighborhood Map',
-    atmosphere: 'Doorways, corners, familiar ground becoming a story.',
-    discoveryPrompt: 'Find one tiny place your dog knows better than you do.',
-    atlasNoun: 'neighborhood memories',
+    worldName: 'nearby',
+    atmosphere: '',
+    discoveryPrompt: '',
+    atlasNoun: 'places',
   },
 }
 
 const CATEGORY_DISCOVERY: Record<GeneratedMission['category'], string> = {
-  social: 'Today is about being part of the neighborhood.',
-  exploration: 'Today is about adding a new corner to the mental map.',
-  chill: 'Today is about softness, air, and taking the long breath.',
-  chaos: 'Today is about letting the nose write the route.',
-  routine: 'Today is about making familiar ground feel cared for.',
+  social: '',
+  exploration: '',
+  chill: '',
+  chaos: '',
+  routine: '',
 }
 
 function cleanLocation(value: string | undefined): string {
-  return value?.trim() || 'your nearby world'
+  return value?.trim() || 'Nearby'
 }
 
 export function buildPlaceIdentity(state: PawstreakState) {
@@ -68,7 +68,7 @@ export function buildPlaceIdentity(state: PawstreakState) {
 
   return {
     locale,
-    worldName: resolution.source === 'handcrafted' ? neighborhood : tone.worldName,
+    worldName: resolution.source === 'handcrafted' ? neighborhood.split('/')[0]?.trim() ?? neighborhood : tone.worldName,
     atmosphere: tone.atmosphere,
     atlasNoun: tone.atlasNoun,
     locationLine: cleanLocation(mission.locationHint),

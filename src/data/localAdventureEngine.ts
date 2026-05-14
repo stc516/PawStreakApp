@@ -8,7 +8,7 @@ import type {
   ZipLocale,
 } from '../types'
 
-import { flavorForMission, hashString, tomorrowRarePossible } from './missions'
+import { flavorForMission, hashString } from './missions'
 import { resolveUserEnvironment } from '../lib/resolveUserEnvironment'
 
 // --- ZIP → locale (no APIs; heuristic groups & prefixes) ---
@@ -88,7 +88,7 @@ function pickFrom<T>(list: T[], seed: string): T {
   return list[hashString(seed) % list.length]
 }
 
-function rollRarity(seed: string, streak: number, streakMomentumBonus: boolean): AdventureRarity {
+export function rollRarity(seed: string, streak: number, streakMomentumBonus: boolean): AdventureRarity {
   const roll = (hashString(`${seed}|rarity`) % 100) + (streak >= 5 ? 4 : 0) + (streakMomentumBonus ? 5 : 0)
   if (roll >= 93) return 'rare'
   if (roll >= 73) return 'uncommon'
@@ -293,30 +293,8 @@ function buildDescription(params: {
   locale: ZipLocale
   moodMatches: boolean
 }): string {
-  const { dogName, dogMood, template, rarity, moodMatches } = params
-  const streakHint =
-    rarity === 'rare'
-      ? 'Rare pull — save this route in your bones.'
-      : rarity === 'uncommon'
-        ? 'Enough spice to remember tomorrow.'
-        : 'Solid warmth beats perfection.'
-
-  const moodLines: Record<DogMood, string[]> = {
-    restless: [`${dogName} doesn’t want “fine.” ${dogName} wants GO.`],
-    curious: [`Follow ${dogName}’s nose — it’s doing homework.`],
-    explorer: [`New corners pay rent today.`],
-    social: [`Witnesses welcome. Tail diplomacy engaged.`],
-    zoomie: [`Physics optional. Velocity mandatory.`],
-    chill: [`Soft goals. Big feelings.`],
-  }
-
-  const moodLine = pickFrom(moodLines[dogMood], `${template.title}|mood`)
-
-  const matchLine = moodMatches
-    ? `Matches ${dogName}’s mood today — ride that wave.`
-    : `Even when ${dogName} feels ${dogMood}, this route still lands.`
-
-  return `${moodLine} ${matchLine} ${streakHint}`
+  void params
+  return ''
 }
 
 export function missionTimeLabel(m: Pick<GeneratedMission, 'estimatedMinutesMin' | 'estimatedMinutesMax'>): string {
@@ -418,26 +396,105 @@ export function flattenMission(m: GeneratedMission): Pick<
 }
 
 export function refreshTomorrowTease(input: { dogName: string; zipCode: string; rareTomorrow?: boolean }): string {
-  const { dogName, zipCode } = input
-  const rareTomorrow = input.rareTomorrow ?? tomorrowRarePossible(dogName)
-  const locale = localeFromZip(zipCode)
-  const seed = `${dogName}|${zipCode}|tease`
-  const variant = hashString(seed) % 4
-
-  const newRoute = hashString(`${zipCode}|route`) % 5 === 0
-
-  if (rareTomorrow && newRoute) {
-    return `${dogName} may unlock a new route tomorrow — rare adventures are in the air.`
-  }
-  if (rareTomorrow) {
-    return `Rare adventure possible tomorrow. Come back for the roll.`
-  }
-  const localeHint = localeLabel(locale)
+  const { dogName } = input
+  const variant = hashString(`${dogName}|${input.zipCode}|tease2`) % 3
   const lines = [
-    `Tomorrow’s adventure unlocks later tonight — a fresh ${localeHint} surprise drops at midnight.`,
-    `Tomorrow’s board resets at midnight. ${dogName}’s next chapter is loading.`,
-    `Clock’s ticking — tomorrow’s adventure unlocks with the new day.`,
-    `Stay curious: ${dogName} gets a new route script tomorrow.`,
+    `New picks at midnight.`,
+    `Tomorrow: fresh route for ${dogName}.`,
+    `See you tomorrow for the next walk.`,
   ]
   return lines[variant] ?? lines[0]
+}
+
+export interface QuickAdventurePick {
+  id: string
+  title: string
+  emoji: string
+  place: string
+  vibe: VibeArchetype
+  category: AdventureCategory
+  estMin: number
+  estMax: number
+  idealMoods: DogMood[]
+}
+
+const SD_COASTAL_QUICK: QuickAdventurePick[] = [
+  { id: 'sd-sunset', title: 'Sunset Walk', emoji: '🌅', place: 'Mission Bay', vibe: 'salt', category: 'exploration', estMin: 20, estMax: 40, idealMoods: ['chill', 'social'] },
+  { id: 'sd-cafe', title: 'Coffee Run', emoji: '☕', place: 'Better Buzz', vibe: 'pulse', category: 'social', estMin: 12, estMax: 22, idealMoods: ['chill', 'curious'] },
+  { id: 'sd-patio', title: 'Patio Hang', emoji: '🍺', place: 'Ballast Point', vibe: 'pulse', category: 'social', estMin: 18, estMax: 32, idealMoods: ['social', 'chill'] },
+  { id: 'sd-trail', title: 'Trail Walk', emoji: '🥾', place: 'Cowles Mountain', vibe: 'wander', category: 'exploration', estMin: 28, estMax: 50, idealMoods: ['explorer', 'restless'] },
+  { id: 'sd-beach', title: 'Dog Beach', emoji: '🏖', place: 'Coronado Dog Beach', vibe: 'salt', category: 'exploration', estMin: 25, estMax: 45, idealMoods: ['explorer', 'social'] },
+  { id: 'sd-pb', title: 'Beach Walk', emoji: '🌊', place: 'Pacific Beach', vibe: 'salt', category: 'routine', estMin: 18, estMax: 36, idealMoods: ['chill', 'curious'] },
+]
+
+const GENERIC_QUICK: QuickAdventurePick[] = [
+  { id: 'g-sunset', title: 'Sunset Walk', emoji: '🌅', place: 'Near you', vibe: 'salt', category: 'exploration', estMin: 18, estMax: 35, idealMoods: ['chill'] },
+  { id: 'g-park', title: 'Park Day', emoji: '🌳', place: 'Local park', vibe: 'wander', category: 'routine', estMin: 20, estMax: 38, idealMoods: ['social', 'chill'] },
+  { id: 'g-coffee', title: 'Coffee Run', emoji: '☕', place: 'Your block', vibe: 'pulse', category: 'social', estMin: 12, estMax: 24, idealMoods: ['chill', 'curious'] },
+  { id: 'g-neighborhood', title: 'Neighborhood Loop', emoji: '🏡', place: 'Home loop', vibe: 'pulse', category: 'routine', estMin: 15, estMax: 28, idealMoods: ['curious'] },
+  { id: 'g-explore', title: 'Explore Somewhere New', emoji: '🗺️', place: 'A new street', vibe: 'wander', category: 'exploration', estMin: 22, estMax: 40, idealMoods: ['explorer', 'curious'] },
+  { id: 'g-golden', title: 'Golden Hour Walk', emoji: '🌇', place: 'Around dusk', vibe: 'salt', category: 'chill', estMin: 18, estMax: 32, idealMoods: ['chill', 'social'] },
+]
+
+const URBAN_QUICK: QuickAdventurePick[] = [
+  { id: 'u-coffee', title: 'Coffee Run', emoji: '☕', place: 'Downtown', vibe: 'pulse', category: 'social', estMin: 12, estMax: 22, idealMoods: ['chill', 'social'] },
+  { id: 'u-park', title: 'Park Day', emoji: '🌳', place: 'City park', vibe: 'wander', category: 'routine', estMin: 18, estMax: 34, idealMoods: ['social'] },
+  { id: 'u-loop', title: 'Neighborhood Loop', emoji: '🚶', place: 'Sidewalk loop', vibe: 'pulse', category: 'routine', estMin: 16, estMax: 30, idealMoods: ['restless'] },
+  { id: 'u-sunset', title: 'Sunset Walk', emoji: '🌅', place: 'Waterfront', vibe: 'salt', category: 'exploration', estMin: 20, estMax: 38, idealMoods: ['chill'] },
+  { id: 'u-new', title: 'Explore Somewhere New', emoji: '🗺️', place: 'New block', vibe: 'wander', category: 'exploration', estMin: 22, estMax: 40, idealMoods: ['explorer'] },
+  { id: 'u-patio', title: 'Patio Hang', emoji: '🍺', place: 'Sidewalk café', vibe: 'pulse', category: 'social', estMin: 16, estMax: 30, idealMoods: ['social', 'chill'] },
+]
+
+const TRAIL_QUICK: QuickAdventurePick[] = [
+  { id: 't-hike', title: 'Trail Walk', emoji: '🥾', place: 'Local trailhead', vibe: 'wander', category: 'exploration', estMin: 30, estMax: 55, idealMoods: ['explorer', 'restless'] },
+  { id: 't-ridge', title: 'Ridge Walk', emoji: '⛰️', place: 'Hills nearby', vibe: 'wander', category: 'exploration', estMin: 32, estMax: 58, idealMoods: ['explorer'] },
+  { id: 't-coffee', title: 'Coffee Run', emoji: '☕', place: 'Trail town', vibe: 'pulse', category: 'social', estMin: 12, estMax: 22, idealMoods: ['chill'] },
+  { id: 't-park', title: 'Park Day', emoji: '🌳', place: 'Open space', vibe: 'wander', category: 'routine', estMin: 20, estMax: 38, idealMoods: ['social'] },
+  { id: 't-loop', title: 'Neighborhood Loop', emoji: '🏡', place: 'Quiet roads', vibe: 'pulse', category: 'routine', estMin: 15, estMax: 28, idealMoods: ['curious'] },
+  { id: 't-sunset', title: 'Sunset Walk', emoji: '🌅', place: 'Viewpoint', vibe: 'salt', category: 'exploration', estMin: 22, estMax: 40, idealMoods: ['chill'] },
+]
+
+const SUBURBAN_QUICK: QuickAdventurePick[] = [
+  { id: 's-park', title: 'Park Day', emoji: '🌳', place: 'Neighborhood park', vibe: 'wander', category: 'routine', estMin: 18, estMax: 36, idealMoods: ['social', 'chill'] },
+  { id: 's-loop', title: 'Neighborhood Loop', emoji: '🏡', place: 'Familiar blocks', vibe: 'pulse', category: 'routine', estMin: 14, estMax: 28, idealMoods: ['curious'] },
+  { id: 's-coffee', title: 'Coffee Run', emoji: '☕', place: 'Corner café', vibe: 'pulse', category: 'social', estMin: 12, estMax: 22, idealMoods: ['chill'] },
+  { id: 's-sunset', title: 'Sunset Walk', emoji: '🌅', place: 'Quiet streets', vibe: 'salt', category: 'exploration', estMin: 18, estMax: 34, idealMoods: ['chill'] },
+  { id: 's-explore', title: 'Explore Somewhere New', emoji: '🗺️', place: 'Next block over', vibe: 'wander', category: 'exploration', estMin: 20, estMax: 38, idealMoods: ['explorer'] },
+  { id: 's-treat', title: 'Treat Run', emoji: '🍖', place: 'Quick loop', vibe: 'pulse', category: 'routine', estMin: 10, estMax: 18, idealMoods: ['zoomie', 'restless'] },
+]
+
+export function quickAdventurePicksForZip(zip: string): QuickAdventurePick[] {
+  const locale = localeFromZip(zip)
+  if (locale === 'coastal') return SD_COASTAL_QUICK
+  if (locale === 'urban') return URBAN_QUICK
+  if (locale === 'trail') return TRAIL_QUICK
+  if (locale === 'suburban') return SUBURBAN_QUICK
+  return GENERIC_QUICK
+}
+
+export function missionFromQuickPick(params: {
+  pick: QuickAdventurePick
+  dogName: string
+  dogMood: DogMood
+  streak: number
+  nonce: string
+}): GeneratedMission {
+  const { pick, dogName, dogMood, streak, nonce } = params
+  const rarity = rollRarity(`${nonce}|r`, streak, false)
+  const moodMatchesToday = pick.idealMoods.includes(dogMood)
+  const flavor = flavorForMission({ mood: dogMood, title: pick.title, dogName, rarity })
+  return {
+    title: pick.title,
+    emoji: pick.emoji,
+    category: pick.category,
+    estimatedMinutesMin: pick.estMin,
+    estimatedMinutesMax: pick.estMax,
+    locationHint: pick.place,
+    idealMoods: pick.idealMoods,
+    moodMatchesToday,
+    rarity,
+    description: '',
+    flavor,
+    vibe: pick.vibe,
+  }
 }

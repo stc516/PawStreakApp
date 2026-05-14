@@ -15,11 +15,11 @@ export interface XpLevel {
 }
 
 export const XP_LEVELS: readonly XpLevel[] = [
-  { level: 1, name: 'Pup', min: 0, max: 299, icon: '\u{1F43E}' },
-  { level: 2, name: 'Scout', min: 300, max: 799, icon: '\u{1F33F}' },
-  { level: 3, name: 'Trailblazer', min: 800, max: 1799, icon: '\u{1F5FA}\uFE0F' },
-  { level: 4, name: 'Expedition', min: 1800, max: 3499, icon: '\u26F0\uFE0F' },
-  { level: 5, name: 'Legend', min: 3500, max: 99_999, icon: '\u{1F3C6}' },
+  { level: 1, name: 'Warm-up', min: 0, max: 299, icon: '\u{1F43E}' },
+  { level: 2, name: 'Building', min: 300, max: 799, icon: '\u{1F33F}' },
+  { level: 3, name: 'Steady', min: 800, max: 1799, icon: '\u{1F5FA}\uFE0F' },
+  { level: 4, name: 'Strong', min: 1800, max: 3499, icon: '\u26F0\uFE0F' },
+  { level: 5, name: 'All-star', min: 3500, max: 99_999, icon: '\u{1F3C6}' },
 ] as const
 
 export interface CurrentLevel {

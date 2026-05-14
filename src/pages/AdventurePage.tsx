@@ -4,9 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { AdventureShareCard } from '../components/adventure/AdventureShareCard'
 import { missionTimeLabel } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
-import { getAdventureMilestone, getSendOffLine } from '../lib/adventureMilestones'
+import { getAdventureMilestone } from '../lib/adventureMilestones'
 import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
-import { buildPlaceIdentity } from '../lib/placeIdentity'
 import { shareAdventure } from '../lib/shareAdventure'
 import { track } from '../lib/analytics'
 import { calculateAdventureXp } from '../lib/xp'
@@ -81,8 +80,6 @@ export function AdventurePage() {
     () => getAdventureMilestone(walkSeconds, state.dogName),
     [walkSeconds, state.dogName],
   )
-  const place = useMemo(() => buildPlaceIdentity(state), [state])
-
   const timerOffset = 565 - (565 * Math.min(walkSeconds, 3600)) / 3600
 
   async function handleShareAdventure() {
@@ -114,50 +111,34 @@ export function AdventurePage() {
         <button
           type='button'
           onClick={() => navigate('/app')}
-          className='mb-5 text-[13px] text-[var(--text-2)]'
+          className='mb-3 text-[13px] text-[var(--text-2)]'
         >
-          ← Today
+          ← Back
         </button>
-        <div
-          data-testid='adventure-send-off'
-          className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--orange)]'
-        >
-          {getSendOffLine(state.dogName)}
+        <div data-testid='adventure-send-off' className='text-[12px] font-medium text-[var(--text-2)]'>
+          {m.title}
         </div>
-        <h1 className='mt-2 font-[family-name:var(--fd),Fraunces,serif] text-[34px] font-semibold italic leading-[1.02] text-[var(--text)]'>
-          Enter {place.worldName}
-        </h1>
-        <p className='mt-3 text-[14px] leading-relaxed text-[var(--text-2)]'>
-          {place.atmosphere} {state.dogName} is discovering <span className='text-[var(--text)]'>{place.locationLine}</span>.
-        </p>
+        <h1 className='mt-1 text-[22px] font-semibold leading-tight tracking-tight text-[var(--text)]'>{m.locationHint}</h1>
+        <p className='mt-2 text-[13px] text-[var(--text-2)]'>{missionTimeLabel(m)}</p>
       </div>
-      <div className='walk-body gap-4 px-5 py-4'>
-        <article className='w-full rounded-[28px] bg-[radial-gradient(circle_at_85%_0%,rgba(255,107,53,0.20),transparent_35%),linear-gradient(165deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))] p-4 shadow-[0_22px_54px_rgba(0,0,0,0.38)]'>
-          <div className='flex items-start gap-3'>
-            <div className='grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[rgba(255,255,255,0.06)] text-[34px]'>
+      <div className='walk-body gap-3 px-5 py-3'>
+        <article className='w-full rounded-2xl border border-[color:var(--border)] bg-[var(--bg-card)] p-4'>
+          <div className='flex items-center gap-3'>
+            <div className='grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[var(--bg-elevated)] text-[28px]'>
               {m.emoji}
             </div>
             <div className='min-w-0'>
-              <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
-                Adventure unfolding
-              </div>
-              <h2 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[25px] leading-tight text-[var(--text)]'>
-                {visibleTitle}
-              </h2>
-              <p className='mt-2 text-[13px] leading-relaxed text-[var(--text-2)]'>&ldquo;{m.description}&rdquo;</p>
+              <h2 className='text-[17px] font-semibold leading-tight text-[var(--text)]'>{visibleTitle}</h2>
+              <p className='mt-0.5 text-[12px] text-[var(--text-2)]'>{m.locationHint}</p>
             </div>
           </div>
-          <div className='mt-4 rounded-2xl bg-[rgba(255,255,255,0.045)] px-3 py-2 text-[12px] leading-relaxed text-[var(--text-2)]'>
-            <span className='font-semibold text-[var(--blue)]'>{missionTimeLabel(m)}</span>
-            <span className='text-[var(--text-3)]'> · </span>
-            {place.microQuest}
-          </div>
+          {m.description ? (
+            <p className='mt-3 text-[13px] leading-relaxed text-[var(--text-2)]'>&ldquo;{m.description}&rdquo;</p>
+          ) : null}
         </article>
 
-        <div className='w-full rounded-[24px] bg-[rgba(255,255,255,0.035)] p-3 text-center' aria-label='Supporting timer'>
-          <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
-            Supporting timer
-          </div>
+        <div className='w-full rounded-2xl border border-[color:var(--border)] bg-[var(--bg-card)] p-3 text-center' aria-label='Timer'>
+          <div className='text-[10px] font-medium uppercase tracking-wide text-[var(--text-3)]'>Timer</div>
           <div className='mx-auto -my-7 scale-[0.72]'>
             <div className='timer-ring'>
               <svg viewBox='0 0 190 190' width='190' height='190'>
@@ -186,15 +167,9 @@ export function AdventurePage() {
           data-testid='adventure-memory-block'
           className='mx-auto w-full max-w-[340px] rounded-[24px] bg-[var(--bg-card)] p-3.5'
         >
-          <label
-            htmlFor='adventure-memory-input'
-            className='block text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-3)]'
-          >
-            Memory note · optional
+          <label htmlFor='adventure-memory-input' className='block text-[12px] font-medium text-[var(--text-2)]'>
+            Note (optional)
           </label>
-          <p className='mt-1 text-[12px] leading-snug text-[var(--text-2)]'>
-            Capture the detail that makes this place part of {state.dogName}&apos;s atlas.
-          </p>
           <textarea
             id='adventure-memory-input'
             data-testid='adventure-memory-input'
@@ -280,16 +255,9 @@ export function AdventurePage() {
             >
               {state.dogName} had a great day.
             </h2>
-            <p className='mt-1 text-[13px] italic leading-snug text-[var(--text-2)]'>
-              {state.dogName} added{' '}
-              <span className='text-[var(--text)]'>{completionModal.title}</span>
-              {completionModal.locationHint ? (
-                <>
-                  {' '}
-                  to the atlas near {completionModal.locationHint}
-                </>
-              ) : null}
-              .
+            <p className='mt-1 text-[13px] leading-snug text-[var(--text-2)]'>
+              {state.dogName} logged <span className='text-[var(--text)]'>{completionModal.title}</span>
+              {completionModal.locationHint ? <> near {completionModal.locationHint}</> : null}.
             </p>
 
             {completionModal.memoryText ? (
