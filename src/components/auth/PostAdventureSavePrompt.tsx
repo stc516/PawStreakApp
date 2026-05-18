@@ -32,8 +32,8 @@ export function PostAdventureSavePrompt() {
             Save {state.dogName}&apos;s adventure to keep it forever.
           </h3>
           <p className='mt-1 text-[12px] leading-snug text-[var(--text-2)]'>
-            Right now everything lives on this device. One-tap signup keeps your streak, packs, and
-            story safe across devices.
+            Right now everything lives on this device. One-tap signup keeps your streak and story
+            safe across devices.
           </p>
         </div>
       </div>

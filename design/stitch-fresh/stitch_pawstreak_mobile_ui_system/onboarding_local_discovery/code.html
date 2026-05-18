@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "tertiary": "#ffbe68",
+                  "surface-bright": "#3a3939",
+                  "outline": "#a38d7a",
+                  "on-tertiary": "#462a00",
+                  "on-primary-fixed": "#2d1600",
+                  "primary": "#ffbd7f",
+                  "on-surface": "#e5e2e1",
+                  "on-error": "#690005",
+                  "surface": "#131313",
+                  "primary-fixed": "#ffdcbf",
+                  "inverse-surface": "#e5e2e1",
+                  "tertiary-fixed": "#ffddb6",
+                  "surface-tint": "#ffb874",
+                  "secondary-fixed-dim": "#ffb599",
+                  "surface-container-highest": "#353534",
+                  "on-tertiary-fixed": "#2a1800",
+                  "on-secondary-container": "#531900",
+                  "surface-container-lowest": "#0e0e0e",
+                  "surface-container": "#201f1f",
+                  "on-primary-container": "#643700",
+                  "surface-dim": "#131313",
+                  "secondary-container": "#ff5e00",
+                  "on-tertiary-fixed-variant": "#643f00",
+                  "surface-container-low": "#1c1b1b",
+                  "on-primary-fixed-variant": "#6a3b00",
+                  "tertiary-container": "#e9a035",
+                  "surface-container-high": "#2a2a2a",
+                  "secondary": "#ffb599",
+                  "on-error-container": "#ffdad6",
+                  "inverse-primary": "#8c5000",
+                  "error": "#ffb4ab",
+                  "primary-fixed-dim": "#ffb874",
+                  "error-container": "#93000a",
+                  "background": "#0A0A0A",
+                  "inverse-on-surface": "#313030",
+                  "secondary-fixed": "#ffdbce",
+                  "outline-variant": "#554334",
+                  "surface-variant": "#353534",
+                  "on-primary": "#4b2800",
+                  "on-background": "#e5e2e1",
+                  "on-surface-variant": "#dbc2ad",
+                  "on-tertiary-container": "#5e3b00",
+                  "on-secondary-fixed": "#370e00",
+                  "on-secondary": "#5a1c00",
+                  "primary-container": "#ff9500",
+                  "on-secondary-fixed-variant": "#7f2b00",
+                  "tertiary-fixed-dim": "#ffb95a"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "stack-lg": "24px",
+                  "margin-page": "24px",
+                  "gutter-grid": "16px",
+                  "stack-sm": "8px",
+                  "card-padding": "20px",
+                  "stack-md": "16px"
+          },
+          "fontFamily": {
+                  "label-sm": ["Inter"],
+                  "headline-md": ["Inter"],
+                  "display-time": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "headline-lg-mobile": ["Inter"],
+                  "body-md": ["Inter"]
+          },
+          "fontSize": {
+                  "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                  "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+                  "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .amber-glow {
+      box-shadow: 0 0 20px 2px rgba(255, 149, 0, 0.15);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="docked full-width top-0 z-50 flex justify-between items-center w-full px-margin-page h-16 bg-surface dark:bg-surface">
+<button class="text-primary dark:text-primary hover:opacity-80 transition-all duration-200 Active: scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary tracking-tight">PawStreak</h1>
+<button class="font-label-sm text-label-sm text-on-surface-variant dark:text-on-surface-variant hover:opacity-80 transition-all duration-200">
+      Skip
+    </button>
+</header>
+<main class="flex-grow px-margin-page pt-stack-lg pb-32 max-w-[720px] mx-auto w-full">
+<!-- Header Section -->
+<section class="mb-stack-lg">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg mb-stack-sm text-on-surface">
+        Let’s find amazing spots nearby.
+      </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant opacity-80">
+        Personalized adventures based on your area and your dog’s favorite vibes.
+      </p>
+</section>
+<!-- Category Chips -->
+<section class="mb-stack-lg -mx-margin-page overflow-x-auto hide-scrollbar flex gap-3 px-margin-page">
+<button class="flex items-center gap-2 bg-primary-container text-on-primary-container px-5 py-2.5 rounded-full amber-glow whitespace-nowrap transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="beach_access">beach_access</span>
+<span class="font-label-sm text-label-sm">Beach</span>
+</button>
+<button class="flex items-center gap-2 border border-white/10 bg-surface-container text-on-surface-variant px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-200 hover:bg-surface-bright/20">
+<span class="material-symbols-outlined text-[20px]" data-icon="terrain">terrain</span>
+<span class="font-label-sm text-label-sm">Trail</span>
+</button>
+<button class="flex items-center gap-2 border border-white/10 bg-surface-container text-on-surface-variant px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-200 hover:bg-surface-bright/20">
+<span class="material-symbols-outlined text-[20px]" data-icon="coffee">coffee</span>
+<span class="font-label-sm text-label-sm">Coffee</span>
+</button>
+<button class="flex items-center gap-2 border border-white/10 bg-surface-container text-on-surface-variant px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-200 hover:bg-surface-bright/20">
+<span class="material-symbols-outlined text-[20px]" data-icon="sports_bar">sports_bar</span>
+<span class="font-label-sm text-label-sm">Brewery</span>
+</button>
+<button class="flex items-center gap-2 border border-white/10 bg-surface-container text-on-surface-variant px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-200 hover:bg-surface-bright/20">
+<span class="material-symbols-outlined text-[20px]" data-icon="park">park</span>
+<span class="font-label-sm text-label-sm">Park</span>
+</button>
+</section>
+<!-- Location Cards -->
+<section class="flex flex-col gap-stack-md">
+<!-- Card 1 -->
+<article class="bg-surface-container-low rounded-lg p-stack-sm border border-white/5 shadow-2xl relative overflow-hidden group">
+<div class="relative h-48 w-full rounded-[1.5rem] overflow-hidden mb-4">
+<img alt="Golden Retriever running on a sunny beach" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A sun-drenched cinematic shot of a happy Golden Retriever running across the white sands of Coronado Dog Beach in San Diego. The ocean waves are glistening in the background under a warm sunset light. The overall mood is vibrant, high-end, and joyful, matching a premium lifestyle brand aesthetic with deep amber tones and high-contrast shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCysxTZLfmxNEEe5xCAB2_JTipcDYduG0hM1mpvqbDFm62VbFXLh0FfDmJbuxAK-h9qi_fUbdgJo4LxqZBBPGDFqtRrVRKAaTPL5M9LiOOgNumWmw9JMJwgEIB2UdKUDWJwV1SOCfdYoMUNedEMLOnKa_4MRuSKaJJvhTk_5GEgHc-DD6AtuqctMCQjwiOVsRfJ7gs08GhlNISIXJT1AD39ySeCYrlGSOpZ1wZgxaPY8HzV0MJ_8r8SFSxjwF512e82Y0GGFrI3nBwF"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-4 flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-label-sm text-label-sm">2.4mi away</span>
+</div>
+</div>
+<div class="px-3 pb-3 flex justify-between items-end">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Coronado Dog Beach</h3>
+<div class="flex items-center gap-2">
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant opacity-60">128 reviews</span>
+</div>
+</div>
+<button class="bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-fixed font-bold px-8 py-3 rounded-full amber-glow active:scale-95 transition-all">
+            Start
+          </button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface-container-low rounded-lg p-stack-sm border border-white/5 shadow-2xl relative overflow-hidden group">
+<div class="relative h-48 w-full rounded-[1.5rem] overflow-hidden mb-4">
+<img alt="Dogs playing in a large open island field" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A wide-angle lifestyle shot of multiple dogs of various breeds playing in the lush, grassy fields of Fiesta Island, San Diego. The lighting is soft and golden, characteristic of a late afternoon glow. The background features calm bay waters and distant palm trees. The visual style is polished, cinematic, and evokes a sense of freedom and community with rich, warm color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnry98ifdc2jYgOKqN7cpgHILudpGDSavbNSBchyeWWP9WFv_bW0UJIbSVzVUQJQpw-rJfKu_6dHLyrifXSMJBsKOCad-wrCzrXdhAavRYCJeEzpICbqJJgDgvPnJQUwzs1EF0ZwseUIVPYGmOKIf1GDDeLT9E_Wl63NLJtvV2yS_fk6T7tC5AyRcSTaG18F9HdnFZLcA5lRJo47_8FjslKxLuiuso0uADoGZYSdF9hv801z0pj40sK_HnStufHqqTSdclxF6HJw65"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-4 flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-label-sm text-label-sm">4.1mi away</span>
+</div>
+</div>
+<div class="px-3 pb-3 flex justify-between items-end">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Fiesta Island</h3>
+<div class="flex items-center gap-2">
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star_half" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant opacity-60">254 reviews</span>
+</div>
+</div>
+<button class="bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-fixed font-bold px-8 py-3 rounded-full amber-glow active:scale-95 transition-all">
+            Start
+          </button>
+</div>
+</article>
+</section>
+</main>
+<!-- Bottom Nav Bar (Simulated Shell for Context) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-surface-container-low border-t border-white/10 shadow-lg z-50 rounded-t-lg md:hidden">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container/20 text-primary rounded-xl px-4 py-1 Active: scale-90 duration-150 ease-out">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-label-sm text-label-sm">Adventures</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+<span class="font-label-sm text-label-sm">Memories</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined" data-icon="pet_supplies">pet_supplies</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</div>
+</nav>
+</body></html>

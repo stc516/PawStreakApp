@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PawStreak Community Feed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#8c5000",
+                        "surface": "#131313",
+                        "tertiary": "#ffbe68",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed-dim": "#ffb599",
+                        "surface-dim": "#131313",
+                        "primary-fixed-dim": "#ffb874",
+                        "secondary-container": "#ff5e00",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "secondary-fixed": "#ffdbce",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#dbc2ad",
+                        "background": "#131313",
+                        "primary": "#ffbd7f",
+                        "outline-variant": "#554334",
+                        "tertiary-container": "#e9a035",
+                        "primary-container": "#ff9500",
+                        "on-secondary-fixed": "#370e00",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary": "#462a00",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-primary-fixed": "#2d1600",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#ffddb6",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-container": "#5e3b00",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffdcbf",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-container": "#531900",
+                        "secondary": "#ffb599",
+                        "surface-bright": "#3a3939",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-background": "#e5e2e1",
+                        "on-primary": "#4b2800",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary": "#5a1c00",
+                        "outline": "#a38d7a",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "card-padding": "20px",
+                        "stack-sm": "8px",
+                        "gutter-grid": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-time": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #0A0A0A; }
+        .glow-primary { box-shadow: 0 0 20px rgba(255, 149, 0, 0.15); }
+        .glow-text-primary { text-shadow: 0 0 8px rgba(255, 184, 116, 0.5); }
+        .glass-card { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen font-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-lg px-margin-page pt-4 pb-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Bailey profile" data-alt="A close-up high-resolution photograph of a cheerful Golden Retriever named Bailey with soft, sun-drenched fur. The background is a blurred sunset at a beach, creating a warm, cinematic atmosphere. The lighting is golden and soft, emphasizing the premium and intimate lifestyle feel of the brand's digital pet keepsake identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXkxzU_XN-f_q9JWMlxqUUw_eICFnCBYsDLBnfAvzqf3Qu_hae5xeqWv0uphzN7Pw6rVYTQeMFsf7brFwZOaL2eRMFJ-HBhivC6wvZsRLit3mucD7nr_MXLgM54LVovA2ZhK6TmNYJC6N_z-_FzU4kK5GNLlUVxHRseZBuftZ3RTWps7SzFag6xhn8qTRkz6ogQhBxCmu5tT5TXXlZrOCUNgSLmuXY5TsMYrTrFUDO6sSdaZeAg6vZ2JFWVpCYDAauRh_0WNJvSfG0"/>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">PawStreak Community</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-margin-page max-w-[720px] mx-auto space-y-stack-lg">
+<!-- Story/Recent Bar (Quick Filter/Highlights) -->
+<section class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-secondary-container">
+<div class="w-full h-full rounded-full border-2 border-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a small, fluffy dog looking curiously at the camera, framed within a circular profile aesthetic. The background is a soft-focus urban park at dusk. The overall image has a vibrant, warm tone with high-polish surfaces, reflecting the cinematic dark mode of the luxury pet app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAIaAz5AgCFU2k9z-5rudYjYAybCXjBdt5ZoLpxHRv8Oyccme6r19hQibXLlFhLb1yKqSzWCe7WPXSGpuoGiLViMGRHbF3ZAoCCXLymKfXAR1bq0Wf72f3rh3rWBfnR_aqRD7QqSAQ-kV3x-loTHZrpzAhG7nOc5vO5hMyjLJz8dOTkiPGOGrp4-7yzxvrUjUB-eEFFfs7ZTWJXvoZGQtRmBd4ujbL-4jNZSwwAysDpGhoctapdCc7xLvtuiOsmBxwzPT_Rd0oQxvK"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Luna</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="w-16 h-16 rounded-full p-[2px] bg-outline-variant/30">
+<div class="w-full h-full rounded-full border-2 border-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A high-quality image of a sleek French Bulldog wearing a stylish collar, sitting elegantly in a modern living room with soft ambient lighting. The atmosphere is intimate and sophisticated, consistent with a premium lifestyle brand for discerning pet owners. The color palette features deep blacks and warm amber highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5GWilxDF471G8Axv21dZUdtjFkXpmdlWz5KcjBcADo4hSUfoCN6xZSjMNkYJiW5Xx14bRcCFjDWfW1FgwT0gPdPx13aTpDHXgg7uryyvHgJsiVTQ9U9aZz4efgqP1nszLX8-aQRRpzHry9xshTpkcVqRtJJPNC52Kld9gW7g8iLkAnZZ3PurG7wXWO6y4WG-8YSsVb4H6hEL4e5NbHhNu-ZAcOP1nP7BITixou95S4i41jFO_WKFgVd9_BVfLlG6oJCfcfdFKVxaV"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Cooper</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="w-16 h-16 rounded-full p-[2px] bg-outline-variant/30">
+<div class="w-full h-full rounded-full border-2 border-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A playful beagle puppy jumping in the air in a lush green field during the late afternoon. The sunlight creates a beautiful backlight effect, making the puppy's coat glow. The image quality is crisp and professional, fitting the modern startup aesthetic of the app's visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1oOWUjTGefULSJMR6pnqKTU42NreoG5pIBUw0K1nMNNfXPuLYgfOqJV8MqgeB_p5AkrnNxLgq9gS_TpyEYtC8Wm9IuASnyTzbXui98RktGE4L4xyWL55YM22bwHTaWnq6kkxoVw7rKe03zJdZ3mwYSzYAAdiukhlUDJl1BfUNi8sxFnCLu-MrjC_dmvNoPEkaCx0XQLOKL8X0ppz63KEBERO3rOXrwIed0Eg5KWx87JzLcTfDV1rtgQRb4KJihFwfunodry-84Gwa"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Milo</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="w-16 h-16 rounded-full p-[2px] bg-outline-variant/30">
+<div class="w-full h-full rounded-full border-2 border-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A regal German Shepherd sitting tall on a rocky trail overlooking a canyon at sunrise. The lighting is dramatic and cinematic, with long shadows and a rich, warm sky. The scene evokes adventure and companionship, perfectly aligned with the app's core emotional mission for pet owners." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBpZR7rhDfHP-L7jQ6MwMLtcwsZ6WtEsWDRPbF69UvHMalEz4NGFxK11s33mUrLWl2uohH7SM2WwW4h5ANQK_ynePYSp_Nc0acBS86pk2nrnw5ZE2TUVPGTuHNQnwIB5k0U5AyRk-53qH5TYliXVU_7EOpmyP2jxX8tU-KJQxaaAM4gwMHY9ImTytWPt67v7ojydAxITzvFGY9CYJiKouIP9ittWGP2588yDGu1ARbdbqMkHVBKnazdlFvjhfHELSbIffZuk9IY1Jw"/>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Bear</span>
+</div>
+</section>
+<!-- Community Feed Content -->
+<div class="space-y-stack-lg">
+<!-- Feed Card 1 -->
+<article class="glass-card rounded-lg overflow-hidden flex flex-col glow-primary transition-all duration-300">
+<div class="px-card-padding pt-card-padding pb-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-primary/20 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Profile avatar of a happy Border Collie dog against a soft blue sky. The image is clean and high-contrast, designed to look like a social media profile element in a luxury pet application. The lighting is natural and bright, enhancing the friendly and approachable brand personality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0iA4jB2Rb5VonC_39bhWVkD5Mj0iao-qbffDyBPz-PWnAliwz37GNWGeSjT3wsSvbBSBHNghXL5vacAtPDayCR6aEs6VuIcoPoZhanR18UNZYQ1QgIKIRGU3qDT0yWd641XSaVNhhGMCm5Rlcd47fPmRcvOy82fQaTh8TEcblNSYSpqipZG_YeELxuLCRRP7rOXi2eM9eml7UPsONXeDpB6wHFXpYV290Pk8k54DjOAtytlb7s41V4KwtLaxhQPmWjmc7dPtupYlH"/>
+</div>
+<div>
+<div class="flex items-center gap-1">
+<span class="font-headline-md text-body-lg text-on-surface">Luna</span>
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant text-label-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="location_on">location_on</span>
+<span>Balboa Park, San Diego</span>
+</div>
+</div>
+</div>
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+<div class="relative w-full aspect-[4/5]">
+<img class="w-full h-full object-cover" data-alt="A wide-angle cinematic shot of a Border Collie running joyfully through a field of yellow wildflowers during the golden hour. The background features rolling hills under a deep orange and purple sunset sky. The lighting is high-contrast and dramatic, creating a premium, filmic look that emphasizes the pet as a family member." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIs-E07sDwLvwLeI7Z4EKgmJ3aPvbLzc4KfBAP2rQZZSI3voWUWLvEolQ4NZcHBP137Qe-vXK1VpIdSfKbsWcYg3seMFxiV_19PmTc54Oh6om1yNtPXmIDbKFpVM1mRoweACnW9WAP4eNg5DIwEk4yh-bqA7sOIx9Cbq5-lLhx-LTHrGOz0SPcXJFGbs8CXVQSurrs3dIsxwoyxqsQK6dyYR882zdAjEg6mh6RlsPua4-x9v3caGBP8dlszQsfHECryDUaTEeMiA0-"/>
+<div class="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-4 left-margin-page flex items-center gap-2">
+<span class="bg-primary-container/20 backdrop-blur-md border border-primary/30 px-3 py-1 rounded-full text-primary text-label-sm font-label-sm">
+                            Morning Run
+                        </span>
+<span class="bg-surface-container/40 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface text-label-sm font-label-sm">
+                            +120 XP
+                        </span>
+</div>
+</div>
+<div class="p-card-padding space-y-3">
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                        Chasing the morning sun at Balboa today. Luna's 5th day streak in a row! 🐾✨
+                    </p>
+<div class="flex items-center gap-6 pt-2">
+<button class="flex items-center gap-2 group transition-all active:scale-95">
+<span class="material-symbols-outlined text-primary glow-text-primary" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="text-label-sm font-label-sm text-primary">24 High-Paws</span>
+</button>
+<button class="flex items-center gap-2 group text-on-surface-variant hover:text-on-surface transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-label-sm font-label-sm">8 Comments</span>
+</button>
+<button class="ml-auto flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Feed Card 2 (Bento Style Variation) -->
+<article class="glass-card rounded-lg overflow-hidden flex flex-col glow-primary transition-all duration-300">
+<div class="px-card-padding pt-card-padding pb-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-primary/20 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a regal Doberman Pinscher with sharp features, sitting against a dark charcoal studio background. The lighting is moody and directional, highlighting the sleek coat. This visual matches the cinematic dark mode aesthetic of the app, targeting owners who value high-polish and modern luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwJl-hMQnQEfmW7nf41COIrWd3QMwiGn0rxzewGACPj0cH7e_YEe4OvbaiGk7tmZ2fbq4UnBISmRnULNWnjI5dCgaDpcE82eNbAHL_p1Cb7M_KcQnt4MyuxhSTcb7Hbl-EcGs7v9bcbRSz6O1Etg0yVrfpL62I65n5_fJrO_EBhPpnzPjkw-V2ketOUSeZMyTTIT8mrDkvLoJtm8QUzIiwV518KTFvkhkxe0y6zHwje1d81fLnIFXU39aiUQRE_q0fE2NSE7DedP2o"/>
+</div>
+<div>
+<div class="flex items-center gap-1">
+<span class="font-headline-md text-body-lg text-on-surface">Cooper</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant text-label-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="explore">explore</span>
+<span>Coronado Dog Beach</span>
+</div>
+</div>
+</div>
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-[2px] w-full aspect-square bg-outline-variant/10">
+<div class="h-full">
+<img class="w-full h-full object-cover" data-alt="A photo showing a dog's paws walking on wet sand at the water's edge. The setting sun reflects off the water, creating a sparkling, warm glow. The image is intimate and focuses on the small details of the adventure, evoking a sense of companionship and digital keepsake quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA61NAAjyNUQ5sU3H6bWcvvvM83rKzUs7QJSvzeFsNxm3qFnEh42gOPyaBAdUkGV2i6POQLTZyCEN0mAcBzbZ09zfr-TtXNcNnwwWTQjt-sAIbtQJAhHCPdYGEwqJTIWRFPra-mCxTTiyS4mYglDfjjy0opijdhLGdXr44cG2YSpChdW2kFbEZog_jSRBiAIvCXJThEFqQFjn-1tX_p0QQWGh9aF594742f4lv6V4YHXzDP0I3-A6YqpDG4cdtF_P6fsgz18GhFM_mz"/>
+</div>
+<div class="grid grid-rows-2 gap-[2px] h-full">
+<img class="w-full h-full object-cover" data-alt="A playful shot of a large dog shaking off water after a swim at the beach. Tiny droplets of water are frozen in the air, catch the evening sunlight. The mood is energetic and happy, presented with a vibrant amber accent palette against a dark background environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPfApsxhl5JlF52tFgeagGyGM_opnibKuxAPLbHZ8UjiAl1soOq5HXowpDKZ2_1KKFT1MIE_e-UB8qo7rI766NX8ckhhE4OThJE9PnPIVlIhUFqux1rs7Xvb_f9beAbt0WIO4mS85t-gVtazSepDDSEjVqc1v-1sOgFoz0lN7n-4xfrPTbdeCbOldRr6T9fGIavGjWIcZsPYoi2ZNywcIJTm3gOrfl5NjJgWMrNW59VV8ldmLj6MpMArU3e7A388WGfBViW_8xDQ4o"/>
+<img class="w-full h-full object-cover" data-alt="A serene image of a dog sitting quietly on the sand, looking out at the ocean horizon as the sky turns deep pink and purple. The lighting is soft and diffused, creating a calm and luxury atmosphere. The visual style follows the Cinematic Dark Mode principle of the brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvLXtVr-cGZBsJa55Yn_mazL_M9xhHBpkNeotVBLnLPyOVa9qPu-xSjeRl9EpQn8UIv9tEi55JMka3VLN7UDqk0Vun5us7JOkm26IfMtMDIRL3i09Ojp4Dlpz0H5mtUkb2raOUO5OlL3pu2LbOBO1X9LP2YiwXOAEeUVnvzV2bWz0ZrQo-bPyfh-X-WrSvFS21U1dLE4RNxa545xtZy3HrDVE99_74A1pgA9mDiny6xkc8GJwcC2qsnnc7Wfk0a5lBpNS6b0WLu5Ob"/>
+</div>
+</div>
+<div class="p-card-padding space-y-3">
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                        Weekend vibes only. Coronado never disappoints. 🌊🦴
+                    </p>
+<div class="flex items-center gap-6 pt-2">
+<button class="flex items-center gap-2 group text-on-surface-variant hover:text-primary transition-colors active:scale-95">
+<span class="material-symbols-outlined group-hover:text-primary" data-icon="pets">pets</span>
+<span class="text-label-sm font-label-sm">52 High-Paws</span>
+</button>
+<button class="flex items-center gap-2 group text-on-surface-variant hover:text-on-surface transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-label-sm font-label-sm">15 Comments</span>
+</button>
+<button class="ml-auto flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<div class="fixed bottom-24 right-6 z-50">
+<button class="w-14 h-14 bg-gradient-to-br from-primary-container to-secondary-container rounded-full flex items-center justify-center shadow-lg shadow-primary/20 active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined text-on-primary-container text-[28px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-md flex justify-around items-center px-4 pt-3 pb-8 shadow-lg border-t border-outline-variant/10">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="text-label-sm font-label-sm mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="text-label-sm font-label-sm mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="timeline">timeline</span>
+<span class="text-label-sm font-label-sm mt-1">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

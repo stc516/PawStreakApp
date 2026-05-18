@@ -1,0 +1,235 @@
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffbd7f",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-surface-variant": "#dbc2ad",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#643700",
+                        "outline-variant": "#554334",
+                        "on-tertiary-container": "#5e3b00",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary": "#ffbe68",
+                        "surface-container-highest": "#353534",
+                        "surface-container-high": "#2a2a2a",
+                        "secondary-fixed": "#ffdbce",
+                        "secondary-container": "#ff5e00",
+                        "surface-tint": "#ffb874",
+                        "surface-container-lowest": "#0e0e0e",
+                        "primary-fixed-dim": "#ffb874",
+                        "primary-fixed": "#ffdcbf",
+                        "outline": "#a38d7a",
+                        "primary-container": "#ff9500",
+                        "on-error": "#690005",
+                        "on-background": "#e5e2e1",
+                        "tertiary-container": "#e9a035",
+                        "secondary": "#ffb599",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "inverse-primary": "#8c5000",
+                        "background": "#131313",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#2d1600",
+                        "on-tertiary": "#462a00",
+                        "on-secondary-fixed-variant": "#7f2b00",
+                        "on-secondary-fixed": "#370e00",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "surface-container": "#201f1f",
+                        "on-secondary-container": "#531900",
+                        "secondary-fixed-dim": "#ffb599",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "on-secondary": "#5a1c00",
+                        "on-primary": "#4b2800",
+                        "on-surface": "#e5e2e1",
+                        "surface-variant": "#353534",
+                        "tertiary-fixed": "#ffddb6",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-bright": "#3a3939",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "20px",
+                        "stack-lg": "24px",
+                        "margin-page": "24px",
+                        "gutter-grid": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-time": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-overlay {
+            background: radial-gradient(circle at 50% 50%, rgba(255, 189, 127, 0.1) 0%, transparent 70%);
+        }
+        .seasonal-gradient {
+            background: linear-gradient(180deg, transparent 0%, rgba(10, 10, 10, 0.9) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="w-full top-0 sticky z-40 bg-background flex justify-between items-center px-margin-page py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary font-headline-lg-mobile text-headline-lg-mobile" data-icon="pets">pets</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">PawStreak</h1>
+</div>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="px-margin-page mt-stack-lg">
+<!-- Hero Section -->
+<section class="mb-stack-lg relative overflow-hidden rounded-lg p-6 bg-surface-container-low border border-white/5">
+<div class="absolute inset-0 glow-overlay"></div>
+<div class="relative z-10">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background mb-2">Current Season: Autumn</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Collect memories while the leaves fall.</p>
+<!-- Streak Badge -->
+<div class="mt-stack-md flex items-center gap-3 bg-primary/10 w-fit px-4 py-2 rounded-full border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-icon="local_fire_department" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Active Streak: 14 Days</span>
+</div>
+</div>
+</section>
+<!-- Seasonal Journey -->
+<div class="space-y-stack-lg">
+<!-- ACTIVE CARD: Golden Autumn -->
+<div class="group relative rounded-lg overflow-hidden border border-primary/30 bg-surface-container-high transition-transform duration-300 active:scale-[0.98]">
+<div class="h-64 w-full relative">
+<img alt="Golden Autumn Landscape" class="w-full h-full object-cover" data-alt="A cinematic low-angle photograph of a winding forest path covered in vibrant orange and red fallen leaves. Soft morning sunlight filters through the golden canopy of maple trees, creating a warm and intimate atmosphere. The visual style is premium and lifestyle-focused, with deep shadows and glowing amber highlights that align with a dark-mode pet ownership app aesthetic. The overall mood is peaceful and nostalgic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDldaszVEi-fy1NDX-soo9OZRbRJx_DlSrDOx4YrFfBweFWNGYUTamrMiJ6x7NJ9U81ys6cf95qjQ1ZvC84xklBbHRhtdWwdFUeY6Tw_PA93szCqEnjKoWeiA23RtFwxkyyv2ZrPTgL1N9TiSHotILkGGf5pGk6I1zUGOEpihCMgiPt0rOJUvcqoeIV-qvVrtSp3DYS_IMxIN8wkI3__aol_CH5mgCJmuBVFHBNHUTWhT9Vuhw0rBQL1gX1-FGSOuebLeKFLFLUat6m"/>
+<div class="absolute inset-0 seasonal-gradient"></div>
+<div class="absolute bottom-0 left-0 p-card-padding w-full">
+<div class="flex justify-between items-end mb-stack-sm">
+<div>
+<span class="bg-primary text-on-primary font-label-sm text-[10px] px-2 py-0.5 rounded-full uppercase tracking-tighter mb-2 inline-block">Active Now</span>
+<h3 class="font-headline-md text-headline-md text-white">Golden Autumn</h3>
+</div>
+<div class="text-right">
+<span class="font-display-time text-[24px] text-primary">72%</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary-container shadow-[0_0_12px_rgba(255,189,127,0.5)] w-[72%]"></div>
+</div>
+</div>
+</div>
+<div class="p-card-padding flex justify-between items-center">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-high bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a golden retriever smiling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0fLZP3KuG8ucExmXivh3sG8uB2eCt5HZRM2vKGKWawH-Nbloh1PLgIbDX99a2cwFytCIVmvgKa0xaWdnerZgUEDvtedyrBanUGkEWCU1pBj9qpmUnrAhvBol6B2pYRbrmItjOKGQHjjN-DjZKiuAtNRB0z9fAdnLFpybivBR4421jlNNhRD20OAPsbN-_aaIlH5G9ATYHizx0vPp9X60LvChAEu14ojz8Mwmu1IzdGNAsOIsnnR6KMV9Incaub8aNi99Ma-z3IhWO"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-high bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a cute beagle puppy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxUmbpmqA03boSC58Y_PZeZC-aJxBusah519waYQXne59CqMoY8ht-NTYrWdCbSWAQwUl0CZ_USiLvxPM2I6mTU1lJ_sVb-Sp6eK6HH-3rlUGQD-0Rsde-gGdg2L7pmfxigSaqAVA3bOiZTBaqPsc_2D0m-dwlqioV5ja091KpZhyOahD8P4gkCHXeKN-YWwPJawdHILwRLMXNcDLtJgId0sGx71OrJaaI1km9lRnnhtNxmZTT8xzVvaaFrx7WkobLG9HxQR2Um2AQ"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-high bg-primary/20 flex items-center justify-center">
+<span class="text-[10px] font-bold text-primary">+12</span>
+</div>
+</div>
+<button class="flex items-center gap-2 text-primary font-label-sm text-label-sm hover:opacity-80">
+                        CONTINUE JOURNEY
+                        <span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- INACTIVE CARD: Crisp Winter -->
+<div class="relative rounded-lg overflow-hidden border border-white/5 bg-surface-container-low opacity-80 grayscale-[0.5]">
+<div class="h-48 w-full relative">
+<img alt="Crisp Winter Landscape" class="w-full h-full object-cover" data-alt="A serene, minimalist landscape of a snow-covered valley under a deep twilight blue sky. Lone pine trees are dusted with heavy white snow, standing against a dark, moody mountain backdrop. The lighting is cold and atmospheric, with subtle blue tones and crisp whites, maintaining the cinematic dark-mode luxury aesthetic. The mood is quiet, still, and expectant." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP2vT7jFjRw_H-mlFNFaPuy8VEzJv4hmInMNtMA3DcW3JMIectsaZTOOMoRK5LaFSLCPdhZdLMNwAdFUNSrByMavohKyTWZ7PXPhkXW0ULbZqmg6--95uzMXkK79N7xAEuWieKlPcgSyCKn-qj7_6ZR3c42yXelw5uYhB1p2vvb-B08BYrzLYH0fsDDW6TBrboYXHEzsvrx0T3j4ggRaUnRitpscjNcvRZ2RNXt0d9fZ_r8pYDEp7bHOagZzZaRD-g0yIXursqVq7s"/>
+<div class="absolute inset-0 seasonal-gradient"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/40 text-[48px]" data-icon="lock">lock</span>
+</div>
+<div class="absolute bottom-0 left-0 p-card-padding w-full">
+<h3 class="font-headline-md text-headline-md text-white/60">Crisp Winter</h3>
+<p class="font-label-sm text-label-sm text-white/40 uppercase tracking-widest mt-1">Unlocks in 42 Days</p>
+</div>
+</div>
+</div>
+<!-- INACTIVE CARD: Spring Bloom -->
+<div class="relative rounded-lg overflow-hidden border border-white/5 bg-surface-container-low opacity-80 grayscale-[0.5]">
+<div class="h-48 w-full relative">
+<img alt="Spring Bloom Landscape" class="w-full h-full object-cover" data-alt="A macro photograph of delicate cherry blossoms emerging from dark branches against a soft-focus background of a green meadow. The lighting is gentle and ethereal, with subtle pink and white tones popping against a dark, cinematic background. The style is modern startup aesthetic, combining natural beauty with a sophisticated, polished finish. The mood is hopeful and fresh." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY3fI2zbrQbmnMmyqaR7139OvuomSwpYjmBSz3buy28meC6yBu9DsPIa3Jd52-WOI6gxAL6gCymDIkHuprNWP8QAk_xk92TFXkl9ry1FF6bVcILvxiTraI1YcvAXy8-x8O-uvgeSt6XuzFLuCDnEa7uVLoKPSueAXl9_mwDI4VbNJBzRFXefiiW_crKoBV8hYaiIDUR2aX64sMIvwSvkVnkcA6M4ENxcbIMjmLlIrjPqdJSV3CQMLbkT2iXm_DEx3CA_2u1wPUJl6D"/>
+<div class="absolute inset-0 seasonal-gradient"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/40 text-[48px]" data-icon="lock">lock</span>
+</div>
+<div class="absolute bottom-0 left-0 p-card-padding w-full">
+<h3 class="font-headline-md text-headline-md text-white/60">Spring Bloom</h3>
+<p class="font-label-sm text-label-sm text-white/40 uppercase tracking-widest mt-1">Locked</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-surface-container-low/95 backdrop-blur-md shadow-lg rounded-t-xl z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-sm text-label-sm mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-label-sm text-label-sm mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary/10 rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-sm text-label-sm mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="timeline">timeline</span>
+<span class="font-label-sm text-label-sm mt-1">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</a>
+</nav>
+<!-- FAB (Hidden on this view per guidelines as it's a detail/progression screen, but keeping logic for potential dashboard reuse) -->
+</body></html>

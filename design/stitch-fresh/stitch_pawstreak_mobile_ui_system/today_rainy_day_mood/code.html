@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffbd7f",
+                    "on-tertiary-fixed": "#2a1800",
+                    "on-surface-variant": "#dbc2ad",
+                    "error-container": "#93000a",
+                    "on-primary-container": "#643700",
+                    "outline-variant": "#554334",
+                    "on-tertiary-container": "#5e3b00",
+                    "on-primary-fixed-variant": "#6a3b00",
+                    "inverse-surface": "#e5e2e1",
+                    "tertiary": "#ffbe68",
+                    "surface-container-highest": "#353534",
+                    "surface-container-high": "#2a2a2a",
+                    "secondary-fixed": "#ffdbce",
+                    "secondary-container": "#ff5e00",
+                    "surface-tint": "#ffb874",
+                    "surface-container-lowest": "#0e0e0e",
+                    "primary-fixed-dim": "#ffb874",
+                    "primary-fixed": "#ffdcbf",
+                    "outline": "#a38d7a",
+                    "primary-container": "#ff9500",
+                    "on-error": "#690005",
+                    "on-background": "#e5e2e1",
+                    "tertiary-container": "#e9a035",
+                    "secondary": "#ffb599",
+                    "on-tertiary-fixed-variant": "#643f00",
+                    "inverse-primary": "#8c5000",
+                    "background": "#131313",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-fixed": "#2d1600",
+                    "on-tertiary": "#462a00",
+                    "on-secondary-fixed-variant": "#7f2b00",
+                    "on-secondary-fixed": "#370e00",
+                    "tertiary-fixed-dim": "#ffb95a",
+                    "surface-container": "#201f1f",
+                    "on-secondary-container": "#531900",
+                    "secondary-fixed-dim": "#ffb599",
+                    "surface-dim": "#131313",
+                    "surface": "#131313",
+                    "on-secondary": "#5a1c00",
+                    "on-primary": "#4b2800",
+                    "on-surface": "#e5e2e1",
+                    "surface-variant": "#353534",
+                    "tertiary-fixed": "#ffddb6",
+                    "inverse-on-surface": "#313030",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-bright": "#3a3939",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "card-padding": "20px",
+                    "stack-lg": "24px",
+                    "margin-page": "24px",
+                    "gutter-grid": "16px",
+                    "stack-sm": "8px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-time": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>.rainy-overlay {
+    background-image: linear-gradient(to bottom, rgba(19, 19, 19, 0.8), rgba(19, 19, 19, 0.95)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuCDBkWS9bH-OExiRpJ5pTZuDg2l4lcc__xevmoWVarATk57yzFcIhp8X2aH3SzmA-HdPay4Qm3gkqiTPHLmJee0pA6iaFSgpIkmOCF8w7satVnVnblbkwo0MH5N-mqKlC8_liZToo_543X4Hdu923sLbVe_FeyYiOs-ie_Bc5xLiUQQZ3W3EgLVEAFB3OOWCyje0qXE4Z13hmXOLtxzCjwu2Om1OXfxR_zTEdqKLbUrgkZA5CRExFHT4e-OdybfQTGIU101lgbP0GSj);
+    background-size: cover;
+    background-position: center
+    }
+.amber-glow {
+    box-shadow: 0 0 40px 10px rgba(255, 189, 127, 0.1)
+    }
+.glass-card {
+    background: rgba(28, 27, 27, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen rainy-overlay">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-background/50 backdrop-blur-md flex justify-between items-center px-margin-page py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-headline-lg-mobile" data-icon="pets">pets</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">PawStreak</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="px-margin-page pt-stack-lg pb-32 max-w-2xl mx-auto">
+<!-- Hero Section -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-end mb-stack-md">
+<div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Cozy indoor day?</h2>
+<p class="font-body-lg text-on-surface-variant">The rain is perfect for some mental stimulation.</p>
+</div>
+<!-- Weather Widget -->
+<div class="glass-card p-4 rounded-lg flex flex-col items-center amber-glow">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="rainy">rainy</span>
+<span class="font-headline-md text-headline-md mt-1">62°</span>
+</div>
+</div>
+</section>
+<!-- Featured Activity Card (Asymmetric Layout) -->
+<section class="mb-stack-lg">
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low amber-glow">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-60"></div>
+<img alt="Cozy Dog Indoors" class="w-full h-64 object-cover" data-alt="A portrait of a serene Golden Retriever lying on a plush, cream-colored rug inside a dimly lit living room during a rainy sunset. The soft glow of an amber lamp reflects off the dog's coat, creating a warm contrast with the cool, dark blue rain-streaked window in the background. The mood is calm, safe, and intimate, featuring rich textures of fur and fabric in a cinematic dark-mode style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdOoPwnAb62mFmZxrGPkP0LhrOaw-0TluYgmC2pTSWO_1-gOHrg6oqpIYq-16HUkM15brJ3lSb_10DyDhXXDepUlfScdvbPYdkk2T8iAcyMxdURqTU2gYkxhM8YCmNiWniGxs8II6Hlz1ekTFzvjAeTzwhi15aFEbruQ87yPvrxOKpXSTi-RTvHX01qQrWwcc4Ykdi3W5IkOjG_UpUv6RO1j8x5vR3CcTwh7Cw7CuZSR52BlG3KSSgzFlcfpL5qAdDcqyk7QFO0Qgx"/>
+<div class="absolute bottom-0 left-0 p-card-padding w-full">
+<span class="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary font-label-sm text-label-sm mb-2">RAINY DAY SPECIAL</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Indoor scent work</h3>
+<p class="font-body-md text-on-surface-variant mb-4">Hide treats around the room to engage their nose and brain.</p>
+<button class="w-full bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-fixed font-headline-md py-3 rounded-full hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                        Start Activity
+                    </button>
+</div>
+</div>
+</section>
+<!-- Routine Bento Grid -->
+<section>
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-stack-md">Indoor Routine</h4>
+<div class="grid grid-cols-2 gap-gutter-grid">
+<!-- Activity 1 -->
+<div class="glass-card p-card-padding rounded-lg flex flex-col justify-between aspect-square">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="toys">toys</span>
+</div>
+<div>
+<h5 class="font-headline-md text-on-surface text-lg">Living room play</h5>
+<p class="font-label-sm text-on-surface-variant">15 min tug-of-war session</p>
+</div>
+</div>
+<!-- Activity 2 -->
+<div class="glass-card p-card-padding rounded-lg flex flex-col justify-between aspect-square">
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<h5 class="font-headline-md text-on-surface text-lg">Lick Mat Prep</h5>
+<p class="font-label-sm text-on-surface-variant">Calming yogurt &amp; peanut butter</p>
+</div>
+</div>
+<!-- Streak Progress -->
+<div class="col-span-2 glass-card p-card-padding rounded-lg flex items-center gap-4">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175" stroke-dashoffset="40" stroke-width="4"></circle>
+</svg>
+<span class="absolute material-symbols-outlined text-primary" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div>
+<h5 class="font-headline-md text-on-surface">12 Day Streak</h5>
+<p class="font-body-md text-on-surface-variant">Don't let the rain stop your path!</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-surface-container-low/95 backdrop-blur-md shadow-lg z-50 rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-primary bg-primary/10 rounded-full px-4 py-1 hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-sm text-label-sm">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-label-sm text-label-sm">Plan</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-sm text-label-sm">Journey</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="timeline">timeline</span>
+<span class="font-label-sm text-label-sm">Path</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</div>
+</nav>
+</body></html>

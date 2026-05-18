@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PawStreak - Plan Your Next Adventure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#8c5000",
+            "surface": "#131313",
+            "tertiary": "#ffbe68",
+            "inverse-on-surface": "#313030",
+            "secondary-fixed-dim": "#ffb599",
+            "surface-dim": "#131313",
+            "primary-fixed-dim": "#ffb874",
+            "secondary-container": "#ff5e00",
+            "on-primary-fixed-variant": "#6a3b00",
+            "secondary-fixed": "#ffdbce",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#dbc2ad",
+            "background": "#131313",
+            "primary": "#ffbd7f",
+            "outline-variant": "#554334",
+            "tertiary-container": "#e9a035",
+            "primary-container": "#ff9500",
+            "on-secondary-fixed": "#370e00",
+            "surface-container-high": "#2a2a2a",
+            "on-tertiary": "#462a00",
+            "surface-container-highest": "#353534",
+            "surface-variant": "#353534",
+            "on-tertiary-fixed": "#2a1800",
+            "on-primary-fixed": "#2d1600",
+            "error": "#ffb4ab",
+            "tertiary-fixed": "#ffddb6",
+            "on-error-container": "#ffdad6",
+            "surface-container": "#201f1f",
+            "on-tertiary-container": "#5e3b00",
+            "error-container": "#93000a",
+            "primary-fixed": "#ffdcbf",
+            "surface-container-lowest": "#0e0e0e",
+            "surface-container-low": "#1c1b1b",
+            "on-secondary-container": "#531900",
+            "secondary": "#ffb599",
+            "surface-bright": "#3a3939",
+            "tertiary-fixed-dim": "#ffb95a",
+            "on-background": "#e5e2e1",
+            "on-primary": "#4b2800",
+            "on-error": "#690005",
+            "on-tertiary-fixed-variant": "#643f00",
+            "on-secondary": "#5a1c00",
+            "outline": "#a38d7a",
+            "inverse-surface": "#e5e2e1"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-page": "24px",
+            "stack-lg": "24px",
+            "stack-md": "16px",
+            "card-padding": "20px",
+            "stack-sm": "8px",
+            "gutter-grid": "16px"
+          },
+          "fontFamily": {
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "display-time": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "label-sm": ["Inter"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+            "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+            "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+            "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+            "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+            "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { background-color: #0A0A0A; }
+    .glow-amber { box-shadow: 0 0 20px 0 rgba(255, 149, 0, 0.2); }
+    .glass-card { background: rgba(28, 28, 30, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .gradient-primary { background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); }
+    .mask-fade-bottom { mask-image: linear-gradient(to bottom, black 70%, transparent 100%); }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md flex justify-between items-center px-margin-page pt-4 pb-2">
+<div class="flex items-center gap-stack-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a friendly Golden Retriever dog named Bailey, looking directly at the camera with a happy expression. The background is a soft, out-of-focus garden setting with warm sunlight. The image is framed within a clean circular border, emphasizing a personalized and high-quality pet-focused user experience in a cinematic dark-themed application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZjC-KhDgDnOJtOFbvATCOa2zdtBPb5aWVyvs4pnAyGTC2n41-fb9WBikqUaU7KwvTsln-FbPg6DkhLYoF_Rj2FZlDiskeyI-PFnTPgbAQFlKKesdKa-TAbj7RPvQutHEksWpvWkxASdsrDptaJN2VcBuaPD8msHy0xPzCExnDxGeAhJ15T4Zq9MNAKzvs_ukNkOske1rFSVlOgSSkRfTF9tmDrdyNHkNyayyXbD0tIkndq1vFif6RSj8PDeF6u1rh7KOZ6ucUCaGC"/>
+</div>
+<div>
+<h1 class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Plan</h1>
+<p class="text-headline-md font-headline-md text-primary">PawStreak</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-variant/10 transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<main class="mt-24 px-margin-page">
+<!-- Hero Section -->
+<section class="mb-stack-lg">
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile mb-1">What should we do next?</h2>
+<p class="text-body-md font-body-md text-on-surface-variant">Pick a vibe. Find a place. Make a memory.</p>
+</section>
+<!-- Filter Chips -->
+<section class="mb-stack-lg overflow-x-auto pb-2 scrollbar-hide">
+<div class="flex gap-stack-sm whitespace-nowrap">
+<button class="px-6 py-2 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm shadow-md glow-amber">Beach</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Trail</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Coffee</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Brewery</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Park</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Social</button>
+</div>
+</section>
+<!-- Location Feed -->
+<section class="space-y-stack-md">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">beach_access</span>
+<h3 class="text-headline-md font-headline-md">Beach Spots</h3>
+</div>
+<!-- Card 1: Coronado Dog Beach -->
+<div class="glass-card rounded-lg overflow-hidden flex flex-col group transition-all duration-300 hover:scale-[1.01]">
+<div class="relative h-48 overflow-hidden">
+<img alt="Coronado Dog Beach" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A wide-angle landscape of Coronado Dog Beach at golden hour, featuring soft white sand and the majestic Hotel del Coronado in the distance. A golden retriever is happily playing in the surf. The lighting is warm and cinematic, reflecting a premium lifestyle brand with deep amber highlights and deep blacks in the shadows for a luxury feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNFbtaFTql7nLVnO8mI8wbXnEj5ZmXGrIppzOXxiNRho7P4Khoj56uxAIBhmdGN20nIV-MDeh061t80Vn695AJeabstbXairnW_YbBNbDFSeM79LWzDw1MouqvQET6kHbk9_YwKiuXHAvRgZ_BxC5Osr8ELjRMLp1zBjLaFbjveL3zg6td5C_zRlguvr-q_5NUvCzsjC4jQWCCubYREQao_YLqWv7zPBONsdFXGEL-VxaYhKL6ixIXR5N0bshSgZ00ME-zdnDSiGJE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 flex items-center gap-1 text-white/90">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-label-sm font-label-sm">Coronado, CA • 2.4 mi</span>
+</div>
+</div>
+<div class="p-card-padding flex justify-between items-end">
+<div class="flex-1">
+<h4 class="text-headline-md font-headline-md mb-1">Coronado Dog Beach</h4>
+<p class="text-body-md font-body-md text-on-surface-variant line-clamp-2">Wide sandy beach perfect for zoomies and sunset social hours.</p>
+</div>
+<button class="gradient-primary text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm glow-amber active:scale-95 transition-all">Start</button>
+</div>
+</div>
+<!-- Card 2: Fiesta Island -->
+<div class="glass-card rounded-lg overflow-hidden flex flex-col group transition-all duration-300 hover:scale-[1.01]">
+<div class="relative h-48 overflow-hidden">
+<img alt="Fiesta Island" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Fiesta Island in San Diego showing vast, off-leash open spaces where dogs can run freely. The scene is captured with cinematic depth of field, highlighting a dog looking out over the calm bay waters under a vibrant sunset sky. The color palette emphasizes warm oranges and deep indigos, aligning with a high-end, lifestyle-first digital application aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm7ohPI60_WnxAJS-m0QKri9-wvc-25fimqpY3-V5pIjCbt7jk7WysGgYZsNS3K17uwNCRt7FY5D9RfKVam5QZ1Nrd1wqHaUMtUVs7kZns23shrWVFE8b65X6gfknKiR-j1cR0AoF4euMfMPskyzkMBEAZxSYlTn6bvwz9eGU7ErLhbiLefzV4etFq8WrYZNeodI3clJgBd4yXSrFT3hxDoXhsM2iKgoAGsXZLjaDS-Mdvi8omvou7mv0Edayr0pzzjCqEzojAaiYF"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 flex items-center gap-1 text-white/90">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-label-sm font-label-sm">San Diego, CA • 3.1 mi</span>
+</div>
+</div>
+<div class="p-card-padding flex justify-between items-end">
+<div class="flex-1">
+<h4 class="text-headline-md font-headline-md mb-1">Fiesta Island</h4>
+<p class="text-body-md font-body-md text-on-surface-variant line-clamp-2">Great views and tons of off-leash space for social pups.</p>
+</div>
+<button class="gradient-primary text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm glow-amber active:scale-95 transition-all">Start</button>
+</div>
+</div>
+<!-- Card 3: Ocean Beach Dog Beach -->
+<div class="glass-card rounded-lg overflow-hidden flex flex-col group transition-all duration-300 hover:scale-[1.01]">
+<div class="relative h-48 overflow-hidden">
+<img alt="Ocean Beach Dog Beach" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="The iconic Dog Beach in Ocean Beach, San Diego, during a clear afternoon. Dogs of various breeds are interacting in the foreground with the San Diego River meeting the Pacific Ocean in the background. The lighting is crisp and natural, with a focus on vibrant colors and high contrast, echoing a premium dark-mode UI with bright, saturated accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1yhTX6vwImdsxKa-M21cgVEC-dwq3ZdNX-C05PUZHaw14nnmkpruksaIZJtnMVYwkxqEP8X1efHv639w_yhgVCNQVqirnJkMQzJDbW0HL0YWAwWitME7c0VfqBUFQ1Vm_uw9Es32rs9-XbN65_oMjK1I_YY8nGnbWQx5_lkXIya05C-LptIOHi_AqlsgrLjt2xoyb6R6e33KQlwIwBs0nGcz_hbBxtzF2S1hL5tqVLIRfWz268Ili1Ri4cuiNm_RFS_hYrdJXkXGY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 flex items-center gap-1 text-white/90">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-label-sm font-label-sm">San Diego, CA • 4.2 mi</span>
+</div>
+</div>
+<div class="p-card-padding flex justify-between items-end">
+<div class="flex-1">
+<h4 class="text-headline-md font-headline-md mb-1">Ocean Beach Dog Beach</h4>
+<p class="text-body-md font-body-md text-on-surface-variant line-clamp-2">Laid back vibes and happy pups exploring the coastal shoreline.</p>
+</div>
+<button class="gradient-primary text-on-primary px-6 py-2 rounded-full font-label-sm text-label-sm glow-amber active:scale-95 transition-all">Start</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-md border-t border-outline-variant/20 shadow-lg px-4 pt-3 pb-8 flex justify-around items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-label-sm font-label-sm mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary transition-colors group scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="text-label-sm font-label-sm mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-label-sm font-label-sm mt-1">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-variant": "#353534",
+                  "primary-fixed-dim": "#ffb874",
+                  "tertiary-fixed": "#ffddb6",
+                  "surface-container-high": "#2a2a2a",
+                  "on-primary": "#4b2800",
+                  "secondary-fixed-dim": "#ffb599",
+                  "on-error-container": "#ffdad6",
+                  "surface-container-highest": "#353534",
+                  "surface-container-lowest": "#0e0e0e",
+                  "on-primary-fixed": "#2d1600",
+                  "on-tertiary-fixed-variant": "#643f00",
+                  "on-surface": "#e5e2e1",
+                  "on-background": "#e5e2e1",
+                  "secondary-container": "#ff5e00",
+                  "inverse-primary": "#8c5000",
+                  "error": "#ffb4ab",
+                  "surface-bright": "#3a3939",
+                  "primary": "#ffbd7f",
+                  "tertiary-fixed-dim": "#ffb95a",
+                  "primary-container": "#ff9500",
+                  "on-surface-variant": "#dbc2ad",
+                  "on-secondary-fixed-variant": "#7f2b00",
+                  "outline": "#a38d7a",
+                  "on-secondary-fixed": "#370e00",
+                  "on-primary-container": "#643700",
+                  "inverse-surface": "#e5e2e1",
+                  "surface-tint": "#ffb874",
+                  "inverse-on-surface": "#313030",
+                  "surface-dim": "#131313",
+                  "surface": "#131313",
+                  "secondary-fixed": "#ffdbce",
+                  "outline-variant": "#554334",
+                  "on-error": "#690005",
+                  "surface-container": "#201f1f",
+                  "error-container": "#93000a",
+                  "surface-container-low": "#1c1b1b",
+                  "primary-fixed": "#ffdcbf",
+                  "tertiary": "#ffbe68",
+                  "secondary": "#ffb599",
+                  "on-tertiary-fixed": "#2a1800",
+                  "on-secondary-container": "#531900",
+                  "on-tertiary": "#462a00",
+                  "on-tertiary-container": "#5e3b00",
+                  "tertiary-container": "#e9a035",
+                  "on-primary-fixed-variant": "#6a3b00",
+                  "on-secondary": "#5a1c00",
+                  "background": "#0A0A0A"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "stack-md": "16px",
+                  "stack-lg": "24px",
+                  "margin-page": "24px",
+                  "card-padding": "20px",
+                  "stack-sm": "8px",
+                  "gutter-grid": "16px"
+          },
+          "fontFamily": {
+                  "body-lg": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "headline-md": ["Inter"],
+                  "body-md": ["Inter"],
+                  "label-sm": ["Inter"],
+                  "headline-lg-mobile": ["Inter"],
+                  "display-time": ["Inter"]
+          },
+          "fontSize": {
+                  "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                  "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .amber-glow {
+      box-shadow: 0 0 30px 2px rgba(255, 149, 0, 0.15);
+    }
+    .radial-bg-glow {
+      background: radial-gradient(circle at center, rgba(255, 184, 116, 0.08) 0%, rgba(10, 10, 10, 0) 70%);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#0A0A0A] text-on-background font-body-md antialiased min-h-screen flex flex-col items-center overflow-x-hidden">
+<!-- Top Navigation Shell -->
+<header class="flex justify-between items-center w-full px-margin-page pt-4 pb-2 bg-background dark:bg-background fixed top-0 z-50">
+<div class="flex items-center gap-stack-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Profile picture of Bailey the golden retriever" class="w-full h-full object-cover" data-alt="A close-up, warm-toned studio portrait of a friendly golden retriever with expressive amber eyes. The lighting is soft and cinematic, highlighting the silky texture of its golden fur against a deep ink-black background. The mood is intimate and premium, consistent with a high-end pet lifestyle brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA22GssA8ec5DtJs-GtXoy1kYyjlzTsTxPvmi4-Z-12OSxqu06Gdw1QuScffaBTvx9dGWfsJ7FbSKGJh0XskEZcfExVQ0S-KQiFvAX513PdT_BY7fJZy7JA6XW_Gp9RM6SlK2dCoTU8RqNRr5Se61prpjci7XG1E5xEMWc177t_7An26zvyb-4DJe801NVgnEXsPMolKngI7mQ1ZVelq1CPAMGNxoZaUi3O0zJXD4uQGoTkD0GjF4XG5gdapXsbryiKyxQBXi30opOz"/>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary tracking-tight">Today</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10 transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="w-full max-w-[720px] px-margin-page pt-24 pb-32 flex flex-col items-center gap-stack-lg radial-bg-glow">
+<!-- Hero Section -->
+<section class="w-full text-center space-y-2">
+<p class="text-label-sm font-label-sm text-primary tracking-[0.2em] uppercase">MEMORY SAVED</p>
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile md:text-headline-lg md:font-headline-lg text-on-surface">Bailey had a great day.</h2>
+</section>
+<!-- Adventure Summary Card -->
+<div class="w-full bg-surface-container-low border border-white/10 rounded-lg p-card-padding amber-glow">
+<div class="flex justify-between items-start mb-stack-md">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Coronado Dog Beach</h3>
+<p class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">explore</span> Adventure
+          </p>
+</div>
+<div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-label-sm border border-primary/20">
+          +120 XP
+        </div>
+</div>
+<div class="flex items-center gap-stack-sm pt-stack-md border-t border-outline-variant/20">
+<div class="relative">
+<span class="material-symbols-outlined text-primary text-[24px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<div class="absolute inset-0 bg-primary/20 blur-lg rounded-full"></div>
+</div>
+<p class="text-body-md font-body-md text-on-surface">12 Day Streak Protected</p>
+</div>
+</div>
+<!-- Discovery Text -->
+<div class="w-full py-stack-lg text-center px-4">
+<blockquote class="text-headline-md font-headline-md italic text-primary-fixed-dim leading-relaxed opacity-90">
+        "Something in the tide pools. She circled it three times."
+      </blockquote>
+</div>
+<!-- Share Card -->
+<div class="w-full aspect-[4/5] relative rounded-lg overflow-hidden group shadow-2xl">
+<img alt="Bailey at Coronado Dog Beach" class="w-full h-full object-cover" data-alt="A wide, cinematic shot of a golden retriever playing at the edge of the ocean at sunset. The water is shimmering with warm amber reflections of the sun, and the dog is captured mid-stride with sand flying. The sky is a gradient of deep indigo and soft orange. The style is high-contrast and atmospheric, emphasizing a sense of joy and freedom." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiNqb32mgNoT2TTidNscjmA5Q8MLRu7v-uvXXWBsATSdj-HAHw5ckKRaj2fRrfEzdRzmfbUbL41yuIF20y8Op1PxLKJMjOnvVn_IMKjHyWmRP_uJJzilVnRE8hMmSKinWaqhqjBcEWXypftk6mZh6fQMwSDrWdGIXbp97Q8sP4S6_cdUMNuXg88vlIKNlZPGM5wuuSneIAPuEgvSUPwDrxUBVa7pmp1F_kfrYWsn88cPlc1ndIZ8FfSPojcCuxb21IMdV_szkrJBbP"/>
+<!-- Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-black/20"></div>
+<!-- Content on Card -->
+<div class="absolute bottom-0 left-0 w-full p-stack-lg space-y-stack-sm">
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<h4 class="text-headline-md font-headline-md text-white">Bailey</h4>
+<p class="text-label-sm font-label-sm text-primary uppercase tracking-widest">BEACH ADVENTURE</p>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-display-time font-display-time text-primary">12</span>
+<span class="text-label-sm font-label-sm text-white/60 -mt-2">DAYS</span>
+</div>
+</div>
+</div>
+<!-- Share Action Overlay -->
+<div class="absolute top-4 right-4">
+<button class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<!-- Footer Actions -->
+<footer class="w-full flex flex-col items-center gap-stack-md mt-stack-lg">
+<p class="text-body-md font-body-md text-on-surface-variant text-center">Come back tomorrow — the story continues.</p>
+<div class="flex flex-col w-full gap-stack-sm items-center">
+<button class="w-full max-w-[280px] bg-gradient-to-r from-[#FF9500] to-[#FF5E00] text-on-primary font-bold py-4 rounded-full text-body-lg shadow-[0_4px_20px_rgba(255,94,0,0.3)] hover:brightness-110 active:scale-[0.98] transition-all">
+          Done
+        </button>
+<button class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors py-2">
+          Remind me
+        </button>
+</div>
+</footer>
+</main>
+<!-- Bottom Navigation Shell (Relevance Check: User at Top-Level Journey End) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-6 bg-surface-container-lowest/90 dark:bg-surface-container-lowest/90 backdrop-blur-md border-t border-outline-variant/20 shadow-lg md:hidden">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-label-sm font-label-sm">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-label-sm font-label-sm">Plan</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary dark:text-primary scale-[0.95]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="text-label-sm font-label-sm">Journey</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-label-sm font-label-sm">Path</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-label-sm font-label-sm">Profile</span>
+</div>
+</nav>
+</body></html>

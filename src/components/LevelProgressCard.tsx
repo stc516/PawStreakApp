@@ -53,7 +53,7 @@ export function LevelProgressCard({
           <div className='flex items-baseline justify-between gap-2'>
             <div>
               <div className='text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--orange)]'>
-                Level {current.level}
+                Chapter {current.level}
               </div>
               <div
                 data-testid='level-progress-card-name'
@@ -80,7 +80,7 @@ export function LevelProgressCard({
                 </span>
               ) : null}
               <div className='text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--text-3)]'>
-                XP
+                Energy
               </div>
             </div>
           </div>
@@ -111,7 +111,7 @@ export function LevelProgressCard({
               </span>
             ) : (
               <>
-                {xpToNext.toLocaleString()} XP to{' '}
+                {xpToNext.toLocaleString()} energy to{' '}
                 <strong className='text-[var(--text)]'>{next?.name}</strong>
               </>
             )}

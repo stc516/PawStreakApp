@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffbd7f",
+                    "on-tertiary-fixed": "#2a1800",
+                    "on-surface-variant": "#dbc2ad",
+                    "error-container": "#93000a",
+                    "on-primary-container": "#643700",
+                    "outline-variant": "#554334",
+                    "on-tertiary-container": "#5e3b00",
+                    "on-primary-fixed-variant": "#6a3b00",
+                    "inverse-surface": "#e5e2e1",
+                    "tertiary": "#ffbe68",
+                    "surface-container-highest": "#353534",
+                    "surface-container-high": "#2a2a2a",
+                    "secondary-fixed": "#ffdbce",
+                    "secondary-container": "#ff5e00",
+                    "surface-tint": "#ffb874",
+                    "surface-container-lowest": "#0e0e0e",
+                    "primary-fixed-dim": "#ffb874",
+                    "primary-fixed": "#ffdcbf",
+                    "outline": "#a38d7a",
+                    "primary-container": "#ff9500",
+                    "on-error": "#690005",
+                    "on-background": "#e5e2e1",
+                    "tertiary-container": "#e9a035",
+                    "secondary": "#ffb599",
+                    "on-tertiary-fixed-variant": "#643f00",
+                    "inverse-primary": "#8c5000",
+                    "background": "#131313",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-fixed": "#2d1600",
+                    "on-tertiary": "#462a00",
+                    "on-secondary-fixed-variant": "#7f2b00",
+                    "on-secondary-fixed": "#370e00",
+                    "tertiary-fixed-dim": "#ffb95a",
+                    "surface-container": "#201f1f",
+                    "on-secondary-container": "#531900",
+                    "secondary-fixed-dim": "#ffb599",
+                    "surface-dim": "#131313",
+                    "surface": "#131313",
+                    "on-secondary": "#5a1c00",
+                    "on-primary": "#4b2800",
+                    "on-surface": "#e5e2e1",
+                    "surface-variant": "#353534",
+                    "tertiary-fixed": "#ffddb6",
+                    "inverse-on-surface": "#313030",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-bright": "#3a3939",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "card-padding": "20px",
+                    "stack-lg": "24px",
+                    "margin-page": "24px",
+                    "gutter-grid": "16px",
+                    "stack-sm": "8px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-time": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(28, 28, 30, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .amber-glow {
+        box-shadow: 0 0 40px -10px rgba(255, 149, 0, 0.15);
+      }
+      .amber-radial {
+        background: radial-gradient(circle at center, rgba(255, 189, 127, 0.08) 0%, transparent 70%);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary/30">
+<!-- Top App Bar -->
+<header class="w-full top-0 sticky bg-background z-50 flex justify-between items-center px-margin-page py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary font-headline-lg-mobile text-headline-lg-mobile" data-icon="pets">pets</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">PawStreak</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="px-margin-page pb-32 space-y-stack-lg">
+<!-- Hero Context -->
+<section class="py-stack-lg">
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">New Beginnings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-70">Your path with Bailey starts here. Every milestone begins with a single step.</p>
+</section>
+<!-- Bento Grid of Empty States -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-grid">
+<!-- Journey Empty State (Large) -->
+<div class="glass-card rounded-lg p-card-padding relative overflow-hidden flex flex-col items-center justify-center min-h-[320px] md:col-span-2 amber-glow">
+<div class="absolute inset-0 amber-radial pointer-events-none"></div>
+<div class="relative z-10 text-center flex flex-col items-center">
+<div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mb-stack-md border border-white/5">
+<span class="material-symbols-outlined text-primary/40 text-5xl" data-icon="photo_camera" style="font-variation-settings: 'wght' 200;">photo_camera</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-2">No memories yet.</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[280px] mx-auto mb-stack-lg">Start your first walk to capture the moments that matter most.</p>
+<button class="bg-gradient-to-r from-primary-container to-secondary-container text-on-primary font-label-sm text-label-sm px-8 py-4 rounded-full hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                        Start First Walk
+                    </button>
+</div>
+</div>
+<!-- Favorites Empty State -->
+<div class="glass-card rounded-lg p-card-padding flex flex-col items-center justify-center min-h-[260px] text-center border-white/5">
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-stack-md border border-white/5">
+<span class="material-symbols-outlined text-primary/30 text-3xl" data-icon="location_on" style="font-variation-settings: 'wght' 200;">location_on</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface mb-1">No favorite places found.</p>
+<p class="font-body-md text-body-md text-on-surface-variant px-4">Save the spots Bailey loves visiting on your map.</p>
+</div>
+<!-- Finds Empty State -->
+<div class="glass-card rounded-lg p-card-padding flex flex-col items-center justify-center min-h-[260px] text-center border-white/5 overflow-hidden relative">
+<!-- Subtle background prompt for context -->
+<div class="absolute bottom-[-20px] right-[-20px] opacity-5">
+<span class="material-symbols-outlined text-[120px]" data-icon="redeem">redeem</span>
+</div>
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-stack-md border border-white/5">
+<span class="material-symbols-outlined text-primary/30 text-3xl" data-icon="search_spark" data-weight="fill" style="font-variation-settings: 'FILL' 1;">search_spark</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface mb-1">Bailey hasn't found any treasures today.</p>
+<p class="font-body-md text-body-md text-on-surface-variant px-4">Sniffing around usually turns up something magical.</p>
+</div>
+<!-- Profile Summary (Secondary Small State) -->
+<div class="glass-card rounded-lg p-card-padding flex items-center gap-stack-md md:col-span-2 border-white/5">
+<div class="w-14 h-14 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 border border-white/10">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="pets">pets</span>
+</div>
+<div class="flex-grow">
+<p class="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-1">Status</p>
+<p class="font-body-md text-body-md text-on-surface italic">Waiting for the first spark of activity...</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Inspiration Section -->
+<section class="mt-stack-lg">
+<div class="rounded-lg overflow-hidden glass-card h-[200px] relative flex items-end p-card-padding group">
+<img alt="Happy dog running" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40 group-hover:scale-105 transition-transform duration-700" data-alt="A cinematic, low-light photograph of a golden retriever joyfully running through a misty field at dusk. The lighting is dramatic and moody, with warm amber glows from a setting sun breaking through deep indigo clouds. The aesthetic is premium and lifestyle-focused, using deep shadows and vibrant light highlights to create an emotional, cinematic atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7iB3V9URHtyy8CrV4-jU_w6rT3Z6_8WLSGt7O4hCxPU9zc7AcYBT1wxOf93KcKhZJs0CzEC3nrCBo0UOG6_HREckA0pNmBibtNJXyGj1Keqgz6zEvB_1oPa6AGwKEEp7ulh8w7jJZC-cfGpK46EtLP_QZG23TNKS_Vb9bkYVrbPSP5mQrI6sm53CnIWlXCjjwqH4MAfELAZAV9BPh_TP4mMenMCsMhX-fk_Y7F8ktWnY6VhnkHZ5xJnM3stevawlZiA3wKPFgToI1"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+<div class="relative z-10">
+<p class="font-label-sm text-label-sm text-primary mb-1">Inspiration</p>
+<p class="font-headline-md text-headline-md text-on-background">Every legend has a day one.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-surface-container-low/95 backdrop-blur-md shadow-lg z-50 rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-sm text-label-sm">Today</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-label-sm text-label-sm">Plan</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary bg-primary/10 rounded-full px-4 py-1 active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-sm text-label-sm">Journey</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="timeline">timeline</span>
+<span class="font-label-sm text-label-sm">Path</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A; /* Cinematic Deep Black */
+            -webkit-font-smoothing: antialiased;
+        }
+        .glow-amber {
+            filter: drop-shadow(0 0 12px rgba(255, 149, 0, 0.3));
+        }
+        .radial-glow {
+            background: radial-gradient(circle at center, rgba(255, 149, 0, 0.12) 0%, rgba(255, 149, 0, 0) 70%);
+        }
+        .glass-card {
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#8c5000",
+                        "surface": "#131313",
+                        "tertiary": "#ffbe68",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed-dim": "#ffb599",
+                        "surface-dim": "#131313",
+                        "primary-fixed-dim": "#ffb874",
+                        "secondary-container": "#ff5e00",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "secondary-fixed": "#ffdbce",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#dbc2ad",
+                        "background": "#131313",
+                        "primary": "#ffbd7f",
+                        "outline-variant": "#554334",
+                        "tertiary-container": "#e9a035",
+                        "primary-container": "#ff9500",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "surface-container": "#201f1f",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary": "#ffb599",
+                        "on-background": "#e5e2e1",
+                        "on-primary": "#4b2800",
+                        "outline": "#a38d7a",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "card-padding": "20px",
+                        "stack-sm": "8px",
+                        "gutter-grid": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface selection:bg-primary-container/30">
+<!-- Top AppBar -->
+<header class="bg-background dark:bg-background flex justify-between items-center w-full px-margin-page pt-4 pb-2 docked full-width top-0 z-50 fixed">
+<div class="flex items-center gap-3">
+<div class="relative group">
+<div class="absolute -inset-1 bg-primary/20 rounded-full blur group-hover:bg-primary/30 transition duration-200"></div>
+<img alt="Profile picture of Bailey the golden retriever" class="w-10 h-10 rounded-full object-cover relative border border-white/10" data-alt="A high-quality close-up portrait of a friendly Golden Retriever named Bailey with soft, golden fur and warm, soulful eyes. The dog is positioned against a soft-focus outdoor natural background with golden hour lighting that creates a cinematic halo effect. The image is framed as a circular profile avatar, conveying a sense of premium companionship and warmth within a dark-mode app interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCil4Iq3vcXhwJAOxzkFHo5SNPqSoGvsYFb_HTUuYOMw9fwDgocdvgPcaEthSZ9FmzFQzDx5SOf46v7VeVeoVEQ9BJ6AdW00MkOTfdEc--L0vEQ83ivw4mBGeGF7sC9WQY7eL6MN-7GlMUEaduetBcle9cvVyITaiCarS_oqpbdF5Jfvjdvu509-cuU_XU_dE0Db-JoEpFfSV_bdxtuInTB6PgEeqM-l3XlCkbQo-xFBKpAOYWKVTGCIiwlNUyMiwRJcpN6Zz7xj7Ai"/>
+</div>
+<div>
+<div class="flex items-center gap-1">
+<span class="text-primary font-bold text-headline-md font-headline-md">Bailey</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">12 day streak</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right mr-2 hidden sm:block">
+<p class="text-label-sm font-label-sm text-on-surface-variant">San Diego</p>
+<p class="text-primary font-bold">72°</p>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin-page min-h-screen">
+<!-- Welcome Hero -->
+<section class="mb-stack-lg">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile mb-1">Ready for an adventure?</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Make today a good one.</p>
+</section>
+<!-- Quick Actions Categories -->
+<section class="mb-stack-lg overflow-x-auto no-scrollbar -mx-margin-page px-margin-page">
+<div class="flex gap-4 min-w-max">
+<!-- Active Category -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-16 h-16 rounded-2xl flex items-center justify-center relative primary-gradient shadow-[0_0_20px_rgba(255,149,0,0.3)] transition-transform active:scale-95">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<span class="text-label-sm font-label-sm text-primary">Dog Beach</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-16 h-16 rounded-2xl flex items-center justify-center bg-surface-container border border-white/5 transition-all hover:bg-surface-container-high active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">coffee</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Coffee Run</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-16 h-16 rounded-2xl flex items-center justify-center bg-surface-container border border-white/5 transition-all hover:bg-surface-container-high active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">park</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Trail Walk</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-16 h-16 rounded-2xl flex items-center justify-center bg-surface-container border border-white/5 transition-all hover:bg-surface-container-high active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">groups</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Patio Hang</span>
+</button>
+</div>
+</section>
+<!-- Recommended Nearby Bento Card -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="text-headline-md font-headline-md">Recommended Nearby</h2>
+</div>
+<div class="relative rounded-lg overflow-hidden glass-card group">
+<div class="aspect-[4/3] relative">
+<img alt="Coronado Dog Beach" class="w-full h-full object-cover" data-alt="A panoramic wide shot of Coronado Dog Beach at sunset, with a golden retriever happily running along the pristine shoreline. The sky is a dramatic blend of deep orange, purple, and ink-black as the sun dips below the horizon. The water reflects the vibrant sunset colors, creating a glowing, cinematic landscape. The overall mood is luxurious, intimate, and serene, matching the premium lifestyle-first dark UI aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTCrFtR5bJqIK2BuHTUKz7bGFyuzcGD6zVslXAmIfeivpLgvimmwsNe-xFqcTetAmmUJ5LgGVfgedL2XgTKCjfEEj-0hQQJoXOqmk3I_C28ZegmykbNFQb2pWr9trX89AKwmK7viViDGDWwRp69zkS0dzKI32SC6Hn3Fyccac7WkJ3MA6a-v4E2N30LcXcbf9ZG7nYFIOIpckump2KsnE9kJaMqZZ8-5-aODBVxEpnlLsa7S_kAgGdmffjtCpn_WGPYMF8hBbgDat6"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-card-padding w-full">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="text-headline-md font-headline-md text-white mb-1">Coronado Dog Beach</h3>
+<div class="flex items-center gap-2 text-on-surface-variant mb-3">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-label-sm font-label-sm">Coronado, CA</span>
+<span class="mx-1">•</span>
+<span class="text-label-sm font-label-sm">2.4 mi</span>
+</div>
+<p class="text-body-md font-body-md text-white/80 line-clamp-1 max-w-[70%]">Wide open beach and good vibes.</p>
+</div>
+<button class="primary-gradient px-6 py-2.5 rounded-full text-white font-bold active:scale-95 transition-transform shadow-lg shadow-orange-900/40">
+                                Let's go
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Memories Carousel -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="text-headline-md font-headline-md">Recent Memories</h2>
+<button class="text-primary text-label-sm font-label-sm hover:underline">See all</button>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar -mx-margin-page px-margin-page">
+<!-- Memory Item 1 -->
+<div class="flex-shrink-0 w-32 space-y-2">
+<div class="aspect-square rounded-2xl overflow-hidden border border-white/5">
+<img alt="Sunset Walk" class="w-full h-full object-cover" data-alt="A vertical shot of a golden retriever silhouetted against a vibrant San Diego sunset on a beach. The dog is looking toward the ocean waves. The colors are warm ambers and deep purples. High-end lifestyle photography style with soft edge-fading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdg1Nv4cHTZWNgSXwPUW8diWpF3aowrTkM1JT0DHeIF65W00MMbQDbGH2MsJxp9V2f3g3yM45UkpBXuDIHn7qKhLQpIHQ1gjJNDVTiBDS7ZDPD81YiQi-NgatBhirl-TUu2U7v9Xtbdit90htJ72H9faL4cFBLKsuo-c64QObFm8YT2bBqMO1FEfkMjZv5JObok84TSLHNBIa3hiDMk3v7ETwuefBGHIhvKPFxZGToNQzWaey3ER3BOOitiK4oySDN3zUmNF2atYeZ"/>
+</div>
+<div>
+<p class="text-label-sm font-bold text-white truncate">Sunset Walk</p>
+<p class="text-[10px] text-on-surface-variant">May 12</p>
+</div>
+</div>
+<!-- Memory Item 2 -->
+<div class="flex-shrink-0 w-32 space-y-2">
+<div class="aspect-square rounded-2xl overflow-hidden border border-white/5">
+<img alt="Better Buzz" class="w-full h-full object-cover" data-alt="A playful shot of a golden retriever sitting next to a branded coffee cup on a modern patio. Soft morning sunlight filters through nearby trees. Cinematic shallow depth of field, focusing on the dog's happy expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbPdjcxSwQkJLm2dKM_lDPxj42_l7OyN7ZTMdSAY9_aY-k9FxyoL_0A3qWWQsRTwcUfgsGlYhEwK4KanQMOmQya5zqbp19R1pMCp8cQWGqpVEwPwkMV96RWbWNVmy3fQ2rqFASnOsumYeFntKAbVU-aSKULf3derxNBiVOvk6l1xHLgRQQmM465POZjDUxlq4B19e8ZYT6SKFapWvK-uLAlofeo_D3Fi5-vUjHYVDhM3pgWOIi0Dk3zBISk8ruoEdAWFhnihK48oap"/>
+</div>
+<div>
+<p class="text-label-sm font-bold text-white truncate">Better Buzz</p>
+<p class="text-[10px] text-on-surface-variant">May 10</p>
+</div>
+</div>
+<!-- Memory Item 3 -->
+<div class="flex-shrink-0 w-32 space-y-2">
+<div class="aspect-square rounded-2xl overflow-hidden border border-white/5">
+<img alt="Mission Bay" class="w-full h-full object-cover" data-alt="Two dogs playing together in a grassy park near the water at Mission Bay. The lighting is bright and airy with a modern lifestyle aesthetic. The background features palm trees and a clear blue sky." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK0yVjoHffiuqPoKJNWwjMgz5Pus7zrz07AVOehq4pTErn7HGNdbZr6txMGPV8c7Li967v6BIkfankd6v1uCjxYBVSqs97dRRk9q3Spo8A6MvF_4k4uUN3gp4hW0uv0X5iRJ82ObwbW36_7tJ7Nx76PqFI5mX7qjikcT7aygkcqCO7TOiiIWNOHtMekwDpUCNRB19kY8r6yYKQnn2dJHVDR3FKPEX1cQMPExWjs7bFnDj-KU6J5TNBBEnbmdqNPvVCKOh4JA6l53_5"/>
+</div>
+<div>
+<p class="text-label-sm font-bold text-white truncate">Mission Bay</p>
+<p class="text-[10px] text-on-surface-variant">May 8</p>
+</div>
+</div>
+<!-- Memory Item 4 -->
+<div class="flex-shrink-0 w-32 space-y-2">
+<div class="aspect-square rounded-2xl overflow-hidden border border-white/5">
+<img alt="Balboa Park" class="w-full h-full object-cover" data-alt="A portrait of a dog sitting in front of the historic architecture of Balboa Park. The lighting is warm and rich, highlighting the textures of the fur and the stone building. Elegant and premium travel vibes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGkjbmETq837FwfIE5-Z52nq5um_UTex5otLY3ya32cmllhtMg4IwAtpK7pMVOpJAumFpaWXYQltgAbPWr6bEL6RT-ZBVPBRefLgDtFaIwjP88tA8BNx6SQojJg5Qw0FTuWus_E8_bE6o6JrNsfohyyY2spSapu-4LI35r6H77JQlwmSByIuElQIj1V1QtSnOq6AwnWYfaTM-E-M46JUkKKFR024JSmw9WTR6b8SQ_OwFsUUo55wYKvb-2vtVJndT4w7AHp7fNgy8A"/>
+</div>
+<div>
+<p class="text-label-sm font-bold text-white truncate">Balboa Park</p>
+<p class="text-[10px] text-on-surface-variant">May 5</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Grid -->
+<section class="grid grid-cols-3 gap-4 mb-stack-lg">
+<div class="bg-surface-container rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-primary mb-1">pets</span>
+<span class="text-headline-md font-bold text-white">28</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Adventures</span>
+</div>
+<div class="bg-surface-container rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-primary mb-1" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-headline-md font-bold text-white">12</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Day Streak</span>
+</div>
+<div class="bg-surface-container rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-primary mb-1">explore</span>
+<span class="text-headline-md font-bold text-white">9</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Places</span>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-safe-bottom bg-surface-container-lowest/90 backdrop-blur-md shadow-lg border-t border-outline-variant/20">
+<!-- Today (Active) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="text-label-sm font-label-sm">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">assignment</span>
+<span class="text-label-sm font-label-sm">Plan</span>
+</a>
+<!-- Custom FAB-like Journey Button -->
+<div class="relative -top-4">
+<div class="absolute -inset-2 bg-primary/20 rounded-full blur-xl"></div>
+<button class="w-14 h-14 rounded-full primary-gradient flex items-center justify-center shadow-xl shadow-orange-900/40 active:scale-90 transition-all">
+<span class="material-symbols-outlined text-white text-3xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">timeline</span>
+<span class="text-label-sm font-label-sm">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">account_circle</span>
+<span class="text-label-sm font-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Safe area padding for mobile -->
+<div class="h-8 w-full bg-surface-container-lowest/90 fixed bottom-0 z-40"></div>
+</body></html>
