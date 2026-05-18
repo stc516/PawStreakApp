@@ -179,7 +179,7 @@ export function CharacterMomentPage() {
             fontWeight: 600,
           }}
         >
-          supporting XP in the background
+          warmth for the path ahead
         </span>
       </div>
 

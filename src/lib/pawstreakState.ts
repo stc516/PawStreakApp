@@ -53,81 +53,37 @@ const defaultBadges: BadgeDefinition[] = [
   { id: 'mystery-two', name: '???', icon: '❓', description: 'Keep walking.', unlocked: false, mystery: true },
 ]
 
-function seedEntries(): AdventureEntry[] {
-  const ago = (days: number) => new Date(Date.now() - 86400000 * days).toISOString()
-  return [
-    {
-      id: 'a-1',
-      vibe: 'salt',
-      missionTitle: 'Sunset Walk',
-      emoji: '🌅',
-      rarity: 'uncommon',
-      adventureEnergy: 55,
-      durationMinutes: 34,
-      groundCovered: 2.1,
-      completedAt: ago(1),
-      locationHint: 'Mission Bay',
-      missionDescription: '',
-      estimatedMinutesMin: 25,
-      estimatedMinutesMax: 42,
-    },
-    {
-      id: 'a-2',
-      vibe: 'wander',
-      missionTitle: 'Park Day',
-      emoji: '🌳',
-      rarity: 'common',
-      adventureEnergy: 44,
-      durationMinutes: 28,
-      groundCovered: 1.6,
-      completedAt: ago(2),
-      locationHint: 'Local park',
-      estimatedMinutesMin: 25,
-      estimatedMinutesMax: 40,
-    },
-    {
-      id: 'a-3',
-      vibe: 'pulse',
-      missionTitle: 'Coffee Walk',
-      emoji: '☕',
-      rarity: 'common',
-      adventureEnergy: 27,
-      durationMinutes: 18,
-      groundCovered: 0.9,
-      completedAt: ago(3),
-      locationHint: 'Your block',
-      estimatedMinutesMin: 12,
-      estimatedMinutesMax: 22,
-    },
-    {
-      id: 'a-4',
-      vibe: 'wild',
-      missionTitle: 'Explore new',
-      emoji: '🎲',
-      rarity: 'rare',
-      adventureEnergy: 68,
-      durationMinutes: 45,
-      groundCovered: 2.8,
-      completedAt: ago(4),
-      locationHint: 'New block',
-      estimatedMinutesMin: 20,
-      estimatedMinutesMax: 45,
-    },
-    {
-      id: 'a-5',
-      vibe: 'salt',
-      missionTitle: 'Sunset Walk',
-      emoji: '🌅',
-      rarity: 'uncommon',
-      adventureEnergy: 50,
-      durationMinutes: 30,
-      groundCovered: 1.9,
-      completedAt: ago(5),
-      locationHint: 'Waterfront',
-      estimatedMinutesMin: 25,
-      estimatedMinutesMax: 38,
-    },
-  ]
+function freshBadges(): BadgeDefinition[] {
+  return defaultBadges.map((badge) => ({ ...badge, unlocked: false }))
+}
+
+function freshProgressFields(): Pick<
+  PawstreakState,
+  | 'currentStreak'
+  | 'longestStreak'
+  | 'totalAdventures'
+  | 'totalGroundCovered'
+  | 'totalAdventureEnergy'
+  | 'weekAdventures'
+  | 'recentAdventures'
+  | 'todayAdventureDone'
+  | 'badges'
+  | 'latestCompletedAdventure'
+  | 'latestUnlockedBadgeId'
+> {
+  return {
+    currentStreak: 0,
+    longestStreak: 0,
+    totalAdventures: 0,
+    totalGroundCovered: 0,
+    totalAdventureEnergy: 0,
+    weekAdventures: 0,
+    recentAdventures: [],
+    todayAdventureDone: false,
+    badges: freshBadges(),
+    latestCompletedAdventure: null,
+    latestUnlockedBadgeId: null,
+  }
 }
 
 function initialSelection(
@@ -175,7 +131,7 @@ const moodToday = localDayKey()
 
 const selectionSeed = initialSelection({
   dogName: 'Your dog',
-  currentStreak: 4,
+  currentStreak: 0,
   pickNonce: 0,
   dogMood: moodForDay('Your dog', moodToday),
   zipCode: '',
@@ -193,13 +149,7 @@ const initialState: PawstreakState = {
   zipCode: '',
   moodDayKey: moodToday,
   dogMood: moodForDay('Your dog', moodToday),
-  currentStreak: 4,
-  longestStreak: 9,
-  totalAdventures: 47,
-  totalGroundCovered: 38.2,
-  totalAdventureEnergy: 1840,
   reminderSet: false,
-  todayAdventureDone: false,
   pickNonce: 0,
   generatedMission: selectionSeed.generatedMission,
   selectedVibe: selectionSeed.selectedVibe,
@@ -209,11 +159,7 @@ const initialState: PawstreakState = {
   selectedFlavor: selectionSeed.selectedFlavor,
   todayDurationMinutes: null,
   todayGroundCovered: null,
-  weekAdventures: 3,
-  recentAdventures: seedEntries(),
-  badges: defaultBadges,
-  latestCompletedAdventure: null,
-  latestUnlockedBadgeId: null,
+  ...freshProgressFields(),
   emergencyTreatAvailable: true,
   tomorrowTease: refreshTomorrowTease({ dogName: 'Your dog', zipCode: '' }),
   demoStartedAt: null,
@@ -538,11 +484,12 @@ export function completeOnboarding(
     pick: picks[idx],
     dogName,
     dogMood,
-    streak: next.currentStreak,
+    streak: 0,
     nonce: `onboard|${pickNonce}`,
   })
   return {
     ...next,
+    ...freshProgressFields(),
     generatedMission,
     ...flattenMission(generatedMission),
   }

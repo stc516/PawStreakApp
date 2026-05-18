@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PawStreak - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "inverse-primary": "#8c5000",
+                  "surface": "#131313",
+                  "tertiary": "#ffbe68",
+                  "inverse-on-surface": "#313030",
+                  "secondary-fixed-dim": "#ffb599",
+                  "surface-dim": "#131313",
+                  "primary-fixed-dim": "#ffb874",
+                  "secondary-container": "#ff5e00",
+                  "on-primary-fixed-variant": "#6a3b00",
+                  "secondary-fixed": "#ffdbce",
+                  "on-surface": "#e5e2e1",
+                  "on-surface-variant": "#dbc2ad",
+                  "background": "#131313",
+                  "primary": "#ffbd7f",
+                  "outline-variant": "#554334",
+                  "tertiary-container": "#e9a035",
+                  "primary-container": "#ff9500",
+                  "on-secondary-fixed": "#370e00",
+                  "surface-container-high": "#2a2a2a",
+                  "on-tertiary": "#462a00",
+                  "surface-container-highest": "#353534",
+                  "surface-variant": "#353534",
+                  "on-tertiary-fixed": "#2a1800",
+                  "on-primary-fixed": "#2d1600",
+                  "error": "#ffb4ab",
+                  "tertiary-fixed": "#ffddb6",
+                  "on-error-container": "#ffdad6",
+                  "surface-container": "#201f1f",
+                  "on-tertiary-container": "#5e3b00",
+                  "error-container": "#93000a",
+                  "primary-fixed": "#ffdcbf",
+                  "surface-container-lowest": "#0e0e0e",
+                  "surface-container-low": "#1c1b1b",
+                  "on-secondary-container": "#531900",
+                  "secondary": "#ffb599",
+                  "surface-bright": "#3a3939",
+                  "tertiary-fixed-dim": "#ffb95a",
+                  "on-background": "#e5e2e1",
+                  "on-primary": "#4b2800",
+                  "on-error": "#690005",
+                  "on-tertiary-fixed-variant": "#643f00",
+                  "on-secondary": "#5a1c00",
+                  "outline": "#a38d7a",
+                  "inverse-surface": "#e5e2e1"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "margin-page": "24px",
+                  "stack-lg": "24px",
+                  "stack-md": "16px",
+                  "card-padding": "20px",
+                  "stack-sm": "8px",
+                  "gutter-grid": "16px"
+          },
+          "fontFamily": {
+                  "headline-md": ["Inter"],
+                  "body-md": ["Inter"],
+                  "display-time": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "headline-lg-mobile": ["Inter"],
+                  "label-sm": ["Inter"]
+          },
+          "fontSize": {
+                  "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                  "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+                  "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .profile-glow {
+      background: radial-gradient(circle, rgba(255, 149, 0, 0.15) 0%, rgba(10, 10, 10, 0) 70%);
+    }
+    .card-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen pb-24">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-lg flex justify-between items-center px-margin-page pt-4 pb-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
+<img alt="Profile" data-alt="A close-up high-resolution portrait of a friendly Golden Retriever with soft golden fur and warm eyes. The background is a blurred sunset park scene, maintaining the cinematic dark-mode aesthetic with deep oranges and blacks. The dog's expression is joyful, and the lighting is soft and golden." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXV919dPDC9IUE7Pbu-NlJLkez_z_kBpsuF8cpnjAareiv04741q3Me2p1unNotLe0OhaZZp7h6M8jGL06jah3FetDBBT_1ecjAmDTi6h5RKlECQ4a662pPa9RO2YqzkbAt-axoz91wtKOsh1lcazhMJ7XKjh1v31RjtVgT2wxxgOA7FgWy1hOQbd3txrEoRMpx8hZkaBJuVT87vSCCDjgfDQVuQf0ogHjptG9BSP541ROY_dbnZgW81WslwFfjRNG8CWrX8okjU5U"/>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-primary">PawStreak</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10 transition-colors">
+<span class="material-symbols-outlined text-primary">settings</span>
+</button>
+</header>
+<main class="pt-20 px-margin-page">
+<!-- Profile Hero Section -->
+<section class="flex flex-col items-center mb-stack-lg relative">
+<div class="absolute -top-12 w-64 h-64 profile-glow -z-10"></div>
+<!-- Avatar with Glowing Border -->
+<div class="relative mb-4">
+<div class="absolute inset-0 bg-primary-container blur-2xl opacity-20 rounded-full"></div>
+<div class="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-primary to-secondary-container">
+<div class="w-full h-full rounded-full border-4 border-background overflow-hidden bg-surface-container">
+<img alt="Bailey profile" class="w-full h-full object-cover" data-alt="Detailed close-up profile picture of a Bailey, a handsome golden retriever, with rich golden fur glowing under cinematic sunset lighting. The image is set against a dark, moody background to make the subject pop. The lighting highlights the texture of his fur and his gentle brown eyes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_Z1i7Cb_9qCyHUVarRUwugkv8zUb-a_SOkFvAujjkKwQGIOOLWVvNEDdwHr06U_UJBn5ORH1EVrO1V1XLWEbFlkdzd3XF2De-TuHqgibZnWAjN50evu30A3LoDBSiiwYrZbtwELmFXjWjOcaYKCb-Io61yyPOwj_qNcHctEYUZu0LdZrn_aNC14fpKbwE3pgv51MAXL77C_I2KkCcHn91s5lLv6M-XqQtaW_MJViR71L-q3K7Aq5IlZIqjh3YETBp6tffKlIQEezB"/>
+</div>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary text-on-primary rounded-full p-1.5 shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</div>
+</div>
+<div class="text-center">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile mb-1">Bailey</h1>
+<p class="text-on-surface-variant text-label-sm font-label-sm tracking-wider uppercase">Adventure Dog</p>
+</div>
+<!-- Quick Stats Row -->
+<div class="grid grid-cols-3 w-full gap-gutter-grid mt-stack-lg">
+<div class="bg-surface-container-low card-border rounded-lg p-stack-md flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-primary mb-1" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-headline-md font-headline-md">12</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Day Streak</span>
+</div>
+<div class="bg-surface-container-low card-border rounded-lg p-stack-md flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-primary mb-1" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="text-headline-md font-headline-md">28</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Adventures</span>
+</div>
+<div class="bg-surface-container-low card-border rounded-lg p-stack-md flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-primary mb-1" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="text-headline-md font-headline-md">9</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Places</span>
+</div>
+</div>
+</section>
+<!-- Favorite Places Carousel -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-end mb-stack-md">
+<h2 class="text-headline-md font-headline-md">Favorite Places</h2>
+<button class="text-primary text-label-sm font-label-sm">See all</button>
+</div>
+<div class="flex gap-stack-md overflow-x-auto pb-4 scrollbar-hide -mx-margin-page px-margin-page">
+<!-- Place Card 1 -->
+<div class="flex-shrink-0 w-40">
+<div class="relative h-48 rounded-lg overflow-hidden card-border group">
+<img alt="Coronado Beach" class="w-full h-full object-cover" data-alt="A wide-angle cinematic shot of Coronado Dog Beach at dusk. The sand is soft and white, meeting a gentle, shimmering ocean under a vibrant orange and purple sky. The atmosphere is peaceful and high-end, fitting the PawStreak premium aesthetic. Low-key lighting creates deep shadows and rich colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjueKL0BW4Op4WoBJTwKWrQP5bUk9BO1bqceGcjKSb_GdCbb92TnU2H6ja42np-TgEoPWcxIrRg8gfG4lArYz9t5Mt4OZh7emmqk9ygmWpSlBPO-oPQWQrCpMTxDX4LAWu_W5-qAYaC6yvrt8saKZwL8IL7JarcirUzbHuRsswos7NoF113zKGMTYm4gBN9zDIo3sPMoK7bvIjpTwotq0uJYjB_B6DksuvRel7f1TgHqkmceFrhgNb74moNw0wAHNAYs6xUVs1V7I2"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3">
+<p class="text-label-sm font-label-sm text-white">Coronado</p>
+<p class="text-[10px] text-white/70">Dog Beach</p>
+</div>
+</div>
+</div>
+<!-- Place Card 2 -->
+<div class="flex-shrink-0 w-40">
+<div class="relative h-48 rounded-lg overflow-hidden card-border group">
+<img alt="Balboa Park" class="w-full h-full object-cover" data-alt="A luxurious urban park landscape featuring lush green lawns and Spanish Colonial architecture during the golden hour. The sky is a deep, warm amber, and long shadows stretch across the scene. The mood is sophisticated and calm, reflecting a high-quality outdoor experience for a premium pet brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeJyM1aZ9EyiXSnc_gZxCz7EM0NE0SfP9GDDMx4kuAPKmzkZUWkwce1bK_CceJUamfoF1yT978Ns45_j2Gd9nCtR7HJuySjzFMdvYLP_rl5NKznvAwXnkU0oFuLd1cihLCd2--bRM34C3WX8X0Vf2_76VAsRFev4j0XKh3XvW3YbMJc-DtLp0oH8hfavr2n_ItCfUV1sDgioInOaNJ-xMCS5v7qr-42eRrCdyuWsd2tHv6WzwYMPkT7LtculC8qoFkPalMi8o26stp"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3">
+<p class="text-label-sm font-label-sm text-white">Balboa</p>
+<p class="text-[10px] text-white/70">Park</p>
+</div>
+</div>
+</div>
+<!-- Place Card 3 -->
+<div class="flex-shrink-0 w-40">
+<div class="relative h-48 rounded-lg overflow-hidden card-border group">
+<img alt="Mission Bay" class="w-full h-full object-cover" data-alt="A serene bay view with palm trees silhouetted against a deep indigo and burnt orange sunset sky. The water reflects the warm light, creating a shimmering, high-polish look. This lifestyle shot evokes a sense of intimacy and calm companionship in a modern, luxury setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANIL90c16KkP6Q7yGnGBBOthlpD32_yIntTaVPa_ve85k8PQHpup0yE_GKR0LWbPIHdyp8y0KJbjKQCXtyxpW5aORWNJs1nPAPS8hNa0dU3Ix7aQ82dLjHvzjH5CdAbfuI51O_k619C2SIDebJJ1CHpgaUJHtrTVo0kAa8NyyVs5bm02Ro5VRynLoLzndL8OBedRV1NWe7fnucsANxTfOL7L1Auq5VqY8gGALPQ2iSEsab5TSUq_uPioNOjEaxauH1Tyi0SQHmk7Lv"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3">
+<p class="text-label-sm font-label-sm text-white">Mission</p>
+<p class="text-[10px] text-white/70">Bay</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Detailed Stats List -->
+<section class="space-y-stack-sm mb-stack-lg">
+<div class="flex justify-between items-center p-card-padding bg-surface-container card-border rounded-lg">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">auto_awesome_motion</span>
+</div>
+<span class="text-body-lg font-body-lg">Memories Saved</span>
+</div>
+<span class="text-headline-md font-headline-md text-primary">34</span>
+</div>
+<div class="flex justify-between items-center p-card-padding bg-surface-container card-border rounded-lg">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">photo_camera</span>
+</div>
+<span class="text-body-lg font-body-lg">Photos Captured</span>
+</div>
+<span class="text-headline-md font-headline-md text-primary">112</span>
+</div>
+</section>
+<!-- Account & Sync Settings -->
+<section class="space-y-stack-sm mb-stack-lg">
+<!-- Account Info -->
+<button class="w-full flex items-center justify-between p-card-padding bg-surface-container card-border rounded-lg hover:bg-surface-container-high transition-colors text-left group">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+</div>
+<div>
+<p class="text-body-md font-semibold">Account</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Signed in as bailey@pawstreak.app</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<!-- Sync Info -->
+<button class="w-full flex items-center justify-between p-card-padding bg-surface-container card-border rounded-lg hover:bg-surface-container-high transition-colors text-left">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">cloud_done</span>
+</div>
+<div>
+<p class="text-body-md font-semibold">Save &amp; Sync</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Last backup today, 9:41 AM</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-md border-t border-outline-variant/20 flex justify-around items-center px-4 pt-3 pb-8 shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-label-sm font-label-sm mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-label-sm font-label-sm mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-label-sm font-label-sm mt-1">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

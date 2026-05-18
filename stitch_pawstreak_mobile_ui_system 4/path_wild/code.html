@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>PawStreak - Path</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#8c5000",
+                        "surface": "#000000",
+                        "tertiary": "#ffbe68",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed-dim": "#ffb599",
+                        "surface-dim": "#000000",
+                        "primary-fixed-dim": "#ffb874",
+                        "secondary-container": "#ff5e00",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "secondary-fixed": "#ffdbce",
+                        "on-surface": "#e5e2e1",
+                        "on-secondary-fixed-variant": "#7f2b00",
+                        "surface-tint": "#ffb874",
+                        "on-primary-container": "#643700",
+                        "on-surface-variant": "#dbc2ad",
+                        "background": "#000000",
+                        "primary": "#ffbd7f",
+                        "outline-variant": "#554334",
+                        "tertiary-container": "#e9a035",
+                        "primary-container": "#ff9500",
+                        "on-secondary-fixed": "#370e00",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary": "#462a00",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-primary-fixed": "#2d1600",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#ffddb6",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#131313",
+                        "on-tertiary-container": "#5e3b00",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffdcbf",
+                        "surface-container-lowest": "#000000",
+                        "surface-container-low": "#0a0a0a",
+                        "on-secondary-container": "#531900",
+                        "secondary": "#ffb599",
+                        "surface-bright": "#1a1a1a",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-background": "#e5e2e1",
+                        "on-primary": "#4b2800",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary": "#5a1c00",
+                        "outline": "#a38d7a",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "card-padding": "20px",
+                        "stack-sm": "8px",
+                        "gutter-grid": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-time": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100dvh;
+        }
+        .path-glow {
+            filter: drop-shadow(0 0 12px rgba(255, 149, 0, 0.6));
+        }
+        .active-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+        .dotted-line-amber {
+            background-image: radial-gradient(circle, #ff9500 1.5px, transparent 1.5px);
+            background-size: 1px 16px;
+            width: 2px;
+        }
+        .node-shadow {
+            box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.3);
+        }
+        .node-completed {
+            background: linear-gradient(180deg, #FFB874 0%, #FF9500 100%);
+            box-shadow: 0 4px 0 0 #D17A00;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center overflow-x-hidden">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md flex justify-between items-center px-margin-page pt-4 pb-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="Bailey" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8qMS4yiTtusG_w0xEuGaR6LVxt6q5DDcF1gLb2C0DWIgVfJRm51UaUAZEQA7a5Ii9qjBrUuY7-erk6zYCcij7XBvR8hMqLtkfZiZCaXzx9IgN6i7CrDRCfT9RlVcFN3cFUymw4ntuqbUPsmN8GXzH8cu0DW-lIeoJtlhwrBbPvUQBFrHyHSemJsbJFHYLmgttkIj-OukeId2WesRybNWUzA7QH7vXHgAti84YuQommJc_l9BnytzZ5bxhJiZaTZxSpGklWN9dgVp_"/>
+</div>
+<div>
+<h1 class="text-headline-md font-bold text-primary">Today</h1>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/20 transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<!-- Main Content: Path Screen -->
+<main class="w-full max-w-[430px] px-margin-page pt-24 pb-32 flex flex-col flex-grow items-center">
+<!-- Title Section -->
+<header class="w-full mb-12 text-center">
+<h2 class="text-headline-lg font-bold text-on-surface mb-2">Path</h2>
+<p class="text-body-md text-on-surface-variant max-w-[280px] mx-auto">Every adventure shapes your story.</p>
+</header>
+<!-- Vertical Path Container -->
+<div class="relative w-full flex flex-col items-center gap-16">
+<!-- Connecting Line -->
+<div class="absolute top-10 bottom-10 w-[2px] dotted-line-amber opacity-30"></div>
+<!-- Node: First Walk (Completed) -->
+<div class="relative flex flex-col items-center gap-3 group">
+<div class="relative z-10 w-16 h-16 rounded-full node-completed path-glow flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<div class="text-center">
+<p class="text-label-sm font-bold text-primary uppercase tracking-widest">First Walk</p>
+</div>
+</div>
+<!-- Node: Sunset Regular (Completed) -->
+<div class="relative flex flex-col items-center gap-3 group">
+<div class="relative z-10 w-16 h-16 rounded-full node-completed path-glow flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+</div>
+<div class="text-center">
+<p class="text-label-sm font-bold text-primary uppercase tracking-widest">Sunset Regular</p>
+</div>
+</div>
+<!-- Node: Coffee Pup (Completed) -->
+<div class="relative flex flex-col items-center gap-3 group">
+<div class="relative z-10 w-16 h-16 rounded-full node-completed path-glow flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">local_cafe</span>
+</div>
+<div class="text-center">
+<p class="text-label-sm font-bold text-primary uppercase tracking-widest">Coffee Pup</p>
+</div>
+</div>
+<!-- Node: Trail Scout (Completed) -->
+<div class="relative flex flex-col items-center gap-3 group">
+<div class="relative z-10 w-16 h-16 rounded-full node-completed path-glow flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">forest</span>
+</div>
+<div class="text-center">
+<p class="text-label-sm font-bold text-primary uppercase tracking-widest">Trail Scout</p>
+</div>
+</div>
+<!-- Node: Memory Keeper (ACTIVE) -->
+<div class="relative flex flex-col items-center gap-4">
+<!-- Pulse Effect -->
+<div class="absolute top-0 left-0 w-20 h-20 -ml-2 -mt-2 bg-primary/20 rounded-full active-pulse"></div>
+<div class="relative z-10 w-16 h-16 rounded-full border-[3px] border-primary bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">photo_camera</span>
+<!-- SVG Progress Border -->
+<svg class="absolute -inset-[3px] w-[70px] h-[70px] -rotate-90">
+<circle class="text-primary" cx="35" cy="35" fill="none" r="33.5" stroke="currentColor" stroke-dasharray="105 210" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+</div>
+<div class="text-center flex flex-col items-center gap-2">
+<p class="text-body-md font-bold text-on-surface">Memory Keeper</p>
+<div class="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-1/2 bg-primary rounded-full"></div>
+</div>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">5 / 10 adventures</p>
+</div>
+</div>
+<!-- Node: Local Legend (LOCKED) -->
+<div class="relative flex flex-col items-center gap-3 opacity-40">
+<div class="relative z-10 w-16 h-16 rounded-full border-[2px] border-outline-variant bg-surface-container-lowest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<div class="text-center">
+<p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-widest">Local Legend</p>
+</div>
+</div>
+</div>
+<!-- Bonus Card -->
+<div class="mt-20 w-full p-card-padding rounded-lg bg-surface-container-low border border-white/5 relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="relative z-10 flex items-center gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-tertiary-container/20 rounded-full text-tertiary">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h4 class="text-body-md font-bold text-on-surface">Streak Master Bonus</h4>
+<p class="text-label-sm text-on-surface-variant">Next milestone rewards +20% XP boost</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-8 bg-black/90 backdrop-blur-xl border-t border-white/5">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-[10px] font-semibold mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-[10px] font-semibold mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-semibold mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary relative" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">timeline</span>
+<span class="text-[10px] font-bold mt-1">Path</span>
+<div class="absolute -top-1 w-8 h-8 bg-primary/20 blur-lg rounded-full"></div>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-semibold mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

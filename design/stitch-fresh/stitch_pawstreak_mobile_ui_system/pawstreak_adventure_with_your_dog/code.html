@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+    <title>PawStreak - Adventure with your Dog</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#8c5000",
+                        "surface": "#131313",
+                        "tertiary": "#ffbe68",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed-dim": "#ffb599",
+                        "surface-dim": "#131313",
+                        "primary-fixed-dim": "#ffb874",
+                        "secondary-container": "#ff5e00",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "secondary-fixed": "#ffdbce",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#dbc2ad",
+                        "background": "#000000",
+                        "primary": "#ffbd7f",
+                        "outline-variant": "#554334",
+                        "tertiary-container": "#e9a035",
+                        "primary-container": "#ff9500",
+                        "on-secondary-fixed": "#370e00",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary": "#462a00",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-primary-fixed": "#2d1600",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#ffddb6",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-container": "#5e3b00",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffdcbf",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-container": "#531900",
+                        "secondary": "#ffb599",
+                        "surface-bright": "#3a3939",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-background": "#e5e2e1",
+                        "on-primary": "#4b2800",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary": "#5a1c00",
+                        "outline": "#a38d7a",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "card-padding": "20px",
+                        "stack-sm": "8px",
+                        "gutter-grid": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-time": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #000000; font-family: 'Inter', sans-serif; }
+        .glow-amber { box-shadow: 0 0 20px 0 rgba(255, 149, 0, 0.2); }
+        .glass-card { background: rgba(32, 31, 31, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
+        .gradient-primary { background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .amber-ring-glow { box-shadow: 0 0 0 4px rgba(255, 184, 116, 0.1), 0 0 30px 10px rgba(255, 149, 0, 0.25); }
+        .text-glow-amber { text-shadow: 0 0 15px rgba(255, 184, 116, 0.4); }
+        .profile-glow { background: radial-gradient(circle, rgba(255, 149, 0, 0.2) 0%, rgba(10, 10, 10, 0) 70%); }
+        .active-pulse { animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; }
+        @keyframes pulse-ring { 0% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 0.3; } 100% { transform: scale(0.9); opacity: 0.7; } }
+        .dotted-line-amber { background-image: radial-gradient(circle, #ff9500 1.5px, transparent 1.5px); background-size: 1px 16px; width: 2px; }
+        .node-completed { background: linear-gradient(180deg, #FFB874 0%, #FF9500 100%); box-shadow: 0 4px 0 0 #D17A00; }
+        .timeline-line { position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #ff9500 0%, transparent 100%); opacity: 0.2; }
+        .timeline-dot { position: absolute; left: 21px; width: 8px; height: 8px; border-radius: 50%; background-color: #ff9500; box-shadow: 0 0 10px rgba(255, 149, 0, 0.5); z-index: 10; }
+        .primary-gradient { background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background">
+    <div id="root"></div>
+
+    <!-- React Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Common Components ---
+
+        const NavBar = () => {
+            const location = useLocation();
+            const isActive = (path) => location.pathname === path;
+            
+            return (
+                <nav className="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-md border-t border-outline-variant/20 shadow-lg px-4 pt-3 pb-8 flex justify-around items-center">
+                    <Link to="/" className={`flex flex-col items-center justify-center transition-colors group ${isActive('/') ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: isActive('/') ? "'FILL' 1" : "none" }}>pets</span>
+                        <span className="text-[10px] font-bold mt-1">Today</span>
+                    </Link>
+                    <Link to="/plan" className={`flex flex-col items-center justify-center transition-colors group ${isActive('/plan') ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: isActive('/plan') ? "'FILL' 1" : "none" }}>assignment</span>
+                        <span className="text-[10px] font-bold mt-1">Plan</span>
+                    </Link>
+                    <Link to="/journey" className={`flex flex-col items-center justify-center transition-colors group ${isActive('/journey') || isActive('/summary') ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: isActive('/journey') || isActive('/summary') ? "'FILL' 1" : "none" }}>explore</span>
+                        <span className="text-[10px] font-bold mt-1">Journey</span>
+                    </Link>
+                    <Link to="/path" className={`flex flex-col items-center justify-center transition-colors group ${isActive('/path') ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: isActive('/path') ? "'FILL' 1" : "none" }}>timeline</span>
+                        <span className="text-[10px] font-bold mt-1">Path</span>
+                    </Link>
+                    <Link to="/profile" className={`flex flex-col items-center justify-center transition-colors group ${isActive('/profile') ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: isActive('/profile') ? "'FILL' 1" : "none" }}>account_circle</span>
+                        <span className="text-[10px] font-bold mt-1">Profile</span>
+                    </Link>
+                </nav>
+            );
+        };
+
+        // --- Screens ---
+
+        const TodayScreen = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="pb-32">
+                    <header className="bg-background/80 backdrop-blur-lg flex justify-between items-center w-full px-margin-page pt-6 pb-4 fixed top-0 z-50">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <div className="absolute inset-0 rounded-full border-2 border-primary/40 p-0.5 scale-110"></div>
+                                <img alt="Bailey" className="w-10 h-10 rounded-full object-cover border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCil4Iq3vcXhwJAOxzkFHo5SNPqSoGvsYFb_HTUuYOMw9fwDgocdvgPcaEthSZ9FmzFQzDx5SOf46v7VeVeoVEQ9BJ6AdW00MkOTfdEc--L0vEQ83ivw4mBGeGF7sC9WQY7eL6MN-7GlMUEaduetBcle9cvVyITaiCarS_oqpbdF5Jfvjdvu509-cuU_XU_dE0Db-JoEpFfSV_bdxtuInTB6PgEeqM-l3XlCkbQo-xFBKpAOYWKVTGCIiwlNUyMiwRJcpN6Zz7xj7Ai"/>
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold leading-none flex items-center gap-1">
+                                    Bailey <span className="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+                                </h2>
+                                <div className="flex items-center gap-1 mt-0.5">
+                                    <span className="material-symbols-outlined text-primary text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>local_fire_department</span>
+                                    <span className="text-[12px] font-medium text-on-surface-variant">12 day streak</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-primary text-sm">location_on</span>
+                                <p className="text-[12px] font-medium text-on-surface-variant">San Diego</p>
+                            </div>
+                            <p className="text-primary font-bold text-lg leading-none">72°</p>
+                        </div>
+                    </header>
+                    <main className="pt-28 px-margin-page">
+                        <section className="mb-stack-md">
+                            <h1 className="text-[32px] font-bold tracking-tight">Ready for an adventure?</h1>
+                        </section>
+                        <section className="mb-stack-lg overflow-x-auto scrollbar-hide -mx-margin-page px-margin-page">
+                            <div className="flex gap-2.5 min-w-max pb-2">
+                                <button className="px-5 py-2.5 rounded-full primary-gradient text-white text-sm font-bold shadow-lg shadow-primary/20 glow-amber">Beach</button>
+                                <button className="px-5 py-2.5 rounded-full bg-surface-container text-on-surface-variant text-sm font-medium border border-white/5">Coffee</button>
+                                <button className="px-5 py-2.5 rounded-full bg-surface-container text-on-surface-variant text-sm font-medium border border-white/5">Trail</button>
+                                <button className="px-5 py-2.5 rounded-full bg-surface-container text-on-surface-variant text-sm font-medium border border-white/5">Brewery</button>
+                            </div>
+                        </section>
+                        <section className="mb-stack-lg">
+                            <div className="bg-surface-container rounded-2xl p-3 border border-white/5 shadow-2xl">
+                                <div className="relative rounded-xl overflow-hidden aspect-[16/10] mb-4">
+                                    <img alt="Coronado Dog Beach" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTCrFtR5bJqIK2BuHTUKz7bGFyuzcGD6zVslXAmIfeivpLgvimmwsNe-xFqcTetAmmUJ5LgGVfgedL2XgTKCjfEEj-0hQQJoXOqmk3I_C28ZegmykbNFQb2pWr9trX89AKwmK7viViDGDWwRp69zkS0dzKI32SC6Hn3Fyccac7WkJ3MA6a-v4E2N30LcXcbf9ZG7nYFIOIpckump2KsnE9kJaMqZZ8-5-aODBVxEpnlLsa7S_kAgGdmffjtCpn_WGPYMF8hBbgDat6"/>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div className="absolute bottom-3 left-4">
+                                        <span className="bg-primary/90 backdrop-blur-sm text-[10px] uppercase font-bold tracking-widest text-white px-2 py-1 rounded">Recommended</span>
+                                    </div>
+                                </div>
+                                <div className="px-2 pb-2 flex justify-between items-center">
+                                    <div className="flex-1 mr-4">
+                                        <h3 className="text-xl font-bold mb-1">Coronado Dog Beach</h3>
+                                        <div className="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                            <span className="material-symbols-outlined text-[16px]">location_on</span>
+                                            <span>Coronado, CA • 2.4 mi</span>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => navigate('/active')} className="primary-gradient px-6 py-3 rounded-xl text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform shrink-0">
+                                        Let's go
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                        <section className="mb-stack-lg">
+                            <div className="flex justify-between items-end mb-4">
+                                <h2 className="text-xl font-bold">Recent Memories</h2>
+                                <button className="text-primary text-sm font-bold">See all</button>
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-margin-page px-margin-page pb-4">
+                                <div className="shrink-0 w-24">
+                                    <img className="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdg1Nv4cHTZWNgSXwPUW8diWpF3aowrTkM1JT0DHeIF65W00MMbQDbGH2MsJxp9V2f3g3yM45UkpBXuDIHn7qKhLQpIHQ1gjJNDVTiBDS7ZDPD81YiQi-NgatBhirl-TUu2U7v9Xtbdit90htJ72H9faL4cFBLKsuo-c64QObFm8YT2bBqMO1FEfkMjZv5JObok84TSLHNBIa3hiDMk3v7ETwuefBGHIhvKPFxZGToNQzWaey3ER3BOOitiK4oySDN3zUmNF2atYeZ"/>
+                                    <p className="text-[12px] font-bold truncate">Sunset Walk</p>
+                                    <p className="text-[10px] text-on-surface-variant">May 12</p>
+                                </div>
+                                <div className="shrink-0 w-24">
+                                    <img className="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbPdjcxSwQkJLm2dKM_lDPxj42_l7OyN7ZTMdSAY9_aY-k9FxyoL_0A3qWWQsRTwcUfgsGlYhEwK4KanQMOmQya5zqbp19R1pMCp8cQWGqpVEwPwkMV96RWbWNVmy3fQ2rqFASnOsumYeFntKAbVU-aSKULf3derxNBiVOvk6l1xHLgRQQmM465POZjDUxlq4B19e8ZYT6SKFapWvK-uLAlofeo_D3Fi5-vUjHYVDhM3pgWOIi0Dk3zBISk8ruoEdAWFhnihK48oap"/>
+                                    <p className="text-[12px] font-bold truncate">Better Buzz</p>
+                                    <p className="text-[10px] text-on-surface-variant">May 10</p>
+                                </div>
+                                <div className="shrink-0 w-24">
+                                    <img className="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK0yVjoHffiuqPoKJNWwjMgz5Pus7zrz07AVOehq4pTErn7HGNdbZr6txMGPV8c7Li967v6BIkfankd6v1uCjxYBVSqs97dRRk9q3Spo8A6MvF_4k4uUN3gp4hW0uv0X5iRJ82ObwbW36_7tJ7Nx76PqFI5mX7qjikcT7aygkcqCO7TOiiIWNOHtMekwDpUCNRB19kY8r6yYKQnn2dJHVDR3FKPEX1cQMPExWjs7bFnDj-KU6J5TNBBEnbmdqNPvVCKOh4JA6l53_5"/>
+                                    <p className="text-[12px] font-bold truncate">Mission Bay</p>
+                                    <p className="text-[10px] text-on-surface-variant">May 8</p>
+                                </div>
+                            </div>
+                        </section>
+                        <section className="grid grid-cols-3 gap-3 mb-12">
+                            <div className="bg-surface-container/50 border border-white/5 rounded-2xl p-4 text-center">
+                                <p className="text-2xl font-bold text-white leading-none">28</p>
+                                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1">Adventures</p>
+                            </div>
+                            <div className="bg-surface-container/50 border border-white/5 rounded-2xl p-4 text-center">
+                                <p className="text-2xl font-bold text-white leading-none">12</p>
+                                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1 text-primary">Day Streak</p>
+                            </div>
+                            <div className="bg-surface-container/50 border border-white/5 rounded-2xl p-4 text-center">
+                                <p className="text-2xl font-bold text-white leading-none">9</p>
+                                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1">Places</p>
+                            </div>
+                        </section>
+                    </main>
+                    <NavBar />
+                </div>
+            );
+        };
+
+        const PlanScreen = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="pb-32">
+                    <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md flex justify-between items-center px-margin-page pt-4 pb-2">
+                        <div className="flex items-center gap-stack-sm">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+                                <img alt="Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZjC-KhDgDnOJtOFbvATCOa2zdtBPb5aWVyvs4pnAyGTC2n41-fb9WBikqUaU7KwvTsln-FbPg6DkhLYoF_Rj2FZlDiskeyI-PFnTPgbAQFlKKesdKa-TAbj7RPvQutHEksWpvWkxASdsrDptaJN2VcBuaPD8msHy0xPzCExnDxGeAhJ15T4Zq9MNAKzvs_ukNkOske1rFSVlOgSSkRfTF9tmDrdyNHkNyayyXbD0tIkndq1vFif6RSj8PDeF6u1rh7KOZ6ucUCaGC"/>
+                            </div>
+                            <div>
+                                <h1 className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Plan</h1>
+                                <p className="text-headline-md font-headline-md text-primary">PawStreak</p>
+                            </div>
+                        </div>
+                        <button className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-variant/10 transition-colors">
+                            <span className="material-symbols-outlined text-primary">notifications</span>
+                        </button>
+                    </header>
+                    <main className="mt-24 px-margin-page space-y-10">
+                        <section>
+                            <h2 className="text-headline-lg-mobile font-headline-lg-mobile mb-1">What should we do next?</h2>
+                            <p className="text-body-md font-body-md text-on-surface-variant">Pick a vibe. Find a place. Make a memory.</p>
+                        </section>
+                        <section className="overflow-x-auto pb-2 scrollbar-hide">
+                            <div className="flex gap-stack-sm whitespace-nowrap">
+                                <button className="px-6 py-2 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm shadow-md glow-amber">Beach</button>
+                                <button className="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10">Trail</button>
+                                <button className="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10">Coffee</button>
+                                <button className="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10">Park</button>
+                            </div>
+                        </section>
+                        <section className="space-y-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="material-symbols-outlined text-primary" style={{fontVariationSettings: "'FILL' 1"}}>beach_access</span>
+                                <h3 className="text-headline-md font-headline-md">Beach Spots</h3>
+                            </div>
+                            <div onClick={() => navigate('/active')} className="glass-card rounded-lg p-3 flex gap-4 items-center group transition-all duration-300 active:scale-95 shadow-lg cursor-pointer">
+                                <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                                    <img alt="Coronado Dog Beach" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNFbtaFTql7nLVnO8mI8wbXnEj5ZmXGrIppzOXxiNRho7P4Khoj56uxAIBhmdGN20nIV-MDeh061t80Vn695AJeabstbXairnW_YbBNbDFSeM79LWzDw1MouqvQET6kHbk9_YwKiuXHAvRgZ_BxC5Osr8ELjRMLp1zBjLaFbjveL3zg6td5C_zRlguvr-q_5NUvCzsjC4jQWCCubYREQao_YLqWv7zPBONsdFXGEL-VxaYhKL6ixIXR5N0bshSgZ00ME-zdnDSiGJE"/>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="text-body-lg font-bold truncate">Coronado Dog Beach</h4>
+                                    <p className="text-label-sm text-primary-fixed-dim">Coronado • 2.4 mi</p>
+                                    <p className="text-body-md text-on-surface-variant line-clamp-1 mt-1">Wide sandy beach for zoomies.</p>
+                                </div>
+                                <button className="gradient-primary text-on-primary-fixed w-12 h-12 rounded-full flex items-center justify-center glow-amber shrink-0">
+                                    <span className="text-label-sm font-bold">Start</span>
+                                </button>
+                            </div>
+                        </section>
+                        <section className="pb-10">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="material-symbols-outlined text-primary">calendar_add_on</span>
+                                <h3 className="text-headline-md font-headline-md">Build a better routine</h3>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="glass-card rounded-lg p-5 flex items-start gap-4 border-l-4 border-l-primary transition-transform active:scale-[0.98]">
+                                    <div className="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center flex-shrink-0">
+                                        <span className="material-symbols-outlined text-primary text-3xl">beach_access</span>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-headline-md font-bold text-on-surface">Beach every Sunday</h4>
+                                        <p className="text-body-md text-on-surface-variant mt-1">Keep the streak alive.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                    <NavBar />
+                </div>
+            );
+        };
+
+        const ActiveAdventureScreen = () => {
+            const navigate = useNavigate();
+            const [timer, setTimer] = useState(1458); // 00:24:18
+
+            useEffect(() => {
+                const interval = setInterval(() => setTimer(t => t + 1), 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const formatTime = (seconds) => {
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            };
+
+            return (
+                <div className="flex flex-col relative h-screen overflow-hidden">
+                    <div className="fixed inset-0 -z-10">
+                        <div className="absolute inset-0 bg-black/60 z-10"></div>
+                        <img alt="Background" className="w-full h-full object-cover opacity-40 grayscale-[0.2]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3sNWA-72d5eEgXKl201U87Ir_RTy5qtDNnAHONna0EnT5Iqir1o0d5Adw3egy_V2wqjHky3e5QogAk7hZ-3PHrK_fGVafWty6KqG7d5Q34RoeyMzA3FN88UX62vI5SG7KzWkjgo-xhp-jopdGUBOafrDULVqtd9XBrDQwoVYQL1_nh2fIxd4mPJ3NZt-waeE_ZFvCDdR8DtQw1u77xaWqqwIl-mpvSFaNEZvaR-TUaSVySTf_CE_sGEZW8uHL1tAYsF6dYeY7QutB"/>
+                    </div>
+                    <header className="flex justify-between items-center w-full px-margin-page pt-6 pb-2 z-20">
+                        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20">
+                            <span className="material-symbols-outlined text-white">close</span>
+                        </button>
+                        <div className="flex flex-col items-center">
+                            <h1 className="font-headline-md text-[20px] text-white">Coronado Dog Beach</h1>
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-primary text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>light_mode</span>
+                                <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Dog Beach</span>
+                            </div>
+                        </div>
+                        <button className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+                            <span className="material-symbols-outlined text-white">more_horiz</span>
+                        </button>
+                    </header>
+                    <main className="flex-1 flex flex-col items-center justify-center px-margin-page z-20">
+                        <div className="flex flex-col items-center mb-16">
+                            <div className="font-display-time text-display-time text-primary text-glow-amber tabular-nums tracking-tighter">
+                                {formatTime(timer)}
+                            </div>
+                            <div className="font-label-sm text-label-sm text-on-surface-variant mt-1 tracking-[0.2em] uppercase">
+                                Time on Adventure
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center gap-8">
+                            <button className="w-28 h-28 rounded-full bg-surface-container-highest/40 backdrop-blur-xl border-2 border-primary/40 flex items-center justify-center amber-ring-glow active:scale-90 transition-all duration-300 group">
+                                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                                    <span className="material-symbols-outlined text-[44px] text-primary" style={{fontVariationSettings: "'FILL' 1"}}>photo_camera</span>
+                                </div>
+                            </button>
+                            <div className="text-center">
+                                <div className="font-body-lg text-body-lg text-white mb-1">Capture a moment</div>
+                                <div className="font-headline-md text-headline-md text-primary">+10 XP</div>
+                            </div>
+                        </div>
+                    </main>
+                    <footer className="w-full px-margin-page pb-12 pt-4 z-20">
+                        <div className="flex gap-4 items-center">
+                            <button className="flex-1 py-4 px-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center gap-2 backdrop-blur-sm">
+                                <span className="material-symbols-outlined text-white text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>pause</span>
+                                <span className="font-body-lg text-white">Pause</span>
+                            </button>
+                            <button onClick={() => navigate('/summary')} className="flex-[1.5] py-4 px-6 rounded-full bg-gradient-to-r from-primary to-secondary-container flex items-center justify-center shadow-[0_8px_30px_rgba(255,149,0,0.3)] hover:brightness-110 active:scale-95 transition-all">
+                                <span className="font-headline-md text-on-secondary text-[17px] font-bold">Finish</span>
+                            </button>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const JourneyScreen = () => {
+            return (
+                <div className="bg-background min-h-screen flex flex-col">
+                    <header className="pt-8 pb-4 px-margin-page bg-background">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <img alt="Bailey" className="w-12 h-12 rounded-full border-2 border-primary-container object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDLX2DaEF2F4JCyDbcHZTnB9ExPVk-YuitjegNeMuwleghkkajjMCBdZRmaO46n0wx1nW_vr7kVPmrB9aRwkSG7qXgmks2Z6BEElvMqZs9GPDNue5rlU2Rti-CSb5SWS0ufZqQe-P_-UmKGj0Hur6gHri7LZX8F17VzBVTH0XnsSNsVKCecwGa3_w_4_jQKNiEsGe85RqC3yLfUiNWFPO1QzNoOBWzWibrt0QoJAeYyw84lEXtrBDmdLUZg3hqM__1Bnc6PiM9QYrX"/>
+                                    <div className="absolute -bottom-1 -right-1 bg-primary w-4 h-4 rounded-full flex items-center justify-center border-2 border-background">
+                                        <span className="material-symbols-outlined text-[10px] text-on-primary">pets</span>
+                                    </div>
+                                </div>
+                                <h1 className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">Journey</h1>
+                            </div>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container">
+                                <span className="material-symbols-outlined text-on-surface text-[20px]">calendar_today</span>
+                            </button>
+                        </div>
+                        <p className="text-on-surface-variant text-body-md font-body-md">Bailey's life, one memory at a time.</p>
+                    </header>
+                    <main className="flex-1 pb-32 px-margin-page relative">
+                        <div className="timeline-line"></div>
+                        <div className="relative pl-8">
+                            <div className="relative mb-8 pt-4">
+                                <div className="timeline-dot top-[22px]"></div>
+                                <h2 className="text-label-sm font-label-sm uppercase tracking-[0.2em] text-on-surface-variant opacity-70">May 2025</h2>
+                            </div>
+                            <div className="mb-6 relative">
+                                <div className="timeline-dot top-1/2 -translate-y-1/2 !bg-primary/40 !w-4 !h-4 !left-[23px] -ml-2"></div>
+                                <div className="glass-card rounded-lg p-card-padding flex items-center justify-between shadow-lg active:scale-98 transition-all duration-200">
+                                    <div className="flex-1 pr-4">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="material-symbols-outlined text-primary text-[18px]">beach_access</span>
+                                            <h3 className="text-on-surface font-headline-md text-[17px]">Coronado Dog Beach</h3>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-on-surface-variant/80 text-label-sm">
+                                            <span>May 12</span>
+                                            <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                                            <span>Adventure</span>
+                                        </div>
+                                        <div className="mt-2 inline-flex items-center px-2 py-0.5 bg-primary-container/20 text-primary text-[11px] font-bold rounded-md border border-primary/20">
+                                            +120 XP
+                                        </div>
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                        <img alt="Coronado" className="w-20 h-20 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9aW0vQ8hPff1KEULUUWF7A1gWIXiHSVkE1c5ToOCM_3E_g-cWzCLfo7Zc3nmAwZtMIz9hH3ciMW2birh2Ny1AyyXYp8-s6iox0mbE1GcR1Wf65oq87gqlPrNHwZrZ3Op3QLAfH5ZP6d6UBExbtrhammQfkk7F5XHYszakwTV9FDqy1DLs1uk1GIKq3h2O2nE-3VX9NwbIkknvElJNVnWmewdXJimSVekw7NW7zR1oUnOOmNVq_A4NEY2Nl8KO4idEXJxxiwkmhrwS"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <NavBar />
+                </div>
+            );
+        };
+
+        const PathScreen = () => {
+            return (
+                <div className="flex flex-col items-center overflow-x-hidden min-h-screen bg-black pb-32">
+                    <header className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md flex justify-between items-center px-margin-page pt-4 pb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+                                <img alt="Bailey" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8qMS4yiTtusG_w0xEuGaR6LVxt6q5DDcF1gLb2C0DWIgVfJRm51UaUAZEQA7a5Ii9qjBrUuY7-erk6zYCcij7XBvR8hMqLtkfZiZCaXzx9IgN6i7CrDRCfT9RlVcFN3cFUymw4ntuqbUPsmN8GXzH8cu0DW-lIeoJtlhwrBbPvUQBFrHyHSemJsbJFHYLmgttkIj-OukeId2WesRybNWUzA7QH7vXHgAti84YuQommJc_l9BnytzZ5bxhJiZaTZxSpGklWN9dgVp_"/>
+                            </div>
+                            <h1 className="text-headline-md font-bold text-primary">Today</h1>
+                        </div>
+                        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/20 transition-colors">
+                            <span className="material-symbols-outlined text-primary">notifications</span>
+                        </button>
+                    </header>
+                    <main className="w-full max-w-[430px] px-margin-page pt-24 flex flex-col flex-grow items-center">
+                        <header className="w-full mb-12 text-center">
+                            <h2 className="text-headline-lg font-bold text-on-surface mb-2">Path</h2>
+                            <p className="text-body-md text-on-surface-variant max-w-[280px] mx-auto">Every adventure shapes your story.</p>
+                        </header>
+                        <div className="relative w-full flex flex-col items-center gap-16">
+                            <div className="absolute top-10 bottom-10 w-[2px] dotted-line-amber opacity-30"></div>
+                            <div className="relative flex flex-col items-center gap-3">
+                                <div className="relative z-10 w-16 h-16 rounded-full node-completed path-glow flex items-center justify-center text-on-primary">
+                                    <span className="material-symbols-outlined text-3xl" style={{fontVariationSettings: "'FILL' 1"}}>pets</span>
+                                </div>
+                                <p className="text-label-sm font-bold text-primary uppercase tracking-widest">First Walk</p>
+                            </div>
+                            <div className="relative flex flex-col items-center gap-4">
+                                <div className="absolute top-0 left-0 w-20 h-20 -ml-2 -mt-2 bg-primary/20 rounded-full active-pulse"></div>
+                                <div className="relative z-10 w-16 h-16 rounded-full border-[3px] border-primary bg-surface-container-low flex items-center justify-center text-primary">
+                                    <span className="material-symbols-outlined text-3xl">photo_camera</span>
+                                    <svg className="absolute -inset-[3px] w-[70px] h-[70px] -rotate-90">
+                                        <circle className="text-primary" cx="35" cy="35" fill="none" r="33.5" stroke="currentColor" strokeDasharray="105 210" strokeLinecap="round" strokeWidth="3"></circle>
+                                    </svg>
+                                </div>
+                                <div className="text-center flex flex-col items-center gap-2">
+                                    <p className="text-body-md font-bold text-on-surface">Memory Keeper</p>
+                                    <div className="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+                                        <div className="h-full w-1/2 bg-primary rounded-full"></div>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">5 / 10 adventures</p>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <NavBar />
+                </div>
+            );
+        };
+
+        const ProfileScreen = () => {
+            return (
+                <div className="bg-background text-on-surface antialiased min-h-screen pb-32">
+                    <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-margin-page pt-4 pb-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
+                                <img alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXV919dPDC9IUE7Pbu-NlJLkez_z_kBpsuF8cpnjAareiv04741q3Me2p1unNotLe0OhaZZp7h6M8jGL06jah3FetDBBT_1ecjAmDTi6h5RKlECQ4a662pPa9RO2YqzkbAt-axoz91wtKOsh1lcazhMJ7XKjh1v31RjtVgT2wxxgOA7FgWy1hOQbd3txrEoRMpx8hZkaBJuVT87vSCCDjgfDQVuQf0ogHjptG9BSP541ROY_dbnZgW81WslwFfjRNG8CWrX8okjU5U"/>
+                            </div>
+                            <span className="text-xl font-bold tracking-tight text-primary">PawStreak</span>
+                        </div>
+                        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10">
+                            <span className="material-symbols-outlined text-primary">settings</span>
+                        </button>
+                    </header>
+                    <main className="pt-24 px-margin-page">
+                        <section className="flex flex-col items-center mb-stack-lg relative">
+                            <div className="absolute -top-12 w-80 h-80 profile-glow -z-10"></div>
+                            <div className="relative mb-6">
+                                <div className="w-36 h-36 rounded-full border-4 border-primary overflow-hidden bg-surface-container shadow-2xl glow-amber">
+                                    <img alt="Bailey profile" className="w-full h-full object-cover scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_Z1i7Cb_9qCyHUVarRUwugkv8zUb-a_SOkFvAujjkKwQGIOOLWVvNEDdwHr06U_UJBn5ORH1EVrO1V1XLWEbFlkdzd3XF2De-TuHqgibZnWAjN50evu30A3LoDBSiiwYrZbtwELmFXjWjOcaYKCb-Io61yyPOwj_qNcHctEYUZu0LdZrn_aNC14fpKbwE3pgv51MAXL77C_I2KkCcHn91s5lLv6M-XqQtaW_MJViR71L-q3K7Aq5IlZIqjh3YETBp6tffKlIQEezB"/>
+                                </div>
+                                <div className="absolute bottom-1 right-1 bg-primary text-on-primary rounded-full w-9 h-9 shadow-lg flex items-center justify-center ring-4 ring-background">
+                                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <h1 className="text-4xl font-bold mb-1 tracking-tight">Bailey</h1>
+                                <p className="text-primary/80 text-sm font-bold tracking-[0.2em] uppercase">Adventure Dog</p>
+                            </div>
+                            <div className="grid grid-cols-3 w-full gap-4 mt-8">
+                                <div className="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                                    <span className="text-2xl mb-1">🔥</span>
+                                    <span className="text-xl font-bold">12</span>
+                                    <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Streak</span>
+                                </div>
+                                <div className="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                                    <span className="text-2xl mb-1">🐾</span>
+                                    <span className="text-xl font-bold">28</span>
+                                    <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Adventures</span>
+                                </div>
+                                <div className="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                                    <span className="text-2xl mb-1">📍</span>
+                                    <span className="text-xl font-bold">9</span>
+                                    <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Places</span>
+                                </div>
+                            </div>
+                        </section>
+                        <section className="space-y-3 mb-12">
+                            <div className="flex justify-between items-center p-5 glass-card rounded-2xl">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-primary" style={{fontVariationSettings: "'FILL' 1"}}>photo_camera</span>
+                                    </div>
+                                    <span className="text-lg font-medium">Photos Captured</span>
+                                </div>
+                                <span className="text-2xl font-bold text-primary">112</span>
+                            </div>
+                        </section>
+                    </main>
+                    <NavBar />
+                </div>
+            );
+        };
+
+        const AdventureSummaryScreen = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="bg-[#0A0A0A] text-on-background font-body-md antialiased min-h-screen flex flex-col items-center overflow-x-hidden">
+                    <header className="flex justify-between items-center w-full px-margin-page pt-4 pb-2 bg-background fixed top-0 z-50">
+                        <div className="flex items-center gap-stack-sm">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+                                <img alt="Bailey" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA22GssA8ec5DtJs-GtXoy1kYyjlzTsTxPvmi4-Z-12OSxqu06Gdw1QuScffaBTvx9dGWfsJ7FbSKGJh0XskEZcfExVQ0S-KQiFvAX513PdT_BY7fJZy7JA6XW_Gp9RM6SlK2dCoTU8RqNRr5Se61prpjci7XG1E5xEMWc177t_7An26zvyb-4DJe801NVgnEXsPMolKngI7mQ1ZVelq1CPAMGNxoZaUi3O0zJXD4uQGoTkD0GjF4XG5gdapXsbryiKyxQBXi30opOz"/>
+                            </div>
+                            <h1 className="text-headline-md font-headline-md font-bold text-primary tracking-tight">Today</h1>
+                        </div>
+                        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10 transition-colors">
+                            <span className="material-symbols-outlined text-primary">notifications</span>
+                        </button>
+                    </header>
+                    <main className="w-full max-w-[720px] px-margin-page pt-24 pb-32 flex flex-col items-center gap-stack-lg radial-bg-glow">
+                        <section className="w-full text-center space-y-2">
+                            <p className="text-label-sm font-label-sm text-primary tracking-[0.2em] uppercase">MEMORY SAVED</p>
+                            <h2 className="text-headline-lg-mobile font-headline-lg-mobile md:text-headline-lg text-on-surface">Bailey had a great day.</h2>
+                        </section>
+                        <div className="w-full bg-surface-container-low border border-white/10 rounded-lg p-card-padding glow-amber">
+                            <div className="flex justify-between items-start mb-stack-md">
+                                <div>
+                                    <h3 className="text-headline-md font-headline-md text-on-surface">Coronado Dog Beach</h3>
+                                    <p className="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-[16px]">explore</span> Adventure
+                                    </p>
+                                </div>
+                                <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-label-sm border border-primary/20">
+                                    +120 XP
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-stack-sm pt-stack-md border-t border-outline-variant/20">
+                                <span className="material-symbols-outlined text-primary text-[24px]" style={{fontVariationSettings: "'FILL' 1"}}>local_fire_department</span>
+                                <p className="text-body-md font-body-md text-on-surface">12 Day Streak Protected</p>
+                            </div>
+                        </div>
+                        <div className="w-full aspect-[4/5] relative rounded-lg overflow-hidden group shadow-2xl">
+                            <img alt="Beach" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiNqb32mgNoT2TTidNscjmA5Q8MLRu7v-uvXXWBsATSdj-HAHw5ckKRaj2fRrfEzdRzmfbUbL41yuIF20y8Op1PxLKJMjOnvVn_IMKjHyWmRP_uJJzilVnRE8hMmSKinWaqhqjBcEWXypftk6mZh6fQMwSDrWdGIXbp97Q8sP4S6_cdUMNuXg88vlIKNlZPGM5wuuSneIAPuEgvSUPwDrxUBVa7pmp1F_kfrYWsn88cPlc1ndIZ8FfSPojcCuxb21IMdV_szkrJBbP"/>
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-black/20"></div>
+                            <div className="absolute bottom-0 left-0 w-full p-stack-lg flex justify-between items-end">
+                                <div>
+                                    <h4 className="text-headline-md font-headline-md text-white">Bailey</h4>
+                                    <p className="text-label-sm font-label-sm text-primary uppercase tracking-widest">BEACH ADVENTURE</p>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-display-time font-display-time text-primary leading-none">12</span>
+                                    <span className="text-label-sm font-label-sm text-white/60">DAYS</span>
+                                </div>
+                            </div>
+                        </div>
+                        <footer className="w-full flex flex-col items-center gap-stack-md mt-stack-lg">
+                            <button onClick={() => navigate('/')} className="w-full max-w-[280px] bg-gradient-to-r from-[#FF9500] to-[#FF5E00] text-on-primary font-bold py-4 rounded-full text-body-lg shadow-[0_4px_20px_rgba(255,94,0,0.3)] hover:brightness-110 active:scale-[0.98] transition-all">
+                                Done
+                            </button>
+                        </footer>
+                    </main>
+                    <NavBar />
+                </div>
+            );
+        };
+
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <div className="min-h-screen bg-background text-on-background select-none">
+                        <Routes>
+                            <Route path="/" element={<TodayScreen />} />
+                            <Route path="/plan" element={<PlanScreen />} />
+                            <Route path="/active" element={<ActiveAdventureScreen />} />
+                            <Route path="/journey" element={<JourneyScreen />} />
+                            <Route path="/summary" element={<AdventureSummaryScreen />} />
+                            <Route path="/path" element={<PathScreen />} />
+                            <Route path="/profile" element={<ProfileScreen />} />
+                        </Routes>
+                    </div>
+                </MemoryRouter>
+            );
+        };
+
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>

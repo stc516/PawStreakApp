@@ -18,7 +18,7 @@
 
 | Issue | Impact | Notes |
 |-------|--------|-------|
-| `seedEntries()` may populate demo adventures | Empty-state testing harder | Fresh QA: clear localStorage |
+| ~~`seedEntries()` demo adventures on fresh install~~ | Fixed — `completeOnboarding()` resets progress | Legacy localStorage may still have old demo data until cleared |
 | Geolocation optional / silent fail | `isAway` may stay false | No user-facing weather yet |
 
 ---

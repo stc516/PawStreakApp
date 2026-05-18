@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A;
+            -webkit-font-smoothing: antialiased;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .amber-glow {
+            box-shadow: 0 0 15px rgba(255, 149, 0, 0.25);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #ff9500 0%, #ff5e00 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#ffb874",
+                        "inverse-surface": "#e5e2e1",
+                        "primary": "#ffbd7f",
+                        "primary-container": "#ff9500",
+                        "tertiary": "#ffbe68",
+                        "secondary-fixed": "#ffdbce",
+                        "on-tertiary-fixed": "#2a1800",
+                        "surface-container-high": "#2a2a2a",
+                        "secondary-container": "#ff5e00",
+                        "on-secondary-fixed-variant": "#7f2b00",
+                        "outline-variant": "#554334",
+                        "on-secondary": "#5a1c00",
+                        "surface": "#131313",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "on-primary-fixed": "#2d1600",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#5e3b00",
+                        "on-secondary-fixed": "#370e00",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "secondary-fixed-dim": "#ffb599",
+                        "inverse-primary": "#8c5000",
+                        "on-background": "#e5e2e1",
+                        "on-surface-variant": "#dbc2ad",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#e9a035",
+                        "background": "#0A0A0A",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#643700",
+                        "secondary": "#ffb599",
+                        "surface-container": "#201f1f",
+                        "on-secondary-container": "#531900",
+                        "on-surface": "#e5e2e1",
+                        "surface-bright": "#3a3939",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary": "#4b2800",
+                        "on-tertiary": "#462a00",
+                        "surface-variant": "#353534",
+                        "tertiary-fixed": "#ffddb6",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-dim": "#131313",
+                        "primary-fixed": "#ffdcbf",
+                        "on-error": "#690005",
+                        "outline": "#a38d7a",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb874"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter-grid": "16px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "card-padding": "20px",
+                        "stack-sm": "8px",
+                        "margin-page": "24px"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-on-surface bg-background min-h-screen">
+<!-- Top AppBar -->
+<header class="bg-background/80 backdrop-blur-lg flex justify-between items-center w-full px-margin-page pt-6 pb-4 fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="absolute inset-0 rounded-full border-2 border-primary-container/40 p-0.5 scale-110"></div>
+<img alt="Bailey" class="w-10 h-10 rounded-full object-cover border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCil4Iq3vcXhwJAOxzkFHo5SNPqSoGvsYFb_HTUuYOMw9fwDgocdvgPcaEthSZ9FmzFQzDx5SOf46v7VeVeoVEQ9BJ6AdW00MkOTfdEc--L0vEQ83ivw4mBGeGF7sC9WQY7eL6MN-7GlMUEaduetBcle9cvVyITaiCarS_oqpbdF5Jfvjdvu509-cuU_XU_dE0Db-JoEpFfSV_bdxtuInTB6PgEeqM-l3XlCkbQo-xFBKpAOYWKVTGCIiwlNUyMiwRJcpN6Zz7xj7Ai"/>
+</div>
+<div>
+<h2 class="text-lg font-bold leading-none flex items-center gap-1">
+                    Bailey <span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+</h2>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-primary-container text-[14px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-[12px] font-medium text-on-surface-variant">12 day streak</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-sm">location_on</span>
+<p class="text-[12px] font-medium text-on-surface-variant">San Diego</p>
+</div>
+<p class="text-primary-container font-bold text-lg leading-none">72°</p>
+</div>
+</header>
+<main class="pt-28 pb-32 px-margin-page max-w-md mx-auto">
+<!-- Welcome Hero -->
+<section class="mb-stack-md">
+<h1 class="text-[32px] font-bold tracking-tight">Ready for an adventure?</h1>
+</section>
+<!-- Adventure Category Pills -->
+<section class="mb-stack-lg overflow-x-auto no-scrollbar -mx-margin-page px-margin-page">
+<div class="flex gap-2.5 min-w-max pb-2">
+<button class="px-5 py-2.5 rounded-full primary-gradient text-white text-sm font-bold shadow-lg shadow-primary-container/20 amber-glow">Beach</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-medium border border-white/5">Coffee</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-medium border border-white/5">Trail</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-medium border border-white/5">Brewery</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-medium border border-white/5">Park</button>
+</div>
+</section>
+<!-- Hero Recommended Card -->
+<section class="mb-stack-lg">
+<div class="bg-surface-container-low rounded-2xl p-3 border border-white/5 shadow-2xl">
+<div class="relative rounded-xl overflow-hidden aspect-[16/10] mb-4">
+<img alt="Coronado Dog Beach" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTCrFtR5bJqIK2BuHTUKz7bGFyuzcGD6zVslXAmIfeivpLgvimmwsNe-xFqcTetAmmUJ5LgGVfgedL2XgTKCjfEEj-0hQQJoXOqmk3I_C28ZegmykbNFQb2pWr9trX89AKwmK7viViDGDWwRp69zkS0dzKI32SC6Hn3Fyccac7WkJ3MA6a-v4E2N30LcXcbf9ZG7nYFIOIpckump2KsnE9kJaMqZZ8-5-aODBVxEpnlLsa7S_kAgGdmffjtCpn_WGPYMF8hBbgDat6"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-4">
+<span class="bg-primary-container/90 backdrop-blur-sm text-[10px] uppercase font-bold tracking-widest text-white px-2 py-1 rounded">Recommended</span>
+</div>
+</div>
+<div class="px-2 pb-2 flex justify-between items-center">
+<div class="flex-1 mr-4">
+<h3 class="text-xl font-bold mb-1">Coronado Dog Beach</h3>
+<div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Coronado, CA • 2.4 mi</span>
+</div>
+</div>
+<button class="primary-gradient px-6 py-3 rounded-xl text-white font-bold shadow-lg shadow-primary-container/30 active:scale-95 transition-transform shrink-0">
+                        Let's go
+                    </button>
+</div>
+</div>
+</section>
+<!-- Recent Memories -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-end mb-4">
+<h2 class="text-xl font-bold">Recent Memories</h2>
+<button class="text-primary-container text-sm font-bold">See all</button>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar -mx-margin-page px-margin-page">
+<div class="shrink-0 w-24">
+<img class="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdg1Nv4cHTZWNgSXwPUW8diWpF3aowrTkM1JT0DHeIF65W00MMbQDbGH2MsJxp9V2f3g3yM45UkpBXuDIHn7qKhLQpIHQ1gjJNDVTiBDS7ZDPD81YiQi-NgatBhirl-TUu2U7v9Xtbdit90htJ72H9faL4cFBLKsuo-c64QObFm8YT2bBqMO1FEfkMjZv5JObok84TSLHNBIa3hiDMk3v7ETwuefBGHIhvKPFxZGToNQzWaey3ER3BOOitiK4oySDN3zUmNF2atYeZ"/>
+<p class="text-[12px] font-bold truncate">Sunset Walk</p>
+<p class="text-[10px] text-on-surface-variant">May 12</p>
+</div>
+<div class="shrink-0 w-24">
+<img class="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbPdjcxSwQkJLm2dKM_lDPxj42_l7OyN7ZTMdSAY9_aY-k9FxyoL_0A3qWWQsRTwcUfgsGlYhEwK4KanQMOmQya5zqbp19R1pMCp8cQWGqpVEwPwkMV96RWbWNVmy3fQ2rqFASnOsumYeFntKAbVU-aSKULf3derxNBiVOvk6l1xHLgRQQmM465POZjDUxlq4B19e8ZYT6SKFapWvK-uLAlofeo_D3Fi5-vUjHYVDhM3pgWOIi0Dk3zBISk8ruoEdAWFhnihK48oap"/>
+<p class="text-[12px] font-bold truncate">Better Buzz</p>
+<p class="text-[10px] text-on-surface-variant">May 10</p>
+</div>
+<div class="shrink-0 w-24">
+<img class="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK0yVjoHffiuqPoKJNWwjMgz5Pus7zrz07AVOehq4pTErn7HGNdbZr6txMGPV8c7Li967v6BIkfankd6v1uCjxYBVSqs97dRRk9q3Spo8A6MvF_4k4uUN3gp4hW0uv0X5iRJ82ObwbW36_7tJ7Nx76PqFI5mX7qjikcT7aygkcqCO7TOiiIWNOHtMekwDpUCNRB19kY8r6yYKQnn2dJHVDR3FKPEX1cQMPExWjs7bFnDj-KU6J5TNBBEnbmdqNPvVCKOh4JA6l53_5"/>
+<p class="text-[12px] font-bold truncate">Mission Bay</p>
+<p class="text-[10px] text-on-surface-variant">May 8</p>
+</div>
+<div class="shrink-0 w-24">
+<img class="w-24 h-24 rounded-2xl object-cover mb-2 border border-white/5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGkjbmETq837FwfIE5-Z52nq5um_UTex5otLY3ya32cmllhtMg4IwAtpK7pMVOpJAumFpaWXYQltgAbPWr6bEL6RT-ZBVPBRefLgDtFaIwjP88tA8BNx6SQojJg5Qw0FTuWus_E8_bE6o6JrNsfohyyY2spSapu-4LI35r6H77JQlwmSByIuElQIj1V1QtSnOq6AwnWYfaTM-E-M46JUkKKFR024JSmw9WTR6b8SQ_OwFsUUo55wYKvb-2vtVJndT4w7AHp7fNgy8A"/>
+<p class="text-[12px] font-bold truncate">Balboa Park</p>
+<p class="text-[10px] text-on-surface-variant">May 5</p>
+</div>
+</div>
+</section>
+<!-- Stats Bar -->
+<section class="grid grid-cols-3 gap-3">
+<div class="bg-surface-container-low border border-white/5 rounded-2xl p-4 text-center">
+<p class="text-2xl font-bold text-white leading-none">28</p>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1">Adventures</p>
+</div>
+<div class="bg-surface-container-low border border-white/5 rounded-2xl p-4 text-center">
+<p class="text-2xl font-bold text-white leading-none">12</p>
+<p class="text-[10px] font-bold text-primary-container uppercase tracking-wider mt-1">Day Streak</p>
+</div>
+<div class="bg-surface-container-low border border-white/5 rounded-2xl p-4 text-center">
+<p class="text-2xl font-bold text-white leading-none">9</p>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1">Places</p>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 px-6 pt-3 pb-8 bg-background/80 backdrop-blur-xl border-t border-white/5 flex justify-between items-center max-w-md mx-auto left-1/2 -translate-x-1/2">
+<a class="flex flex-col items-center gap-1 text-primary-container" href="#">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="text-[10px] font-bold">Today</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">calendar_today</span>
+<span class="text-[10px] font-bold">Plan</span>
+</a>
+<div class="relative -top-6">
+<div class="absolute -inset-3 bg-primary-container/20 rounded-full blur-xl"></div>
+<button class="w-16 h-16 rounded-full primary-gradient flex items-center justify-center shadow-2xl shadow-primary-container/40 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-white text-3xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">map</span>
+<span class="text-[10px] font-bold">Path</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">account_circle</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</nav>
+</body></html>

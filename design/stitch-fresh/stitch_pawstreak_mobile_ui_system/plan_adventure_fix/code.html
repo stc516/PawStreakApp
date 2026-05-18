@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PawStreak - Plan Your Next Adventure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#ffb874",
+            "inverse-surface": "#e5e2e1",
+            "primary": "#ffbd7f",
+            "primary-container": "#ff9500",
+            "tertiary": "#ffbe68",
+            "secondary-fixed": "#ffdbce",
+            "on-tertiary-fixed": "#2a1800",
+            "surface-container-high": "#2a2a2a",
+            "secondary-container": "#ff5e00",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "outline-variant": "#554334",
+            "on-secondary": "#5a1c00",
+            "surface": "#131313",
+            "on-primary-fixed-variant": "#6a3b00",
+            "on-primary-fixed": "#2d1600",
+            "error": "#ffb4ab",
+            "on-tertiary-container": "#5e3b00",
+            "on-secondary-fixed": "#370e00",
+            "inverse-on-surface": "#313030",
+            "on-tertiary-fixed-variant": "#643f00",
+            "secondary-fixed-dim": "#ffb599",
+            "inverse-primary": "#8c5000",
+            "on-background": "#e5e2e1",
+            "on-surface-variant": "#dbc2ad",
+            "on-error-container": "#ffdad6",
+            "tertiary-container": "#e9a035",
+            "background": "#0A0A0A",
+            "surface-container-highest": "#353534",
+            "on-primary-container": "#643700",
+            "secondary": "#ffb599",
+            "surface-container": "#201f1f",
+            "on-secondary-container": "#531900",
+            "on-surface": "#e5e2e1",
+            "surface-bright": "#3a3939",
+            "tertiary-fixed-dim": "#ffb95a",
+            "surface-container-lowest": "#0e0e0e",
+            "on-primary": "#4b2800",
+            "on-tertiary": "#462a00",
+            "surface-variant": "#353534",
+            "tertiary-fixed": "#ffddb6",
+            "surface-container-low": "#1c1b1b",
+            "surface-dim": "#131313",
+            "primary-fixed": "#ffdcbf",
+            "on-error": "#690005",
+            "outline": "#a38d7a",
+            "error-container": "#93000a",
+            "primary-fixed-dim": "#ffb874"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-grid": "16px",
+            "stack-lg": "24px",
+            "card-padding": "20px",
+            "stack-sm": "8px",
+            "stack-md": "16px",
+            "margin-page": "24px"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "display-time": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg-mobile": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+            "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+            "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+            "body-md": ["15px", {"lineHeight": "1.5", "fontWeight": "400"}],
+            "body-lg": ["17px", {"lineHeight": "1.5", "fontWeight": "400"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { background-color: #0A0A0A; }
+    .glow-amber { box-shadow: 0 0 20px 0 rgba(255, 149, 0, 0.2); }
+    .glass-card { background: rgba(32, 31, 31, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .gradient-primary { background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md flex justify-between items-center px-margin-page pt-4 pb-2">
+<div class="flex items-center gap-stack-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A friendly dog portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZjC-KhDgDnOJtOFbvATCOa2zdtBPb5aWVyvs4pnAyGTC2n41-fb9WBikqUaU7KwvTsln-FbPg6DkhLYoF_Rj2FZlDiskeyI-PFnTPgbAQFlKKesdKa-TAbj7RPvQutHEksWpvWkxASdsrDptaJN2VcBuaPD8msHy0xPzCExnDxGeAhJ15T4Zq9MNAKzvs_ukNkOske1rFSVlOgSSkRfTF9tmDrdyNHkNyayyXbD0tIkndq1vFif6RSj8PDeF6u1rh7KOZ6ucUCaGC"/>
+</div>
+<div>
+<h1 class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Plan</h1>
+<p class="text-headline-md font-headline-md text-primary">PawStreak</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-variant/10 transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<main class="mt-24 px-margin-page space-y-10">
+<!-- Hero Section -->
+<section>
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile mb-1">What should we do next?</h2>
+<p class="text-body-md font-body-md text-on-surface-variant">Pick a vibe. Find a place. Make a memory.</p>
+</section>
+<!-- Filter Chips -->
+<section class="overflow-x-auto pb-2 scrollbar-hide">
+<div class="flex gap-stack-sm whitespace-nowrap">
+<button class="px-6 py-2 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm shadow-md glow-amber">Beach</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Trail</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Coffee</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Brewery</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Park</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant/10 transition-colors">Social</button>
+</div>
+</section>
+<!-- Discovery State: Beach Category -->
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">beach_access</span>
+<h3 class="text-headline-md font-headline-md">Beach Spots</h3>
+</div>
+<!-- Card 1: Coronado Dog Beach -->
+<div class="glass-card rounded-lg p-3 flex gap-4 items-center group transition-all duration-300 active:scale-95 shadow-lg">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+<img alt="Coronado Dog Beach" class="w-full h-full object-cover" data-alt="Coronado Dog Beach golden retriever" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNFbtaFTql7nLVnO8mI8wbXnEj5ZmXGrIppzOXxiNRho7P4Khoj56uxAIBhmdGN20nIV-MDeh061t80Vn695AJeabstbXairnW_YbBNbDFSeM79LWzDw1MouqvQET6kHbk9_YwKiuXHAvRgZ_BxC5Osr8ELjRMLp1zBjLaFbjveL3zg6td5C_zRlguvr-q_5NUvCzsjC4jQWCCubYREQao_YLqWv7zPBONsdFXGEL-VxaYhKL6ixIXR5N0bshSgZ00ME-zdnDSiGJE"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-body-lg font-bold truncate">Coronado Dog Beach</h4>
+<p class="text-label-sm text-primary-fixed-dim">Coronado • 2.4 mi</p>
+<p class="text-body-md text-on-surface-variant line-clamp-1 mt-1">Wide sandy beach for zoomies and sunsets.</p>
+</div>
+<button class="gradient-primary text-on-primary-fixed w-12 h-12 rounded-full flex items-center justify-center glow-amber">
+<span class="text-label-sm font-bold">Start</span>
+</button>
+</div>
+<!-- Card 2: Fiesta Island -->
+<div class="glass-card rounded-lg p-3 flex gap-4 items-center group transition-all duration-300 active:scale-95 shadow-lg">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+<img alt="Fiesta Island" class="w-full h-full object-cover" data-alt="Fiesta Island sunset dog" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm7ohPI60_WnxAJS-m0QKri9-wvc-25fimqpY3-V5pIjCbt7jk7WysGgYZsNS3K17uwNCRt7FY5D9RfKVam5QZ1Nrd1wqHaUMtUVs7kZns23shrWVFE8b65X6gfknKiR-j1cR0AoF4euMfMPskyzkMBEAZxSYlTn6bvwz9eGU7ErLhbiLefzV4etFq8WrYZNeodI3clJgBd4yXSrFT3hxDoXhsM2iKgoAGsXZLjaDS-Mdvi8omvou7mv0Edayr0pzzjCqEzojAaiYF"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-body-lg font-bold truncate">Fiesta Island</h4>
+<p class="text-label-sm text-primary-fixed-dim">San Diego • 3.1 mi</p>
+<p class="text-body-md text-on-surface-variant line-clamp-1 mt-1">Vast off-leash space for social pups.</p>
+</div>
+<button class="gradient-primary text-on-primary-fixed w-12 h-12 rounded-full flex items-center justify-center glow-amber">
+<span class="text-label-sm font-bold">Start</span>
+</button>
+</div>
+<!-- Card 3: Ocean Beach Dog Beach -->
+<div class="glass-card rounded-lg p-3 flex gap-4 items-center group transition-all duration-300 active:scale-95 shadow-lg">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+<img alt="Ocean Beach Dog Beach" class="w-full h-full object-cover" data-alt="Ocean Beach Dog Beach" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1yhTX6vwImdsxKa-M21cgVEC-dwq3ZdNX-C05PUZHaw14nnmkpruksaIZJtnMVYwkxqEP8X1efHv639w_yhgVCNQVqirnJkMQzJDbW0HL0YWAwWitME7c0VfqBUFQ1Vm_uw9Es32rs9-XbN65_oMjK1I_YY8nGnbWQx5_lkXIya05C-LptIOHi_AqlsgrLjt2xoyb6R6e33KQlwIwBs0nGcz_hbBxtzF2S1hL5tqVLIRfWz268Ili1Ri4cuiNm_RFS_hYrdJXkXGY"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-body-lg font-bold truncate">Ocean Beach Dog Beach</h4>
+<p class="text-label-sm text-primary-fixed-dim">San Diego • 4.2 mi</p>
+<p class="text-body-md text-on-surface-variant line-clamp-1 mt-1">Laid back vibes at the river mouth.</p>
+</div>
+<button class="gradient-primary text-on-primary-fixed w-12 h-12 rounded-full flex items-center justify-center glow-amber">
+<span class="text-label-sm font-bold">Start</span>
+</button>
+</div>
+</section>
+<!-- Routine Builder Section -->
+<section class="pb-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">calendar_add_on</span>
+<h3 class="text-headline-md font-headline-md">Build a better routine together</h3>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Routine Card 1 -->
+<div class="glass-card rounded-lg p-5 flex items-start gap-4 shadow-lg border-l-4 border-l-primary transition-transform active:scale-[0.98]">
+<div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary text-3xl">beach_access</span>
+</div>
+<div>
+<h4 class="text-headline-md font-bold text-on-surface">Beach every Sunday</h4>
+<p class="text-body-md text-on-surface-variant mt-1">Set as a weekly goal to keep the streak alive.</p>
+<div class="flex items-center gap-2 mt-3 text-label-sm text-primary">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>Sundays at 9:00 AM</span>
+</div>
+</div>
+</div>
+<!-- Routine Card 2 -->
+<div class="glass-card rounded-lg p-5 flex items-start gap-4 shadow-lg border-l-4 border-l-tertiary transition-transform active:scale-[0.98]">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-tertiary text-3xl">coffee</span>
+</div>
+<div>
+<h4 class="text-headline-md font-bold text-on-surface">Coffee run Saturdays</h4>
+<p class="text-body-md text-on-surface-variant mt-1">Visit a dog-friendly cafe for a pup-cup treat.</p>
+<div class="flex items-center gap-2 mt-3 text-label-sm text-tertiary">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>Saturdays at 8:30 AM</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-md border-t border-outline-variant/20 shadow-lg px-4 pt-3 pb-8 flex justify-around items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-label-sm font-label-sm mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="text-label-sm font-label-sm mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-label-sm font-label-sm mt-1">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

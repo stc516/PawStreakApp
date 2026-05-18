@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A;
+            color: #e5e2e1;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #ff9500 0%, transparent 100%);
+            opacity: 0.2;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 21px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ff9500;
+            box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+            z-index: 10;
+        }
+        .glass-card {
+            background: rgba(28, 28, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#8c5000",
+                        "surface": "#131313",
+                        "tertiary": "#ffbe68",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed-dim": "#ffb599",
+                        "surface-dim": "#131313",
+                        "primary-fixed-dim": "#ffb874",
+                        "secondary-container": "#ff5e00",
+                        "on-primary-fixed-variant": "#6a3b00",
+                        "secondary-fixed": "#ffdbce",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#dbc2ad",
+                        "background": "#0A0A0A",
+                        "primary": "#ffbd7f",
+                        "outline-variant": "#554334",
+                        "tertiary-container": "#e9a035",
+                        "primary-container": "#ff9500",
+                        "on-secondary-fixed": "#370e00",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary": "#462a00",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-primary-fixed": "#2d1600",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#ffddb6",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-container": "#5e3b00",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#ffdcbf",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-container": "#531900",
+                        "secondary": "#ffb599",
+                        "surface-bright": "#3a3939",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-background": "#e5e2e1",
+                        "on-primary": "#4b2800",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary": "#5a1c00",
+                        "outline": "#a38d7a",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "card-padding": "16px",
+                        "stack-sm": "8px",
+                        "gutter-grid": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-time": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-time": ["48px", {"lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "300"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background dark:bg-background min-h-screen flex flex-col">
+<!-- Header -->
+<header class="pt-8 pb-4 px-margin-page bg-background">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Bailey" class="w-12 h-12 rounded-full border-2 border-primary-container object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDLX2DaEF2F4JCyDbcHZTnB9ExPVk-YuitjegNeMuwleghkkajjMCBdZRmaO46n0wx1nW_vr7kVPmrB9aRwkSG7qXgmks2Z6BEElvMqZs9GPDNue5rlU2Rti-CSb5SWS0ufZqQe-P_-UmKGj0Hur6gHri7LZX8F17VzBVTH0XnsSNsVKCecwGa3_w_4_jQKNiEsGe85RqC3yLfUiNWFPO1QzNoOBWzWibrt0QoJAeYyw84lEXtrBDmdLUZg3hqM__1Bnc6PiM9QYrX"/>
+<div class="absolute -bottom-1 -right-1 bg-primary w-4 h-4 rounded-full flex items-center justify-center border-2 border-background">
+<span class="material-symbols-outlined text-[10px] text-on-primary">pets</span>
+</div>
+</div>
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">Journey</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface text-[20px]">calendar_today</span>
+</button>
+</div>
+<p class="text-on-surface-variant text-body-md font-body-md">Bailey's life, one memory at a time.</p>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 pb-32 px-margin-page relative">
+<!-- Timeline Line -->
+<div class="timeline-line"></div>
+<!-- Timeline Container -->
+<div class="relative pl-8">
+<!-- Group: May 2025 -->
+<div class="relative mb-8 pt-4">
+<div class="timeline-dot top-[22px]"></div>
+<h2 class="text-label-sm font-label-sm uppercase tracking-[0.2em] text-on-surface-variant opacity-70">May 2025</h2>
+</div>
+<!-- Memory Card 1: With Photo -->
+<div class="mb-6 relative">
+<div class="timeline-dot top-1/2 -translate-y-1/2 !bg-primary/40 !w-4 !h-4 !left-[23px] -ml-2"></div>
+<div class="glass-card rounded-lg p-card-padding flex items-center justify-between shadow-lg active:scale-98 transition-all duration-200">
+<div class="flex-1 pr-4">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-[18px]">beach_access</span>
+<h3 class="text-on-surface font-headline-md text-[17px]">Coronado Dog Beach</h3>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2 text-on-surface-variant/80 text-label-sm">
+<span>May 12, 2025</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Adventure</span>
+</div>
+<div class="mt-2 inline-flex items-center px-2 py-0.5 bg-primary-container/20 text-primary text-[11px] font-bold rounded-md border border-primary/20">
+                            +120 XP
+                        </div>
+</div>
+</div>
+<div class="flex-shrink-0">
+<img alt="Coronado" class="w-20 h-20 rounded-lg object-cover shadow-inner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9aW0vQ8hPff1KEULUUWF7A1gWIXiHSVkE1c5ToOCM_3E_g-cWzCLfo7Zc3nmAwZtMIz9hH3ciMW2birh2Ny1AyyXYp8-s6iox0mbE1GcR1Wf65oq87gqlPrNHwZrZ3Op3QLAfH5ZP6d6UBExbtrhammQfkk7F5XHYszakwTV9FDqy1DLs1uk1GIKq3h2O2nE-3VX9NwbIkknvElJNVnWmewdXJimSVekw7NW7zR1oUnOOmNVq_A4NEY2Nl8KO4idEXJxxiwkmhrwS"/>
+</div>
+</div>
+</div>
+<!-- Memory Card 2: Icon Only -->
+<div class="mb-6 relative">
+<div class="timeline-dot top-1/2 -translate-y-1/2 !bg-primary/40 !w-4 !h-4 !left-[23px] -ml-2"></div>
+<div class="glass-card rounded-lg p-card-padding flex items-center justify-between shadow-lg active:scale-98 transition-all duration-200">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-tertiary text-[18px]">coffee</span>
+<h3 class="text-on-surface font-headline-md text-[17px]">Better Buzz Coffee</h3>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2 text-on-surface-variant/80 text-label-sm">
+<span>May 10, 2025</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Coffee Run</span>
+</div>
+<div class="mt-2 inline-flex items-center px-2 py-0.5 bg-tertiary-container/20 text-tertiary text-[11px] font-bold rounded-md border border-tertiary/20">
+                            +80 XP
+                        </div>
+</div>
+</div>
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container rounded-full text-on-surface-variant/40">
+<span class="material-symbols-outlined text-[24px]">local_cafe</span>
+</div>
+</div>
+</div>
+<!-- Memory Card 3: Icon Only -->
+<div class="mb-6 relative">
+<div class="timeline-dot top-1/2 -translate-y-1/2 !bg-primary/40 !w-4 !h-4 !left-[23px] -ml-2"></div>
+<div class="glass-card rounded-lg p-card-padding flex items-center justify-between shadow-lg active:scale-98 transition-all duration-200">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-secondary text-[18px]">directions_walk</span>
+<h3 class="text-on-surface font-headline-md text-[17px]">Mission Bay Walk</h3>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2 text-on-surface-variant/80 text-label-sm">
+<span>May 08, 2025</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Trail Walk</span>
+</div>
+<div class="mt-2 inline-flex items-center px-2 py-0.5 bg-secondary-container/20 text-secondary text-[11px] font-bold rounded-md border border-secondary/20">
+                            +100 XP
+                        </div>
+</div>
+</div>
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container rounded-full text-on-surface-variant/40">
+<span class="material-symbols-outlined text-[24px]">park</span>
+</div>
+</div>
+</div>
+<!-- Group: April 2025 -->
+<div class="relative mb-8 pt-4">
+<div class="timeline-dot top-[22px] !bg-on-surface-variant/30 !shadow-none"></div>
+<h2 class="text-label-sm font-label-sm uppercase tracking-[0.2em] text-on-surface-variant opacity-70">April 2025</h2>
+</div>
+<!-- Memory Card 4: With Photo -->
+<div class="mb-6 relative">
+<div class="timeline-dot top-1/2 -translate-y-1/2 !bg-primary/20 !w-4 !h-4 !left-[23px] -ml-2"></div>
+<div class="glass-card rounded-lg p-card-padding flex items-center justify-between shadow-lg opacity-70">
+<div class="flex-1 pr-4">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[18px]">home_health</span>
+<h3 class="text-on-surface font-headline-md text-[17px]">Annual Checkup</h3>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2 text-on-surface-variant/80 text-label-sm">
+<span>April 24, 2025</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Health</span>
+</div>
+</div>
+</div>
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container rounded-full text-on-surface-variant/40">
+<span class="material-symbols-outlined text-[24px]">medical_services</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-background/90 backdrop-blur-xl border-t border-white/5 flex justify-around items-center px-4 pt-3 pb-8">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">pets</span>
+<span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">assignment</span>
+<span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">timeline</span>
+<span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">account_circle</span>
+<span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Profile</span>
+</a>
+</nav>
+</body></html>

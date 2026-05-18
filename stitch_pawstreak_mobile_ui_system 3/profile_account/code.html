@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PawStreak - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "inverse-primary": "#8c5000",
+                  "surface": "#131313",
+                  "tertiary": "#ffbe68",
+                  "inverse-on-surface": "#313030",
+                  "secondary-fixed-dim": "#ffb599",
+                  "surface-dim": "#131313",
+                  "primary-fixed-dim": "#ffb874",
+                  "secondary-container": "#ff5e00",
+                  "on-primary-fixed-variant": "#6a3b00",
+                  "secondary-fixed": "#ffdbce",
+                  "on-surface": "#e5e2e1",
+                  "on-surface-variant": "#dbc2ad",
+                  "background": "#0A0A0A",
+                  "primary": "#ffbd7f",
+                  "outline-variant": "#554334",
+                  "tertiary-container": "#e9a035",
+                  "primary-container": "#ff9500",
+                  "on-secondary-fixed": "#370e00",
+                  "surface-container-high": "#2a2a2a",
+                  "on-tertiary": "#462a00",
+                  "surface-container-highest": "#353534",
+                  "surface-variant": "#353534",
+                  "on-tertiary-fixed": "#2a1800",
+                  "on-primary-fixed": "#2d1600",
+                  "error": "#ffb4ab",
+                  "tertiary-fixed": "#ffddb6",
+                  "on-error-container": "#ffdad6",
+                  "surface-container": "#1A1A1A",
+                  "on-tertiary-container": "#5e3b00",
+                  "error-container": "#93000a",
+                  "primary-fixed": "#ffdcbf",
+                  "surface-container-lowest": "#050505",
+                  "surface-container-low": "#131313",
+                  "on-secondary-container": "#531900",
+                  "secondary": "#ffb599",
+                  "surface-bright": "#3a3939",
+                  "tertiary-fixed-dim": "#ffb95a",
+                  "on-background": "#e5e2e1",
+                  "on-primary": "#4b2800",
+                  "on-error": "#690005",
+                  "on-tertiary-fixed-variant": "#643f00",
+                  "on-secondary": "#5a1c00",
+                  "outline": "#a38d7a",
+                  "inverse-surface": "#e5e2e1"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "margin-page": "24px",
+                  "stack-lg": "24px",
+                  "stack-md": "16px",
+                  "card-padding": "20px",
+                  "stack-sm": "8px",
+                  "gutter-grid": "16px"
+          },
+          "fontFamily": {
+                  "sans": ["DM Sans", "sans-serif"],
+                  "headline-md": ["DM Sans"],
+                  "body-md": ["DM Sans"],
+                  "display-time": ["DM Sans"],
+                  "headline-lg": ["DM Sans"],
+                  "body-lg": ["DM Sans"],
+                  "headline-lg-mobile": ["DM Sans"],
+                  "label-sm": ["DM Sans"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .profile-glow {
+      background: radial-gradient(circle, rgba(255, 149, 0, 0.2) 0%, rgba(10, 10, 10, 0) 70%);
+    }
+    .amber-ring {
+      box-shadow: 0 0 25px rgba(255, 149, 0, 0.3);
+      border: 3px solid #ff9500;
+    }
+    .floating-card {
+      background: #1A1A1A;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    body {
+      min-height: max(884px, 100dvh);
+      font-family: 'DM Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-margin-page pt-4 pb-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
+<img alt="Profile" data-alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXV919dPDC9IUE7Pbu-NlJLkez_z_kBpsuF8cpnjAareiv04741q3Me2p1unNotLe0OhaZZp7h6M8jGL06jah3FetDBBT_1ecjAmDTi6h5RKlECQ4a662pPa9RO2YqzkbAt-axoz91wtKOsh1lcazhMJ7XKjh1v31RjtVgT2wxxgOA7FgWy1hOQbd3txrEoRMpx8hZkaBJuVT87vSCCDjgfDQVuQf0ogHjptG9BSP541ROY_dbnZgW81WslwFfjRNG8CWrX8okjU5U"/>
+</div>
+<span class="text-xl font-bold tracking-tight text-primary">PawStreak</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/10 transition-colors">
+<span class="material-symbols-outlined text-primary">settings</span>
+</button>
+</header>
+<main class="pt-24 px-margin-page">
+<!-- Profile Hero Section -->
+<section class="flex flex-col items-center mb-stack-lg relative">
+<div class="absolute -top-12 w-80 h-80 profile-glow -z-10"></div>
+<!-- Avatar with Amber Ring and Glow -->
+<div class="relative mb-6">
+<div class="w-36 h-36 rounded-full amber-ring overflow-hidden bg-surface-container shadow-2xl">
+<img alt="Bailey profile" class="w-full h-full object-cover scale-110" data-alt="Bailey profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_Z1i7Cb_9qCyHUVarRUwugkv8zUb-a_SOkFvAujjkKwQGIOOLWVvNEDdwHr06U_UJBn5ORH1EVrO1V1XLWEbFlkdzd3XF2De-TuHqgibZnWAjN50evu30A3LoDBSiiwYrZbtwELmFXjWjOcaYKCb-Io61yyPOwj_qNcHctEYUZu0LdZrn_aNC14fpKbwE3pgv51MAXL77C_I2KkCcHn91s5lLv6M-XqQtaW_MJViR71L-q3K7Aq5IlZIqjh3YETBp6tffKlIQEezB"/>
+</div>
+<div class="absolute bottom-1 right-1 bg-primary text-on-primary rounded-full w-9 h-9 shadow-lg flex items-center justify-center ring-4 ring-background">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</div>
+</div>
+<div class="text-center">
+<h1 class="text-4xl font-bold mb-1 tracking-tight">Bailey</h1>
+<p class="text-primary/80 text-sm font-bold tracking-[0.2em] uppercase">Adventure Dog</p>
+</div>
+<!-- Stats Row -->
+<div class="grid grid-cols-3 w-full gap-4 mt-8">
+<div class="floating-card rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+<span class="text-2xl mb-1">🔥</span>
+<span class="text-xl font-bold">12</span>
+<span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Day Streak</span>
+</div>
+<div class="floating-card rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+<span class="text-2xl mb-1">🐾</span>
+<span class="text-xl font-bold">28</span>
+<span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Adventures</span>
+</div>
+<div class="floating-card rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+<span class="text-2xl mb-1">📍</span>
+<span class="text-xl font-bold">9</span>
+<span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Places</span>
+</div>
+</div>
+</section>
+<!-- Favorite Places section with small cards -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-xl font-bold">Favorite Places</h2>
+<button class="text-primary text-sm font-bold">See all</button>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<div class="floating-card p-3 rounded-2xl flex flex-col items-center text-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[20px]">beach_access</span>
+</div>
+<span class="text-xs font-bold truncate w-full">Coronado</span>
+</div>
+<div class="floating-card p-3 rounded-2xl flex flex-col items-center text-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[20px]">park</span>
+</div>
+<span class="text-xs font-bold truncate w-full">Balboa</span>
+</div>
+<div class="floating-card p-3 rounded-2xl flex flex-col items-center text-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[20px]">water</span>
+</div>
+<span class="text-xs font-bold truncate w-full">Mission</span>
+</div>
+</div>
+</section>
+<!-- Detailed Stats List -->
+<section class="space-y-3 mb-stack-lg">
+<div class="flex justify-between items-center p-5 floating-card rounded-2xl">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome_motion</span>
+</div>
+<span class="text-lg font-medium">Memories Saved</span>
+</div>
+<span class="text-2xl font-bold text-primary">34</span>
+</div>
+<div class="flex justify-between items-center p-5 floating-card rounded-2xl">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+</div>
+<span class="text-lg font-medium">Photos Captured</span>
+</div>
+<span class="text-2xl font-bold text-primary">112</span>
+</div>
+</section>
+<!-- Account & Sync Settings -->
+<section class="space-y-3 mb-stack-lg">
+<button class="w-full flex items-center justify-between p-5 floating-card rounded-2xl hover:bg-surface-container transition-colors text-left group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl">
+<span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+</div>
+<div>
+<p class="text-base font-bold">Account</p>
+<p class="text-xs text-on-surface-variant">Signed in as bailey@pawstreak.app</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-5 floating-card rounded-2xl hover:bg-surface-container transition-colors text-left">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl">
+<span class="material-symbols-outlined text-on-surface-variant">cloud_done</span>
+</div>
+<div>
+<p class="text-base font-bold">Save &amp; Sync</p>
+<p class="text-xs text-on-surface-variant">Last backup today, 9:41 AM</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-background/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center px-4 pt-3 pb-8">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-[10px] font-bold mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-[10px] font-bold mt-1">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-bold mt-1">Journey</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-[10px] font-bold mt-1">Path</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="text-[10px] font-bold mt-1">Profile</span>
+</a>
+</nav>
+</body></html>
