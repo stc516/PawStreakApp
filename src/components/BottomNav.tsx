@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom'
 
+import { H } from '../lib/editorialTheme'
+
 const NAV_ITEMS = [
   { to: '/app',       label: 'Today',   icon: 'today'   },
   { to: '/adventure', label: 'Plan',    icon: 'plan'    },
@@ -8,16 +10,8 @@ const NAV_ITEMS = [
   { to: '/account',   label: 'Profile', icon: 'profile' },
 ] as const
 
-const C = {
-  bg:       'rgba(10,10,10,0.80)',
-  active:   '#ffbd7f',
-  inactive: '#a38d7a',
-  border:   'rgba(255,255,255,0.05)',
-}
-const FONT = "'Inter', sans-serif"
-
 function NavIcon({ name, active }: { name: string; active: boolean }) {
-  const color = active ? C.active : C.inactive
+  const color = active ? H.sage : H.muted
   const p = {
     width: 24, height: 24, viewBox: '0 0 24 24',
     fill: 'none', stroke: color, strokeWidth: 1.5,
@@ -69,11 +63,12 @@ export function BottomNav() {
         width: '100%', maxWidth: '390px',
         zIndex: 30,
         display: 'flex', alignItems: 'stretch', justifyContent: 'space-around',
-        background: C.bg,
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderTop: `1px solid ${C.border}`,
-        fontFamily: FONT,
+        background: 'rgba(255, 252, 248, 0.94)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: `1px solid ${H.border}`,
+        boxShadow: '0 -4px 24px rgba(44, 36, 25, 0.06)',
+        fontFamily: H.sans,
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
@@ -88,11 +83,29 @@ export function BottomNav() {
             <div style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '3px', padding: '10px 0 12px', cursor: 'pointer',
+              position: 'relative',
             }}>
+              {isActive ? (
+                <span
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '28px',
+                    height: '3px',
+                    borderRadius: '0 0 3px 3px',
+                    background: H.sage,
+                  }}
+                />
+              ) : null}
               <NavIcon name={item.icon} active={isActive} />
               <span style={{
-                fontSize: '10px', fontWeight: '700', letterSpacing: '0.04em',
-                color: isActive ? C.active : C.inactive,
+                fontSize: '10px',
+                fontWeight: isActive ? 700 : 600,
+                letterSpacing: '0.04em',
+                color: isActive ? H.sageDeep : H.muted,
                 lineHeight: '1',
               }}>
                 {item.label}
