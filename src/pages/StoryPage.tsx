@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
@@ -6,63 +6,38 @@ import { useAppState } from '../hooks/useAppState'
 import type { AdventureEntry } from '../types'
 
 const PLACE_IMAGES: Record<string, string> = {
-  salt:    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80',
-  wander:  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80',
-  pulse:   'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80',
-  wild:    'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=400&q=80',
-  default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80',
+  salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+  wander: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+  pulse: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
+  wild: 'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=800&q=80',
+  default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80',
 }
 
-const C = {
-  bg:          '#0A0A0A',
-  surface:     '#201f1f',
-  primary:     '#ffbd7f',
-  tertiary:    '#ffbe68',
-  secondary:   '#ffb599',
-  onSurface:   '#e5e2e1',
-  muted:       '#dbc2ad',
-  border5:     'rgba(255,255,255,0.05)',
+const H = {
+  page: '#FAF7F2',
+  pageWash: 'linear-gradient(180deg, #FFFDF9 0%, #F5EFE6 48%, #FAF7F2 100%)',
+  card: '#FFFFFF',
+  cardSoft: '#FFFCF8',
+  ink: '#2C2419',
+  inkSoft: '#4A4036',
+  muted: '#7A6E62',
+  sage: '#5C7A6B',
+  sageSoft: 'rgba(92, 122, 107, 0.12)',
+  sageDeep: '#4A6359',
+  terra: '#C67B5C',
+  amber: '#D4956A',
+  amberSoft: 'rgba(212, 149, 106, 0.18)',
+  border: 'rgba(44, 36, 25, 0.08)',
+  borderStrong: 'rgba(44, 36, 25, 0.12)',
+  shadow: '0 12px 40px rgba(44, 36, 25, 0.06)',
+  shadowSoft: '0 4px 20px rgba(44, 36, 25, 0.05)',
+  serif: "'Literata', 'Fraunces', Georgia, 'Times New Roman', serif",
+  sans: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
 }
-const FONT = "'Inter', sans-serif"
 
-function categoryColor(cat: string): string {
-  const c = cat.toLowerCase()
-  if (c.includes('coffee') || c.includes('cafe') || c.includes('pulse')) return C.tertiary
-  if (c.includes('trail') || c.includes('walk') || c.includes('hike') || c.includes('wander')) return C.secondary
-  return C.primary
-}
-
-function CategoryIcon({ category, color, size = 18 }: { category: string; color: string; size?: number }) {
-  const b = {
-    width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color,
-    strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
-  }
-  const c = category.toLowerCase()
-  if (c.includes('beach') || c.includes('salt') || c.includes('ocean')) return (
-    <svg {...b}>
-      <path d="M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>
-      <path d="M2 18c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>
-    </svg>
-  )
-  if (c.includes('coffee') || c.includes('cafe') || c.includes('pulse')) return (
-    <svg {...b}>
-      <path d="M18 8h1a4 4 0 010 8h-1"/>
-      <path d="M3 8h15v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/>
-    </svg>
-  )
-  if (c.includes('trail') || c.includes('walk') || c.includes('hike') || c.includes('wander')) return (
-    <svg {...b}><path d="M8 3l4 8 5-5 5 15H2L8 3z"/></svg>
-  )
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none">
-      <circle cx="9" cy="8.5" r="2.5"/>
-      <circle cx="15" cy="8.5" r="2.5"/>
-      <circle cx="6" cy="13.5" r="2"/>
-      <circle cx="18" cy="13.5" r="2"/>
-      <path d="M12 14c-3.5 0-5 1.5-5 3.5S8.5 21 12 21s5-1.5 5-3.5S15.5 14 12 14z"/>
-    </svg>
-  )
-}
+const FONT_IMPORT = `
+  @import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+`
 
 function formatMonthLabel(iso: string): string {
   const d = new Date(iso)
@@ -76,6 +51,28 @@ function formatDateLabel(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
+function relativeDayLabel(iso: string): string {
+  const then = new Date(iso)
+  if (!Number.isFinite(then.getTime())) return ''
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const diffDays = Math.round((startOfDay(new Date()) - startOfDay(then)) / 86_400_000)
+  if (diffDays <= 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function scrapbookRotation(index: number): string {
+  const angles = ['-1.2deg', '0.8deg', '-0.6deg', '1deg', '0deg']
+  return angles[index % angles.length]
+}
+
+function memoryCaption(entry: AdventureEntry, dogName: string): string {
+  const note = entry.memoryText?.trim()
+  if (note) return note
+  return `A quiet moment with ${dogName} — ${entry.missionTitle}.`
+}
+
 function MemoryDetailSheet({
   entry,
   dogName,
@@ -86,7 +83,6 @@ function MemoryDetailSheet({
   onClose: () => void
 }) {
   const img = PLACE_IMAGES[entry.vibe] || PLACE_IMAGES.default
-  const color = categoryColor(entry.missionTitle)
 
   async function handleShare() {
     const text = entry.memoryText
@@ -112,7 +108,7 @@ function MemoryDetailSheet({
         position: 'fixed',
         inset: 0,
         zIndex: 60,
-        background: 'rgba(0,0,0,0.85)',
+        background: 'rgba(44, 36, 25, 0.35)',
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
@@ -126,84 +122,134 @@ function MemoryDetailSheet({
           maxWidth: '390px',
           maxHeight: '88vh',
           overflowY: 'auto',
-          background: C.surface,
+          background: H.card,
           borderRadius: '24px 24px 0 0',
-          border: `1px solid ${C.border5}`,
+          border: `1px solid ${H.border}`,
+          boxShadow: H.shadow,
           padding: '0 0 32px',
         }}
       >
-        <div style={{ position: 'relative', height: '220px' }}>
+        <div style={{ position: 'relative', height: '240px' }}>
           <img
             src={img}
             alt={entry.missionTitle}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)',
-          }} />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(44, 36, 25, 0.45) 0%, transparent 55%)',
+            }}
+          />
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
             style={{
-              position: 'absolute', top: '16px', left: '16px',
-              width: '40px', height: '40px', borderRadius: '50%',
-              background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'rgba(255, 252, 248, 0.92)',
+              border: `1px solid ${H.border}`,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={H.ink} strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
 
-        <div style={{ padding: '20px 24px 0' }}>
-          <p style={{
-            fontSize: '11px', fontWeight: '700', letterSpacing: '0.15em',
-            textTransform: 'uppercase', color: C.primary, margin: '0 0 8px',
-          }}>
+        <div style={{ padding: '22px 24px 0' }}>
+          <p
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: H.sage,
+              margin: '0 0 8px',
+              fontFamily: H.sans,
+            }}
+          >
             {formatDateLabel(entry.completedAt)}
           </p>
-          <h2 style={{ fontSize: '26px', fontWeight: '700', color: C.onSurface, margin: '0 0 8px', lineHeight: '1.2' }}>
+          <h2
+            style={{
+              fontFamily: H.serif,
+              fontSize: '26px',
+              fontWeight: 700,
+              color: H.ink,
+              margin: '0 0 8px',
+              lineHeight: 1.2,
+            }}
+          >
             {entry.missionTitle}
           </h2>
           {entry.locationHint ? (
-            <p style={{ fontSize: '14px', color: C.muted, margin: '0 0 16px' }}>{entry.locationHint}</p>
+            <p style={{ fontSize: '14px', color: H.muted, margin: '0 0 16px', fontFamily: H.sans }}>
+              {entry.locationHint}
+            </p>
           ) : null}
           {entry.memoryText ? (
-            <p style={{
-              fontSize: '15px', color: C.onSurface, fontStyle: 'italic', lineHeight: '1.5',
-              margin: '0 0 20px', padding: '16px',
-              background: 'rgba(255,149,0,0.06)', borderRadius: '12px',
-              border: '1px solid rgba(255,149,0,0.15)',
-            }}>
+            <p
+              style={{
+                fontSize: '16px',
+                color: H.inkSoft,
+                fontStyle: 'italic',
+                lineHeight: 1.55,
+                margin: '0 0 20px',
+                padding: '16px 18px',
+                background: H.amberSoft,
+                borderRadius: '14px',
+                border: `1px solid ${H.border}`,
+                fontFamily: H.serif,
+              }}
+            >
               &ldquo;{entry.memoryText}&rdquo;
             </p>
           ) : (
-            <p style={{ fontSize: '14px', color: C.muted, margin: '0 0 20px', lineHeight: '1.5' }}>
+            <p style={{ fontSize: '15px', color: H.muted, margin: '0 0 20px', lineHeight: 1.5, fontFamily: H.sans }}>
               A moment from {dogName}&apos;s day — saved in your journey.
             </p>
           )}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            padding: '4px 10px', borderRadius: '8px',
-            background: `${color}20`, border: `1px solid ${color}30`,
-            fontSize: '12px', fontWeight: '700', color, marginBottom: '24px',
-          }}>
+          <p
+            style={{
+              display: 'inline-block',
+              margin: '0 0 24px',
+              padding: '4px 10px',
+              borderRadius: '999px',
+              background: H.sageSoft,
+              fontSize: '12px',
+              fontWeight: 600,
+              color: H.sageDeep,
+              fontFamily: H.sans,
+            }}
+          >
             +{entry.adventureEnergy} warmth
-          </div>
+          </p>
           <button
             type="button"
             onClick={() => void handleShare()}
             style={{
-              width: '100%', height: '52px',
-              background: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
-              border: 'none', borderRadius: '9999px',
-              color: '#FFFFFF', fontSize: '16px', fontWeight: '700',
-              cursor: 'pointer', fontFamily: FONT,
+              width: '100%',
+              height: '52px',
+              background: H.sage,
+              border: 'none',
+              borderRadius: '9999px',
+              color: '#FFFCF8',
+              fontSize: '16px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontFamily: H.sans,
             }}
           >
             Share this memory
@@ -238,15 +284,30 @@ export function StoryPage() {
     return Array.from(map.entries())
   }, [adventures])
 
+  const placeCount = useMemo(
+    () => new Set(adventures.map((a) => a.locationHint?.trim()).filter(Boolean)).size,
+    [adventures],
+  )
+
+  const cardBase: CSSProperties = {
+    background: H.card,
+    borderRadius: '20px',
+    border: `1px solid ${H.border}`,
+    boxShadow: H.shadowSoft,
+  }
+
+  let cardIndex = 0
+
   return (
     <div
       id="screen-story"
       data-testid="story-page"
       style={{
         minHeight: '100dvh',
-        background: C.bg,
-        color: C.onSurface,
-        fontFamily: FONT,
+        background: H.page,
+        backgroundImage: H.pageWash,
+        color: H.ink,
+        fontFamily: H.sans,
         maxWidth: '390px',
         margin: '0 auto',
         paddingBottom: '88px',
@@ -255,145 +316,294 @@ export function StoryPage() {
         flexDirection: 'column',
       }}
     >
-      <header style={{ padding: '32px 24px 16px', background: C.bg }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <img
-            src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&q=80"
-            alt={dogName}
-            style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ff9500' }}
-          />
-          <h1 style={{ fontSize: '28px', fontWeight: '700', color: C.onSurface, margin: 0, lineHeight: '1.2' }}>
-            Journey
-          </h1>
-        </div>
-        <p style={{ fontSize: '14px', color: C.muted, margin: 0 }}>
-          {dogName}&apos;s life, one memory at a time.
+      <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
+
+      <header
+        style={{
+          padding: '28px 24px 20px',
+          borderBottom: `1px solid ${H.border}`,
+          background: 'rgba(250, 247, 242, 0.92)',
+        }}
+      >
+        <p
+          style={{
+            margin: '0 0 6px',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: H.terra,
+          }}
+        >
+          Your story together
         </p>
+        <h1
+          style={{
+            fontFamily: H.serif,
+            fontSize: '34px',
+            fontWeight: 700,
+            color: H.ink,
+            margin: '0 0 10px',
+            lineHeight: 1.15,
+          }}
+        >
+          Journey
+        </h1>
+        <p style={{ fontSize: '15px', color: H.inkSoft, margin: 0, lineHeight: 1.5, maxWidth: '320px' }}>
+          The evolving story of life with {dogName} — walks, places, and the little moments you&apos;ll want to
+          remember.
+        </p>
+        {adventures.length > 0 ? (
+          <p
+            style={{
+              margin: '14px 0 0',
+              fontSize: '13px',
+              color: H.muted,
+              fontWeight: 500,
+            }}
+          >
+            {adventures.length} {adventures.length === 1 ? 'memory' : 'memories'}
+            {placeCount > 0 ? ` · ${placeCount} ${placeCount === 1 ? 'place' : 'places'}` : ''}
+          </p>
+        ) : null}
       </header>
 
-      <main style={{ flex: 1, padding: '0 24px', position: 'relative' }}>
+      <main style={{ flex: 1, padding: '24px 24px 0', position: 'relative' }}>
         {adventures.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }} aria-hidden>🐾</div>
-            <p style={{ fontSize: '16px', color: C.muted, margin: '0 0 24px', lineHeight: '1.5' }}>
-              Start your first walk to capture the moments that matter most.
+          <article
+            style={{
+              ...cardBase,
+              padding: '36px 28px',
+              textAlign: 'center',
+              background: H.cardSoft,
+              marginTop: '8px',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                margin: '0 auto 20px',
+                borderRadius: '50%',
+                background: H.sageSoft,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '28px',
+              }}
+              aria-hidden
+            >
+              🐾
+            </div>
+            <h2
+              style={{
+                fontFamily: H.serif,
+                fontSize: '22px',
+                fontWeight: 700,
+                color: H.ink,
+                margin: '0 0 10px',
+              }}
+            >
+              Your story starts with one walk
+            </h2>
+            <p style={{ fontSize: '15px', color: H.muted, margin: '0 0 28px', lineHeight: 1.55 }}>
+              Every outing becomes a chapter — photos, places, and the feelings you capture along the way.
             </p>
             <button
               type="button"
               onClick={() => navigate('/adventure')}
               style={{
-                background: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
-                border: 'none', borderRadius: '9999px',
-                color: '#FFFFFF', fontFamily: FONT,
-                fontSize: '15px', fontWeight: '700',
-                padding: '14px 28px',
+                background: H.sage,
+                border: 'none',
+                borderRadius: '9999px',
+                color: '#FFFCF8',
+                fontFamily: H.sans,
+                fontSize: '15px',
+                fontWeight: 700,
+                padding: '14px 32px',
                 cursor: 'pointer',
               }}
             >
               Start first walk
             </button>
-          </div>
+          </article>
         ) : (
-          <div style={{ position: 'relative', paddingLeft: '40px' }}>
-            <div style={{
-              position: 'absolute', left: '8px', top: 0, bottom: 0,
-              width: '2px',
-              background: 'linear-gradient(to bottom, #ff9500 0%, transparent 100%)',
-              opacity: 0.2,
-            }} />
+          <div style={{ position: 'relative', paddingLeft: '28px' }}>
+            <div
+              style={{
+                position: 'absolute',
+                left: '5px',
+                top: '8px',
+                bottom: '24px',
+                width: '2px',
+                background: `linear-gradient(to bottom, ${H.sage} 0%, rgba(92, 122, 107, 0.15) 85%, transparent 100%)`,
+                borderRadius: '2px',
+              }}
+            />
 
             {grouped.map(([month, entries]) => (
-              <div key={month}>
-                <div style={{ position: 'relative', marginBottom: '16px', paddingTop: '8px' }}>
-                  <div style={{
-                    position: 'absolute', left: '-34px', top: '14px',
-                    width: '8px', height: '8px', borderRadius: '50%',
-                    background: '#ff9500', boxShadow: '0 0 10px rgba(255,149,0,0.5)', zIndex: 1,
-                  }} />
-                  <h2 style={{
-                    fontSize: '12px', fontWeight: '600', color: C.muted,
-                    textTransform: 'uppercase', letterSpacing: '0.2em', opacity: 0.7, margin: 0,
-                  }}>
+              <section key={month} style={{ marginBottom: '8px' }}>
+                <div style={{ position: 'relative', marginBottom: '18px', paddingTop: '4px' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '-26px',
+                      top: '10px',
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: H.sage,
+                      border: `2px solid ${H.page}`,
+                      boxShadow: `0 0 0 2px ${H.sageSoft}`,
+                      zIndex: 1,
+                    }}
+                  />
+                  <h2
+                    style={{
+                      fontFamily: H.serif,
+                      fontSize: '18px',
+                      fontWeight: 600,
+                      color: H.inkSoft,
+                      margin: 0,
+                      letterSpacing: '0.02em',
+                    }}
+                  >
                     {month}
                   </h2>
                 </div>
 
                 {entries.map((a) => {
-                  const color = categoryColor(a.missionTitle)
-                  const hasPhoto = Boolean(PLACE_IMAGES[a.vibe])
+                  const idx = cardIndex++
+                  const rotate = scrapbookRotation(idx)
+                  const img = PLACE_IMAGES[a.vibe] || PLACE_IMAGES.default
+                  const caption = memoryCaption(a, dogName)
+                  const isQuote = Boolean(a.memoryText?.trim())
+
                   return (
-                    <div key={a.id} style={{ position: 'relative', marginBottom: '24px' }}>
-                      <div style={{
-                        position: 'absolute', left: '-36px', top: '50%', transform: 'translateY(-50%)',
-                        width: '16px', height: '16px', borderRadius: '50%',
-                        background: 'rgba(255,149,0,0.4)', zIndex: 1,
-                      }} />
+                    <div
+                      key={a.id}
+                      style={{
+                        position: 'relative',
+                        marginBottom: '28px',
+                        transform: `rotate(${rotate})`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '-24px',
+                          top: '28px',
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: H.amber,
+                          opacity: 0.65,
+                          zIndex: 1,
+                        }}
+                      />
                       <button
                         type="button"
                         onClick={() => setSelectedMemory(a)}
                         style={{
                           width: '100%',
-                          background: 'rgba(28,28,30,0.6)',
-                          backdropFilter: 'blur(12px)',
-                          WebkitBackdropFilter: 'blur(12px)',
-                          border: '1px solid rgba(255,255,255,0.05)',
-                          borderRadius: '16px',
-                          padding: '16px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
+                          ...cardBase,
+                          padding: 0,
+                          overflow: 'hidden',
                           cursor: 'pointer',
-                          fontFamily: FONT,
+                          fontFamily: H.sans,
                           textAlign: 'left',
                         }}
                       >
-                        <div style={{ flex: 1, minWidth: 0, paddingRight: hasPhoto ? '16px' : '0' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                            <CategoryIcon category={a.missionTitle} color={color} size={18} />
-                            <h3 style={{
-                              fontSize: '17px', fontWeight: '600', color: C.onSurface, margin: 0,
-                              overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-                            }}>
-                              {a.missionTitle}
-                            </h3>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '12px', color: C.muted }}>{formatDateLabel(a.completedAt)}</span>
+                        <div style={{ position: 'relative', aspectRatio: '16 / 10', overflow: 'hidden' }}>
+                          <img
+                            src={img}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          />
+                          <div
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              background:
+                                'linear-gradient(to top, rgba(44, 36, 25, 0.35) 0%, transparent 45%)',
+                            }}
+                          />
+                        </div>
+                        <div style={{ padding: '16px 18px 18px' }}>
+                          <h3
+                            style={{
+                              fontFamily: H.serif,
+                              fontSize: '20px',
+                              fontWeight: 700,
+                              color: H.ink,
+                              margin: '0 0 8px',
+                              lineHeight: 1.25,
+                            }}
+                          >
+                            {a.missionTitle}
+                          </h3>
+                          <p
+                            style={{
+                              fontSize: isQuote ? '15px' : '14px',
+                              color: isQuote ? H.inkSoft : H.muted,
+                              fontStyle: isQuote ? 'italic' : 'normal',
+                              lineHeight: 1.5,
+                              margin: '0 0 12px',
+                              fontFamily: isQuote ? H.serif : H.sans,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {isQuote ? `“${caption}”` : caption}
+                          </p>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              flexWrap: 'wrap',
+                              fontSize: '12px',
+                              color: H.muted,
+                            }}
+                          >
+                            <span>{relativeDayLabel(a.completedAt)}</span>
+                            <span aria-hidden style={{ opacity: 0.5 }}>
+                              ·
+                            </span>
+                            <span>{formatDateLabel(a.completedAt)}</span>
                             {a.locationHint ? (
                               <>
-                                <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(85,67,52,0.8)' }} />
-                                <span style={{ fontSize: '12px', color: C.muted }}>{a.locationHint}</span>
+                                <span aria-hidden style={{ opacity: 0.5 }}>
+                                  ·
+                                </span>
+                                <span>{a.locationHint}</span>
                               </>
                             ) : null}
                           </div>
-                          <div style={{
-                            marginTop: '8px', display: 'inline-flex', alignItems: 'center',
-                            padding: '2px 8px', background: `${color}20`,
-                            border: `1px solid ${color}30`, borderRadius: '6px',
-                            fontSize: '11px', fontWeight: '700', color,
-                          }}>
-                            +{a.adventureEnergy} warmth
-                          </div>
+                          {a.adventureEnergy > 0 ? (
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                marginTop: '12px',
+                                padding: '3px 9px',
+                                borderRadius: '999px',
+                                background: H.amberSoft,
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                color: H.terra,
+                              }}
+                            >
+                              +{a.adventureEnergy} warmth
+                            </span>
+                          ) : null}
                         </div>
-                        {hasPhoto ? (
-                          <img
-                            src={PLACE_IMAGES[a.vibe]}
-                            alt=""
-                            style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }}
-                          />
-                        ) : (
-                          <div style={{
-                            flexShrink: 0, width: '48px', height: '48px', borderRadius: '50%',
-                            background: '#201f1f', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}>
-                            <CategoryIcon category={a.missionTitle} color="rgba(219,194,173,0.4)" size={22} />
-                          </div>
-                        )}
                       </button>
                     </div>
                   )
                 })}
-              </div>
+              </section>
             ))}
           </div>
         )}
