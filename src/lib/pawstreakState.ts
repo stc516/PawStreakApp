@@ -6,6 +6,7 @@ import {
   refreshTomorrowTease,
 } from '../data/localAdventureEngine'
 import { hashString, moodForDay } from '../data/missions'
+import { buildMemoryNarrative } from './memoryNarrative'
 import { calculateAdventureXp } from './xp'
 import type {
   AdventureEntry,
@@ -97,6 +98,7 @@ function initialSelection(
     dogMood: state.dogMood,
     streak: state.currentStreak,
     nonce: `init|${state.pickNonce}`,
+    zipCode: state.zipCode ?? '',
   })
   return {
     generatedMission,
@@ -166,6 +168,7 @@ const initialState: PawstreakState = {
   hasAccount: false,
   nudgeDismissedAt: null,
   firstAdventurePromptSeenAt: null,
+  memoryReturnHighlightId: null,
 }
 
 function isBrowser() {
@@ -244,6 +247,11 @@ function migrateLegacy(parsed: Record<string, unknown>): Partial<PawstreakState>
         missionDescription: typeof a.missionDescription === 'string' ? a.missionDescription : undefined,
         estimatedMinutesMin: typeof a.estimatedMinutesMin === 'number' ? a.estimatedMinutesMin : undefined,
         estimatedMinutesMax: typeof a.estimatedMinutesMax === 'number' ? a.estimatedMinutesMax : undefined,
+        memoryText: typeof a.memoryText === 'string' ? a.memoryText : undefined,
+        memoryNarrative:
+          a.memoryNarrative && typeof a.memoryNarrative === 'object'
+            ? (a.memoryNarrative as AdventureEntry['memoryNarrative'])
+            : undefined,
       } satisfies AdventureEntry
     })
   }
@@ -415,6 +423,9 @@ function patchLoadedState(merged: PawstreakState) {
   ) {
     merged.firstAdventurePromptSeenAt = null
   }
+  if (merged.memoryReturnHighlightId !== null && typeof merged.memoryReturnHighlightId !== 'string') {
+    merged.memoryReturnHighlightId = null
+  }
 }
 
 export function savePawstreakState(
@@ -486,6 +497,7 @@ export function completeOnboarding(
     dogMood,
     streak: 0,
     nonce: `onboard|${pickNonce}`,
+    zipCode,
   })
   return {
     ...next,
@@ -510,6 +522,7 @@ export function setZipCode(state: PawstreakState, zipCodeRaw: string): Pawstreak
     dogMood: state.dogMood,
     streak: state.currentStreak,
     nonce: `zip|${pickNonce}`,
+    zipCode,
   })
   return {
     ...state,
@@ -532,6 +545,7 @@ export function rollPickForMe(state: PawstreakState): PawstreakState {
     dogMood: state.dogMood,
     streak: state.currentStreak,
     nonce: `pick|${pickNonce}`,
+    zipCode: state.zipCode ?? '',
   })
   return {
     ...state,
@@ -556,6 +570,7 @@ export function selectVibe(state: PawstreakState, vibe: VibeArchetype): Pawstrea
     dogMood: state.dogMood,
     streak: state.currentStreak,
     nonce: `vibe|${pickNonce}|${vibe}`,
+    zipCode: state.zipCode ?? '',
   })
   return {
     ...state,
@@ -576,6 +591,7 @@ export function pickSuggestedAdventure(state: PawstreakState, index: number): Pa
     dogMood: state.dogMood,
     streak: state.currentStreak,
     nonce: `chip|${pickNonce}|${pick.id}`,
+    zipCode: state.zipCode ?? '',
   })
   return {
     ...state,
@@ -630,8 +646,20 @@ export function completeAdventure(
   const gm = state.generatedMission
 
   const trimmedMemory = options.memoryText?.trim() ?? ''
+  const completedAt = new Date()
+  const adventureId = crypto.randomUUID()
+  const memoryNarrative = buildMemoryNarrative({
+    adventureId,
+    walkSeconds,
+    dogName: state.dogName,
+    memoryText: trimmedMemory || undefined,
+    mission: gm,
+    zipCode: state.zipCode ?? '',
+    completedAt,
+    isAway: state.isAway,
+  })
   const completed: AdventureEntry = {
-    id: crypto.randomUUID(),
+    id: adventureId,
     vibe: gm.vibe,
     missionTitle: gm.title,
     emoji: gm.emoji,
@@ -639,11 +667,12 @@ export function completeAdventure(
     adventureEnergy,
     durationMinutes: minutes,
     groundCovered: ground,
-    completedAt: new Date().toISOString(),
+    completedAt: completedAt.toISOString(),
     locationHint: gm.locationHint,
     missionDescription: gm.description,
     estimatedMinutesMin: gm.estimatedMinutesMin,
     estimatedMinutesMax: gm.estimatedMinutesMax,
+    memoryNarrative,
     ...(trimmedMemory ? { memoryText: trimmedMemory } : {}),
   }
 
@@ -664,10 +693,16 @@ export function completeAdventure(
     reminderSet: false,
     recentAdventures: nextRecent,
     latestCompletedAdventure: completed,
+    memoryReturnHighlightId: adventureId,
     badges: nextBadges,
     latestUnlockedBadgeId,
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
+    tomorrowTease: memoryNarrative.anticipationLine,
   }
+}
+
+export function clearMemoryReturnHighlight(state: PawstreakState): PawstreakState {
+  if (!state.memoryReturnHighlightId) return state
+  return { ...state, memoryReturnHighlightId: null }
 }
 
 export function setReminder(state: PawstreakState, value: boolean): PawstreakState {

@@ -8,6 +8,18 @@ export type AdventureCategory = 'social' | 'exploration' | 'chill' | 'chaos' | '
 
 export type DogMood = 'restless' | 'curious' | 'explorer' | 'social' | 'zoomie' | 'chill'
 
+export type ReflectionSource = 'user' | 'milestone' | 'composed' | 'fallback'
+
+export interface MemoryNarrative {
+  emotionalTitle: string
+  atmosphere: string[]
+  reflection: string
+  reflectionSource: ReflectionSource
+  sealMetadata: string
+  anticipationLine: string
+  journeyCardSubtitle: string
+}
+
 /** Locale inferred from ZIP — drives mission pools (no APIs). */
 export type ZipLocale = 'generic' | 'coastal' | 'urban' | 'suburban' | 'trail'
 
@@ -52,6 +64,8 @@ export interface AdventureEntry {
   /** Optional memory text the owner captured on the Adventure screen.
    *  Free-form, kept local (never sent to analytics). */
   memoryText?: string
+  /** Emotional story layer generated at completion (Memory Seal). */
+  memoryNarrative?: MemoryNarrative
 }
 
 export interface BadgeDefinition {
@@ -149,6 +163,8 @@ export interface PawstreakState {
   /** ISO timestamp the post-first-adventure save prompt was acknowledged.
    *  Tracked separately so we never spam the prompt twice. */
   firstAdventurePromptSeenAt: string | null
+  /** Adventure id to show the Today return strip after Memory Seal. */
+  memoryReturnHighlightId: string | null
 }
 
 /** How long a brand-new user can use the app without signing up. */

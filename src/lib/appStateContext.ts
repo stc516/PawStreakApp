@@ -44,6 +44,7 @@ export interface AppStateContextValue extends AuthContextSlice {
   resetRewardFlow: () => void
   dismissSaveNudge: () => void
   markFirstAdventurePromptSeen: () => void
+  clearMemoryReturnHighlight: () => void
 }
 
 export const AppStateContext = createContext<AppStateContextValue | null>(null)

@@ -14,6 +14,7 @@ export default defineConfig({
     deviceScaleFactor: 2,
     isMobile: true,
     hasTouch: true,
+    reducedMotion: 'reduce',
   },
   projects: [
     {

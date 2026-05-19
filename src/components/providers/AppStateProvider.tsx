@@ -5,6 +5,7 @@ import type { Session } from '@supabase/supabase-js'
 import { AppStateContext } from '../../lib/appStateContext'
 import { localStorageStateRepository } from '../../lib/localStorageStateRepository'
 import {
+  clearMemoryReturnHighlight,
   completeAdventure,
   completeOnboarding,
   dismissSaveNudge,
@@ -135,6 +136,9 @@ function AppStateSynced({
       },
       markFirstAdventurePromptSeen: () => {
         setState((currentState) => markFirstAdventurePromptSeen(currentState))
+      },
+      clearMemoryReturnHighlight: () => {
+        setState((currentState) => clearMemoryReturnHighlight(currentState))
       },
     }),
     [authEnabled, loadingSession, remoteHydrated, session, state],

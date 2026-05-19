@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { AccountStatusChip } from '../components/auth/AccountStatusChip'
 import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePrompt'
@@ -8,7 +8,12 @@ import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { localeFromZip, localeLabel } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
-import type { DogMood, VibeArchetype } from '../types'
+import {
+  displayTitleForEntry,
+  memoryReturnTimeLabel,
+  narrativeForEntry,
+} from '../lib/memoryNarrative'
+import type { AdventureEntry, DogMood, VibeArchetype } from '../types'
 
 const PLACE_IMAGES: Record<string, string> = {
   salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
@@ -102,7 +107,8 @@ function scrapbookRotation(index: number): string {
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const { state, selectVibe } = useAppState()
+  const [searchParams] = useSearchParams()
+  const { state, selectVibe, clearMemoryReturnHighlight } = useAppState()
 
   useEffect(() => {
     if (!state.onboardingComplete) navigate('/', { replace: true })
@@ -129,14 +135,36 @@ export function DashboardPage() {
     return withNote ?? recent[0] ?? null
   }, [recent])
 
+  const memoryReturnEntry = useMemo(() => {
+    if (!state.memoryReturnHighlightId) return null
+    return (
+      state.recentAdventures.find((a) => a.id === state.memoryReturnHighlightId) ??
+      state.latestCompletedAdventure
+    )
+  }, [state.memoryReturnHighlightId, state.recentAdventures, state.latestCompletedAdventure])
+
   const memories = recent.slice(0, 5).map((a, index) => ({
     id: a.id,
-    title: a.missionTitle,
+    title: displayTitleForEntry(a, dogDisplayName, state.zipCode ?? ''),
     date: relativeDayLabel(a.completedAt),
     img: PLACE_IMAGES[a.vibe] || PLACE_IMAGES.default,
     rotate: scrapbookRotation(index),
-    memorySnippet: a.memoryText?.trim(),
+    memorySnippet:
+      a.memoryText?.trim() ??
+      a.memoryNarrative?.journeyCardSubtitle ??
+      narrativeForEntry(a, dogDisplayName, state.zipCode ?? '').journeyCardSubtitle,
   }))
+
+  function openJourneyMemory(entry: AdventureEntry) {
+    clearMemoryReturnHighlight()
+    navigate(`/story?memory=${encodeURIComponent(entry.id)}`)
+  }
+
+  useEffect(() => {
+    const memoryId = searchParams.get('memory')
+    if (!memoryId) return
+    clearMemoryReturnHighlight()
+  }, [searchParams, clearMemoryReturnHighlight])
 
   function handleChipClick(vibe: VibeArchetype) {
     selectVibe(vibe)
@@ -480,6 +508,38 @@ export function DashboardPage() {
           </article>
         </section>
 
+        {memoryReturnEntry?.memoryNarrative ? (
+          <section style={{ marginBottom: '20px' }} data-testid="memory-return-strip">
+            <button
+              type="button"
+              onClick={() => openJourneyMemory(memoryReturnEntry)}
+              style={{
+                ...cardBase,
+                width: '100%',
+                textAlign: 'left',
+                padding: '14px 16px',
+                cursor: 'pointer',
+                fontFamily: H.sans,
+                background: H.cardSoft,
+              }}
+            >
+              <p style={{ margin: 0, fontSize: '13px', color: H.muted, lineHeight: 1.4 }}>
+                {memoryReturnTimeLabel(memoryReturnEntry.completedAt)}:{' '}
+                <span
+                  style={{
+                    fontFamily: H.serif,
+                    fontStyle: 'italic',
+                    color: H.ink,
+                    fontWeight: 600,
+                  }}
+                >
+                  {memoryReturnEntry.memoryNarrative.emotionalTitle}
+                </span>
+              </p>
+            </button>
+          </section>
+        ) : null}
+
         {/* 5. Featured memory moment */}
         {featuredMemory ? (
           <section style={{ marginBottom: '24px' }}>
@@ -523,8 +583,7 @@ export function DashboardPage() {
                 </p>
               ) : (
                 <p style={{ margin: '0 0 12px', fontSize: '15px', lineHeight: 1.5, color: H.inkSoft }}>
-                  {featuredMemory.missionTitle}
-                  {featuredMemory.locationHint ? ` · ${featuredMemory.locationHint}` : ''}
+                  {displayTitleForEntry(featuredMemory, dogDisplayName, state.zipCode ?? '')}
                 </p>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

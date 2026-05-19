@@ -285,6 +285,52 @@ function rarePoolForLocale(locale: ZipLocale): Template[] {
   return base
 }
 
+const DESCRIPTION_BY_VIBE: Record<VibeArchetype, string[]> = {
+  salt: [
+    'Salt air and fading light near the coast.',
+    'Cool breeze and a wide horizon tonight.',
+    'Ocean hush and slow steps along the shore.',
+  ],
+  pulse: [
+    'Cool air and quiet sidewalks tonight.',
+    'Warm cup weather and an easy block loop.',
+    'Window light and a gentle sidewalk rhythm.',
+  ],
+  wander: [
+    'Pine shade and unhurried miles ahead.',
+    'Green edges and long shadows on the path.',
+    'Dirt underfoot and birdsong between blocks.',
+  ],
+  wild: [
+    'Unscripted turns and sniff-first energy.',
+    'Plot twists waiting around the next corner.',
+    'Loose-leash momentum on familiar streets.',
+  ],
+}
+
+const DESCRIPTION_BY_LOCALE: Record<ZipLocale, string[]> = {
+  coastal: ['Salt mist and boardwalk quiet.', 'Tide-line curiosity and open sky.'],
+  urban: ['City light on brick and glass.', 'Crosswalk rhythm and soft bustle.'],
+  suburban: ['Porch-light glow on quiet streets.', 'Lawn-line calm and familiar corners.'],
+  trail: ['Elevation in the air and pine dust.', 'Trailhead stillness before the climb.'],
+  generic: ['Open air and familiar corners.', 'Soft light on the neighborhood loop.'],
+}
+
+const DESCRIPTION_BY_TIME: Record<'morning' | 'afternoon' | 'evening' | 'night', string[]> = {
+  morning: ['Cool morning air and a slow start.', 'Early light on empty sidewalks.'],
+  afternoon: ['Midday brightness and easy warmth.', 'Bright air on the afternoon loop.'],
+  evening: ['Fading gold and quiet streets.', 'Last light on the evening route.'],
+  night: ['Streetlamp hush and late-hour calm.', 'Cool night air on familiar blocks.'],
+}
+
+function timeBucketForDescription(): 'morning' | 'afternoon' | 'evening' | 'night' {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'morning'
+  if (h >= 12 && h < 17) return 'afternoon'
+  if (h >= 17 && h < 21) return 'evening'
+  return 'night'
+}
+
 function buildDescription(params: {
   dogName: string
   dogMood: DogMood
@@ -293,8 +339,23 @@ function buildDescription(params: {
   locale: ZipLocale
   moodMatches: boolean
 }): string {
-  void params
-  return ''
+  void params.dogName
+  void params.dogMood
+  const seed = `${params.template.title}|${params.template.vibe}|${params.rarity}|${params.locale}`
+  const tod = timeBucketForDescription()
+  const pool = [
+    ...DESCRIPTION_BY_TIME[tod],
+    ...DESCRIPTION_BY_VIBE[params.template.vibe],
+    ...DESCRIPTION_BY_LOCALE[params.locale],
+  ]
+  if (params.moodMatches) {
+    pool.push('Today’s mood fits this route.')
+  }
+  if (params.rarity === 'rare') {
+    pool.push('A rarer kind of day — worth the extra blocks.')
+  }
+  const idx = hashString(seed) % pool.length
+  return pool[idx] ?? pool[0] ?? 'A good walk waiting outside.'
 }
 
 export function missionTimeLabel(m: Pick<GeneratedMission, 'estimatedMinutesMin' | 'estimatedMinutesMax'>): string {
@@ -478,10 +539,30 @@ export function missionFromQuickPick(params: {
   dogMood: DogMood
   streak: number
   nonce: string
+  zipCode?: string
 }): GeneratedMission {
   const { pick, dogName, dogMood, streak, nonce } = params
   const rarity = rollRarity(`${nonce}|r`, streak, false)
   const moodMatchesToday = pick.idealMoods.includes(dogMood)
+  const locale = localeFromZip(params.zipCode ?? '')
+  const template: Template = {
+    title: pick.title,
+    emoji: pick.emoji,
+    category: pick.category,
+    vibe: pick.vibe,
+    estMin: pick.estMin,
+    estMax: pick.estMax,
+    locationHint: pick.place,
+    idealMoods: pick.idealMoods,
+  }
+  const description = buildDescription({
+    dogName,
+    dogMood,
+    template,
+    rarity,
+    locale,
+    moodMatches: moodMatchesToday,
+  })
   const flavor = flavorForMission({ mood: dogMood, title: pick.title, dogName, rarity })
   return {
     title: pick.title,
@@ -493,7 +574,7 @@ export function missionFromQuickPick(params: {
     idealMoods: pick.idealMoods,
     moodMatchesToday,
     rarity,
-    description: '',
+    description,
     flavor,
     vibe: pick.vibe,
   }

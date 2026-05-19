@@ -27,6 +27,16 @@ async function enterActiveAdventure(page: Page) {
   await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
 }
 
+/** Finish walk → Memory Seal → Today (reduced-motion timings in playwright.config). */
+async function completeMemorySealToToday(page: Page) {
+  await page.getByRole('button', { name: /Wrap adventure/ }).click()
+  await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
+  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 12_000 })
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 15_000 })
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await expect(page).toHaveURL(/\/app/)
+}
+
 async function completeOnboarding(page: Page, options: { dogName: string; zip: string }) {
   await clearStorageAndOpen(page)
 
@@ -199,46 +209,22 @@ test('Path page shows progression nodes', async ({ page }) => {
   await expect(currentTiers).toHaveCount(1)
 })
 
-test('adventure generation and completion modal appears', async ({ page }) => {
+test('adventure generation and Memory Seal appears', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'ModalDog', zip: '92104' })
   await enterActiveAdventure(page)
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
 
   await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Share Adventure' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Done' })).toBeVisible()
+  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 12_000 })
+  await expect(page.getByText('Saved to Journey')).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 15_000 })
 })
 
-test('Share Adventure fallback/native flow does not crash', async ({ page }) => {
-  await completeOnboarding(page, { dogName: 'ShareDog', zip: '92104' })
+test('Memory Seal completes to Today without reward screen', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'SealDog', zip: '92104' })
   await enterActiveAdventure(page)
-  await page.getByRole('button', { name: /Wrap adventure/ }).click()
-  await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
-
-  await page.evaluate(() => {
-    Object.defineProperty(window.navigator, 'share', {
-      configurable: true,
-      value: async () => undefined,
-    })
-  })
-  await page.getByRole('button', { name: 'Share Adventure' }).click()
-  await expect(page.getByText('Shared successfully.')).toBeVisible()
-
-  await page.evaluate(() => {
-    Object.defineProperty(window.navigator, 'share', {
-      configurable: true,
-      value: undefined,
-    })
-    Object.defineProperty(window.navigator, 'clipboard', {
-      configurable: true,
-      value: {
-        writeText: async () => undefined,
-      },
-    })
-  })
-  await page.getByRole('button', { name: 'Share Adventure' }).click()
-  await expect(page.getByText('Copied summary to clipboard.')).toBeVisible()
-  await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
+  await completeMemorySealToToday(page)
+  await expect(page.getByTestId('memory-return-strip')).toBeVisible()
 })
 
 test('account status chip routes to profile', async ({ page }) => {
@@ -270,11 +256,7 @@ test('save-progress nudge appears, dismisses, and re-surfaces after an adventure
   await expect(nudge).toHaveCount(0)
 
   await enterActiveAdventure(page)
-  await page.getByRole('button', { name: /Wrap adventure/ }).click()
-  await page.getByRole('button', { name: 'Done' }).click()
-  await page.waitForURL(/\/reward/, { timeout: 15_000 })
-  await page.getByRole('button', { name: 'Done' }).click()
-  await expect(page).toHaveURL(/\/app/)
+  await completeMemorySealToToday(page)
   await expect(page.getByTestId('save-progress-nudge')).toBeVisible()
 })
 
@@ -282,11 +264,7 @@ test('post-adventure save prompt appears after first completed adventure', async
   await completeOnboarding(page, { dogName: 'PromptDog', zip: '92104' })
 
   await enterActiveAdventure(page)
-  await page.getByRole('button', { name: /Wrap adventure/ }).click()
-  await page.getByRole('button', { name: 'Done' }).click()
-  await page.waitForURL(/\/reward/, { timeout: 15_000 })
-  await page.getByRole('button', { name: 'Done' }).click()
-  await expect(page).toHaveURL(/\/app/)
+  await completeMemorySealToToday(page)
 
   const prompt = page.getByTestId('post-adventure-save-prompt')
   await expect(prompt).toBeVisible()
@@ -319,14 +297,13 @@ test('emotional adventure flow: memory captures and headlines stay dog-first', a
 
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
-  await expect(page.getByTestId('adventure-complete-headline')).toContainText('MemoryDog had a great day.')
+  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 12_000 })
+  await expect(page.getByTestId('adventure-complete-headline')).not.toContainText('had a great day')
   await expect(page.getByTestId('adventure-complete-memory')).toContainText('Chased a leaf')
 
-  await page.getByRole('button', { name: 'Done' }).click()
-  await expect(page).toHaveURL(/\/character-moment/)
-  await page.goto('/reward')
-  await expect(page.getByTestId('reward-headline')).toContainText('MemoryDog had a great day.')
-  await expect(page.getByTestId('reward-memory-card')).toContainText('Chased a leaf')
+  await page.getByRole('button', { name: 'Continue' }).click({ timeout: 15_000 })
+  await expect(page).toHaveURL(/\/app/)
+  await expect(page.getByTestId('memory-return-strip')).toBeVisible()
 })
 
 test('category chip updates today recommendation', async ({ page }) => {
@@ -341,9 +318,7 @@ test('no console errors during main flow', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
   await completeOnboarding(page, { dogName: 'ConsoleDog', zip: '92104' })
   await enterActiveAdventure(page)
-  await page.getByRole('button', { name: /Wrap adventure/ }).click()
-  await page.getByRole('button', { name: 'Done' }).click()
-  await expect(page).toHaveURL(/\/character-moment/)
+  await completeMemorySealToToday(page)
 
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })

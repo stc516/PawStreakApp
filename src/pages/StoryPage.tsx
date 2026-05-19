@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
 import { useAppState } from '../hooks/useAppState'
+import { displayTitleForEntry, narrativeForEntry } from '../lib/memoryNarrative'
 import type { AdventureEntry } from '../types'
 
 const PLACE_IMAGES: Record<string, string> = {
@@ -67,30 +68,35 @@ function scrapbookRotation(index: number): string {
   return angles[index % angles.length]
 }
 
-function memoryCaption(entry: AdventureEntry, dogName: string): string {
-  const note = entry.memoryText?.trim()
-  if (note) return note
-  return `A quiet moment with ${dogName} — ${entry.missionTitle}.`
+function memoryCaption(entry: AdventureEntry, dogName: string, zipCode: string): string {
+  const narrative = narrativeForEntry(entry, dogName, zipCode)
+  if (entry.memoryText?.trim()) return entry.memoryText.trim()
+  if (narrative.reflectionSource !== 'fallback') return narrative.reflection
+  return narrative.journeyCardSubtitle || narrative.reflection
 }
 
 function MemoryDetailSheet({
   entry,
   dogName,
+  zipCode,
   onClose,
 }: {
   entry: AdventureEntry
   dogName: string
+  zipCode: string
   onClose: () => void
 }) {
   const img = PLACE_IMAGES[entry.vibe] || PLACE_IMAGES.default
+  const narrative = narrativeForEntry(entry, dogName, zipCode)
+  const displayTitle = narrative.emotionalTitle
 
   async function handleShare() {
     const text = entry.memoryText
-      ? `${dogName} at ${entry.missionTitle}: "${entry.memoryText}"`
-      : `${dogName} — ${entry.missionTitle}`
+      ? `${displayTitle}: "${entry.memoryText}"`
+      : `${displayTitle} — ${narrative.sealMetadata}`
     try {
       if (navigator.share) {
-        await navigator.share({ title: entry.missionTitle, text })
+        await navigator.share({ title: displayTitle, text })
         return
       }
       await navigator.clipboard.writeText(text)
@@ -132,7 +138,7 @@ function MemoryDetailSheet({
         <div style={{ position: 'relative', height: '240px' }}>
           <img
             src={img}
-            alt={entry.missionTitle}
+            alt={displayTitle}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
           <div
@@ -192,49 +198,36 @@ function MemoryDetailSheet({
               lineHeight: 1.2,
             }}
           >
-            {entry.missionTitle}
+            {displayTitle}
           </h2>
-          {entry.locationHint ? (
-            <p style={{ fontSize: '14px', color: H.muted, margin: '0 0 16px', fontFamily: H.sans }}>
-              {entry.locationHint}
-            </p>
+          {narrative.atmosphere.length > 0 ? (
+            <div style={{ margin: '0 0 16px' }}>
+              {narrative.atmosphere.map((line) => (
+                <p
+                  key={line}
+                  style={{ fontSize: '14px', color: H.muted, margin: '0 0 4px', fontFamily: H.sans, lineHeight: 1.45 }}
+                >
+                  {line}
+                </p>
+              ))}
+            </div>
           ) : null}
-          {entry.memoryText ? (
-            <p
-              style={{
-                fontSize: '16px',
-                color: H.inkSoft,
-                fontStyle: 'italic',
-                lineHeight: 1.55,
-                margin: '0 0 20px',
-                padding: '16px 18px',
-                background: H.amberSoft,
-                borderRadius: '14px',
-                border: `1px solid ${H.border}`,
-                fontFamily: H.serif,
-              }}
-            >
-              &ldquo;{entry.memoryText}&rdquo;
-            </p>
-          ) : (
-            <p style={{ fontSize: '15px', color: H.muted, margin: '0 0 20px', lineHeight: 1.5, fontFamily: H.sans }}>
-              A moment from {dogName}&apos;s day — saved in your journey.
-            </p>
-          )}
           <p
             style={{
-              display: 'inline-block',
-              margin: '0 0 24px',
-              padding: '4px 10px',
-              borderRadius: '999px',
-              background: H.sageSoft,
-              fontSize: '12px',
-              fontWeight: 600,
-              color: H.sageDeep,
-              fontFamily: H.sans,
+              fontSize: '16px',
+              color: H.inkSoft,
+              fontStyle: 'italic',
+              lineHeight: 1.55,
+              margin: '0 0 12px',
+              fontFamily: H.serif,
             }}
           >
-            +{entry.adventureEnergy} warmth
+            {entry.memoryText?.trim()
+              ? `“${entry.memoryText.trim()}”`
+              : narrative.reflection}
+          </p>
+          <p style={{ fontSize: '12px', color: H.muted, margin: '0 0 24px', fontFamily: H.sans }}>
+            {narrative.sealMetadata}
           </p>
           <button
             type="button"
@@ -262,6 +255,7 @@ function MemoryDetailSheet({
 
 export function StoryPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { state } = useAppState()
   const [selectedMemory, setSelectedMemory] = useState<AdventureEntry | null>(null)
 
@@ -270,6 +264,20 @@ export function StoryPage() {
   }, [navigate, state.onboardingComplete])
 
   const adventures = state.recentAdventures.slice(0, 20)
+  const memoryIdParam = searchParams.get('memory')
+  const memoryFromParam = memoryIdParam
+    ? adventures.find((a) => a.id === memoryIdParam) ?? null
+    : null
+  const sheetEntry = selectedMemory ?? memoryFromParam
+
+  function closeMemorySheet() {
+    setSelectedMemory(null)
+    if (memoryIdParam) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('memory')
+      setSearchParams(next, { replace: true })
+    }
+  }
   const dogName = state.dogName?.trim() || 'Your dog'
 
   const grouped = useMemo(() => {
@@ -476,7 +484,8 @@ export function StoryPage() {
                   const idx = cardIndex++
                   const rotate = scrapbookRotation(idx)
                   const img = PLACE_IMAGES[a.vibe] || PLACE_IMAGES.default
-                  const caption = memoryCaption(a, dogName)
+                  const caption = memoryCaption(a, dogName, state.zipCode ?? '')
+                  const cardTitle = displayTitleForEntry(a, dogName, state.zipCode ?? '')
                   const isQuote = Boolean(a.memoryText?.trim())
 
                   return (
@@ -540,7 +549,7 @@ export function StoryPage() {
                               lineHeight: 1.25,
                             }}
                           >
-                            {a.missionTitle}
+                            {cardTitle}
                           </h3>
                           <p
                             style={{
@@ -609,11 +618,12 @@ export function StoryPage() {
         )}
       </main>
 
-      {selectedMemory ? (
+      {sheetEntry ? (
         <MemoryDetailSheet
-          entry={selectedMemory}
+          entry={sheetEntry}
           dogName={dogName}
-          onClose={() => setSelectedMemory(null)}
+          zipCode={state.zipCode ?? ''}
+          onClose={closeMemorySheet}
         />
       ) : null}
 

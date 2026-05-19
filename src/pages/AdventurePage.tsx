@@ -1,27 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { AdventureShareCard } from '../components/adventure/AdventureShareCard'
 import { BottomNav } from '../components/BottomNav'
+import { MemorySealFlow } from '../components/memory/MemorySealFlow'
 import { useAppState } from '../hooks/useAppState'
 import { getAdventureMilestone } from '../lib/adventureMilestones'
 import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
-import { shareAdventure } from '../lib/shareAdventure'
 import { track } from '../lib/analytics'
 import { calculateAdventureXp } from '../lib/xp'
 import { FONT_IMPORT, H } from '../lib/editorialTheme'
-
-interface CompletionViewState {
-  title: string
-  locationHint: string
-  category: 'social' | 'exploration' | 'chill' | 'chaos' | 'routine'
-  rarity: 'common' | 'uncommon' | 'rare'
-  flavor: string
-  emoji: string
-  streakAfterCompletion: number
-  completedAt: string
-  memoryText: string
-}
 
 const CATEGORY_PILLS = ['Beach', 'Trail', 'Coffee', 'Brewery', 'Park', 'Social'] as const
 
@@ -89,8 +76,14 @@ export function AdventurePage() {
   const [walkSeconds, setWalkSeconds] = useState(0)
   const [paused, setPaused] = useState(false)
   const [memoryDraft, setMemoryDraft] = useState('')
-  const [completionModal, setCompletionModal] = useState<CompletionViewState | null>(null)
-  const [shareStatus, setShareStatus] = useState<string | null>(null)
+  const [awaitingMemorySeal, setAwaitingMemorySeal] = useState(false)
+  const activeSealNarrative =
+    awaitingMemorySeal && state.latestCompletedAdventure?.memoryNarrative
+      ? {
+          narrative: state.latestCompletedAdventure.memoryNarrative,
+          vibe: state.latestCompletedAdventure.vibe,
+        }
+      : null
   useEffect(() => {
     if (!state.onboardingComplete) navigate('/', { replace: true })
   }, [navigate, state.onboardingComplete])
@@ -133,24 +126,6 @@ export function AdventurePage() {
   )
   const timerOffset = 565 - (565 * Math.min(walkSeconds, 3600)) / 3600
   const visibleTitle = visibleAdventureTitle(m.title, state.isAway)
-
-  async function handleShareAdventure() {
-    if (!completionModal) return
-    try {
-      const result = await shareAdventure({
-        dogName: state.dogName,
-        title: completionModal.title,
-        category: completionModal.category,
-        rarity: completionModal.rarity,
-        streak: completionModal.streakAfterCompletion,
-        locationHint: completionModal.locationHint,
-        flavor: completionModal.flavor,
-      })
-      setShareStatus(result === 'shared' ? 'Shared successfully.' : 'Copied summary to clipboard.')
-    } catch {
-      setShareStatus(null)
-    }
-  }
 
   const categoryEmoji: Record<string, string> = {
     social: '☕', exploration: '🗺️', chill: '🌅', chaos: '⚡', routine: '🏡',
@@ -513,28 +488,17 @@ export function AdventurePage() {
             className="btn-end"
             aria-label="Wrap adventure"
             onClick={() => {
-              const snap: CompletionViewState = {
-                title: visibleTitle,
-                locationHint: m.locationHint,
-                category: m.category,
-                rarity: m.rarity,
-                flavor: m.flavor,
-                emoji: m.emoji,
-                streakAfterCompletion: state.currentStreak + 1,
-                completedAt: new Date().toISOString(),
-                memoryText: memoryDraft.trim(),
-              }
-              completeAdventure(walkSeconds, { memoryText: snap.memoryText })
+              const memoryText = memoryDraft.trim()
+              completeAdventure(walkSeconds, { memoryText })
               track('adventure_completed', {
                 adventure_category: m.category,
                 adventure_rarity: m.rarity,
                 xp_earned: xpBreakdown.xp,
-                streak_count: snap.streakAfterCompletion,
+                streak_count: state.currentStreak + 1,
                 is_away: state.isAway,
               })
               setPaused(true)
-              setCompletionModal(snap)
-              setShareStatus(null)
+              setAwaitingMemorySeal(true)
             }}
             style={{
               flex: 1.5,
@@ -555,137 +519,15 @@ export function AdventurePage() {
         </div>
       </footer>
 
-      {/* Completion modal */}
-      {completionModal ? (
-        <div
-          className="adventure-complete-modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Adventure complete"
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(44, 36, 25, 0.35)',
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-            zIndex: 50,
+      {activeSealNarrative ? (
+        <MemorySealFlow
+          narrative={activeSealNarrative.narrative}
+          vibe={activeSealNarrative.vibe}
+          onComplete={() => {
+            setAwaitingMemorySeal(false)
+            navigate('/app')
           }}
-        >
-          <div
-            data-testid="adventure-complete-modal"
-            className={`adventure-complete-modal rarity-${completionModal.rarity}`}
-            style={{
-              background: C.surface,
-              borderRadius: '24px 24px 0 0',
-              padding: '24px 24px 40px',
-              width: '100%',
-              maxWidth: '390px',
-              border: `1px solid ${C.border10}`,
-              borderBottom: 'none',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-            }}
-          >
-            <div
-              className="adventure-complete-kicker"
-              style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.primary, marginBottom: '8px' }}
-            >
-              Memory saved
-            </div>
-            <h2
-              data-testid="adventure-complete-headline"
-              className="adventure-complete-title"
-              style={{ fontSize: '26px', fontWeight: '700', color: C.onSurface, lineHeight: '1.2', marginBottom: '6px' }}
-            >
-              {state.dogName} had a great day.
-            </h2>
-            <p style={{ fontSize: '13px', color: C.muted, lineHeight: '1.5', marginBottom: '12px' }}>
-              {state.dogName} logged{' '}
-              <span style={{ color: C.onSurface }}>{completionModal.title}</span>
-              {completionModal.locationHint ? <> near {completionModal.locationHint}</> : null}.
-              {' '}Day {completionModal.streakAfterCompletion} is safe. +{xpBreakdown.xp} warmth.
-            </p>
-
-            {completionModal.memoryText ? (
-              <div
-                data-testid="adventure-complete-memory"
-                style={{
-                  background: H.amberSoft,
-                  border: `1px solid ${H.border}`,
-                  borderRadius: '12px',
-                  padding: '12px',
-                  fontSize: '13px',
-                  fontStyle: 'italic',
-                  color: C.onSurface,
-                  marginBottom: '12px',
-                }}
-              >
-                &ldquo;{completionModal.memoryText}&rdquo;
-              </div>
-            ) : null}
-
-            <AdventureShareCard
-              dogName={state.dogName}
-              title={completionModal.title}
-              neighborhoodOrLocation={completionModal.locationHint}
-              category={completionModal.category}
-              streak={completionModal.streakAfterCompletion}
-              timestamp={completionModal.completedAt}
-              flavor={completionModal.flavor}
-              rarity={completionModal.rarity}
-              emoji={completionModal.emoji}
-            />
-
-            <div
-              className="adventure-complete-actions"
-              style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}
-            >
-              <button
-                type="button"
-                className="btn-share"
-                onClick={handleShareAdventure}
-                style={{
-                  width: '100%', height: '48px',
-                  background: C.surfaceLow,
-                  border: `1px solid ${C.border10}`,
-                  borderRadius: '14px',
-                  color: C.onSurface,
-                  fontSize: '14px', fontWeight: '500',
-                  cursor: 'pointer', fontFamily: FONT,
-                }}
-              >
-                📤 Share Adventure
-              </button>
-              <button
-                type="button"
-                className="btn-done"
-                onClick={() => {
-                  setCompletionModal(null)
-                  navigate('/character-moment')
-                }}
-                style={{
-                  width: '100%', height: '52px',
-                  background: H.sage,
-                  border: 'none', borderRadius: '14px',
-                  color: '#FFFCF8',
-                  fontSize: '15px', fontWeight: '700',
-                  cursor: 'pointer',
-                  boxShadow: H.shadowSoft,
-                  fontFamily: FONT,
-                }}
-              >
-                Done
-              </button>
-            </div>
-
-            {shareStatus ? (
-              <p
-                className="adventure-complete-feedback"
-                style={{ fontSize: '12px', color: C.muted, textAlign: 'center', marginTop: '10px' }}
-              >
-                {shareStatus}
-              </p>
-            ) : null}
-          </div>
-        </div>
+        />
       ) : null}
     </div>
   )
