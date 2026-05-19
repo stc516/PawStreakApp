@@ -9,6 +9,7 @@ import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
 import { shareAdventure } from '../lib/shareAdventure'
 import { track } from '../lib/analytics'
 import { calculateAdventureXp } from '../lib/xp'
+import { FONT_IMPORT, H } from '../lib/editorialTheme'
 
 interface CompletionViewState {
   title: string
@@ -67,17 +68,17 @@ const PLACES: Record<string, Array<{ name: string; city: string; distance: strin
 }
 
 const C = {
-  bg:          '#0A0A0A',
-  surface:     '#201f1f',
-  surfaceLow:  '#1c1b1b',
-  primary:     '#ffbd7f',
-  primaryGrad: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
-  onSurface:   '#e5e2e1',
-  muted:       '#dbc2ad',
-  border5:     'rgba(255,255,255,0.05)',
-  border10:    'rgba(255,255,255,0.10)',
+  bg: H.page,
+  surface: H.card,
+  surfaceLow: H.cardSoft,
+  primary: H.sage,
+  primaryGrad: H.sage,
+  onSurface: H.ink,
+  muted: H.muted,
+  border5: H.border,
+  border10: H.borderStrong,
 }
-const FONT = "'Inter', sans-serif"
+const FONT = H.sans
 
 export function AdventurePage() {
   const navigate = useNavigate()
@@ -165,6 +166,7 @@ export function AdventurePage() {
       <div style={{
         minHeight: '100dvh',
         background: C.bg,
+        backgroundImage: H.pageWash,
         color: C.onSurface,
         fontFamily: FONT,
         maxWidth: '390px',
@@ -172,6 +174,7 @@ export function AdventurePage() {
         overflowX: 'hidden',
         paddingBottom: '88px',
       }}>
+        <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
         {/* Fixed header */}
         <header style={{
           position: 'fixed',
@@ -179,7 +182,7 @@ export function AdventurePage() {
           transform: 'translateX(-50%)',
           width: '100%', maxWidth: '390px',
           zIndex: 50,
-          background: 'rgba(10,10,10,0.80)',
+          background: 'rgba(250, 247, 242, 0.92)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           display: 'flex',
@@ -190,7 +193,7 @@ export function AdventurePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: '50%',
-              overflow: 'hidden', border: `2px solid #ff9500`, flexShrink: 0,
+              overflow: 'hidden', border: `2px solid ${H.sage}`, flexShrink: 0,
             }}>
               <img
                 src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"
@@ -199,8 +202,8 @@ export function AdventurePage() {
               />
             </div>
             <div>
-              <div style={{ fontSize: '10px', fontWeight: '600', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Plan</div>
-              <div style={{ fontSize: '18px', fontWeight: '700', color: C.primary, lineHeight: '1.2' }}>PawStreak</div>
+              <div style={{ fontSize: '10px', fontWeight: '600', color: H.terra, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Plan</div>
+              <div style={{ fontFamily: H.serif, fontSize: '18px', fontWeight: '700', color: C.onSurface, lineHeight: '1.2' }}>PawStreak</div>
             </div>
           </div>
           <div style={{ width: '40px', flexShrink: 0 }} aria-hidden />
@@ -211,7 +214,7 @@ export function AdventurePage() {
 
           {/* Hero heading */}
           <section style={{ marginBottom: '20px', paddingTop: '8px' }}>
-            <h2 style={{ fontSize: '28px', fontWeight: '700', lineHeight: '1.2', color: C.onSurface, margin: '0 0 4px' }}>
+            <h2 style={{ fontFamily: H.serif, fontSize: '28px', fontWeight: '700', lineHeight: '1.2', color: C.onSurface, margin: '0 0 4px' }}>
               What should we do next?
             </h2>
             <p style={{ fontSize: '15px', color: C.muted, margin: 0 }}>
@@ -242,10 +245,10 @@ export function AdventurePage() {
                       letterSpacing: '0.04em',
                       cursor: 'pointer',
                       fontFamily: FONT,
-                      background: active ? '#ff9500' : C.surface,
-                      color: active ? '#4b2800' : C.muted,
-                      border: active ? 'none' : '1px solid rgba(85,67,52,0.5)',
-                      boxShadow: active ? '0 0 20px rgba(255,149,0,0.2)' : 'none',
+                      background: active ? H.sage : H.card,
+                      color: active ? '#FFFCF8' : C.muted,
+                      border: active ? 'none' : `1px solid ${H.border}`,
+                      boxShadow: active ? H.shadowSoft : 'none',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -257,17 +260,18 @@ export function AdventurePage() {
           </section>
 
           {/* Section label */}
-          <div style={{ fontSize: '24px', fontWeight: '600', color: C.onSurface, marginBottom: '16px' }}>
-            {selectedCategory} Spots
+          <div style={{ fontFamily: H.serif, fontSize: '22px', fontWeight: '600', color: C.onSurface, marginBottom: '16px' }}>
+            {selectedCategory} spots
           </div>
 
           {/* Place cards */}
           <section style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
             {places.map((place, i) => (
               <div key={i} style={{
-                background: 'rgba(32,31,31,0.7)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: '16px',
+                background: H.card,
+                border: `1px solid ${H.border}`,
+                borderRadius: '20px',
+                boxShadow: H.shadowSoft,
                 padding: '12px',
                 display: 'flex',
                 alignItems: 'center',
@@ -282,7 +286,7 @@ export function AdventurePage() {
                   <div style={{ fontSize: '17px', fontWeight: '700', color: C.onSurface, lineHeight: '1.2', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                     {place.name}
                   </div>
-                  <div style={{ fontSize: '12px', color: C.primary, marginTop: '3px', fontWeight: '600' }}>
+                  <div style={{ fontSize: '12px', color: H.sage, marginTop: '3px', fontWeight: '600' }}>
                     {place.city} • {place.distance}
                   </div>
                   <div style={{ fontSize: '13px', color: C.muted, marginTop: '4px', lineHeight: '1.4',
@@ -296,11 +300,11 @@ export function AdventurePage() {
                   style={{
                     flexShrink: 0,
                     width: '48px', height: '48px', borderRadius: '50%',
-                    background: C.primaryGrad,
+                    background: H.sage,
                     border: 'none', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 0 20px rgba(255,149,0,0.2)',
-                    fontSize: '11px', fontWeight: '700', color: '#4b2800', fontFamily: FONT,
+                    boxShadow: H.shadowSoft,
+                    fontSize: '11px', fontWeight: '700', color: '#FFFCF8', fontFamily: FONT,
                   }}
                 >
                   Start
@@ -322,6 +326,7 @@ export function AdventurePage() {
     <div style={{
       minHeight: '100dvh',
       background: C.bg,
+      backgroundImage: H.pageWash,
       color: C.onSurface,
       fontFamily: FONT,
       maxWidth: '390px',
@@ -331,6 +336,7 @@ export function AdventurePage() {
       position: 'relative',
       overflow: 'hidden',
     }}>
+      <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       {/* Top header */}
       <header style={{
         display: 'flex',
@@ -344,14 +350,15 @@ export function AdventurePage() {
           onClick={() => navigate('/app')}
           style={{
             width: '40px', height: '40px', borderRadius: '50%',
-            background: 'rgba(255,255,255,0.10)',
+            background: H.sageSoft,
             backdropFilter: 'blur(8px)',
-            border: 'none', cursor: 'pointer',
+            border: `1px solid ${H.border}`,
+            cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round">
+            stroke={H.ink} strokeWidth="2" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -360,7 +367,7 @@ export function AdventurePage() {
         <div style={{ textAlign: 'center' }}>
           <div
             data-testid="adventure-send-off"
-            style={{ fontSize: '18px', fontWeight: '600', color: '#FFFFFF' }}
+            style={{ fontSize: '18px', fontWeight: '600', color: H.ink, fontFamily: H.serif }}
           >
             {m.locationHint || visibleTitle}
           </div>
@@ -393,8 +400,8 @@ export function AdventurePage() {
               fontWeight: '300',
               letterSpacing: '-0.02em',
               lineHeight: '1',
-              color: C.primary,
-              textShadow: '0 0 15px rgba(255,184,116,0.4)',
+              color: H.sageDeep,
+              textShadow: 'none',
               fontVariantNumeric: 'tabular-nums',
               fontFamily: FONT,
             }}
@@ -440,7 +447,7 @@ export function AdventurePage() {
             placeholder={`What did ${state.dogName} notice?`}
             style={{
               width: '100%',
-              background: 'rgba(255,255,255,0.04)',
+              background: H.cardSoft,
               border: `1px solid ${C.border10}`,
               borderRadius: '10px',
               padding: '10px 12px',
@@ -483,9 +490,9 @@ export function AdventurePage() {
               flex: 1,
               height: '56px',
               borderRadius: '9999px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.10)',
-              color: '#FFFFFF',
+              background: H.card,
+              border: `1px solid ${H.border}`,
+              color: H.ink,
               fontSize: '16px',
               fontWeight: '500',
               cursor: 'pointer',
@@ -493,7 +500,7 @@ export function AdventurePage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFFFFF" stroke="none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={H.ink} stroke="none">
               {paused
                 ? <polygon points="5 3 19 12 5 21 5 3"/>
                 : <><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>
@@ -533,13 +540,13 @@ export function AdventurePage() {
               flex: 1.5,
               height: '56px',
               borderRadius: '9999px',
-              background: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
+              background: H.sage,
               border: 'none',
-              color: '#FFFFFF',
+              color: '#FFFCF8',
               fontSize: '17px',
               fontWeight: '700',
               cursor: 'pointer',
-              boxShadow: '0 8px 30px rgba(255,149,0,0.3)',
+              boxShadow: H.shadowSoft,
               fontFamily: FONT,
             }}
           >
@@ -557,7 +564,7 @@ export function AdventurePage() {
           aria-label="Adventure complete"
           style={{
             position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.85)',
+            background: 'rgba(44, 36, 25, 0.35)',
             display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
             zIndex: 50,
           }}
@@ -601,8 +608,8 @@ export function AdventurePage() {
               <div
                 data-testid="adventure-complete-memory"
                 style={{
-                  background: 'rgba(255,149,0,0.06)',
-                  border: '1px solid rgba(255,149,0,0.2)',
+                  background: H.amberSoft,
+                  border: `1px solid ${H.border}`,
                   borderRadius: '12px',
                   padding: '12px',
                   fontSize: '13px',
@@ -656,12 +663,12 @@ export function AdventurePage() {
                 }}
                 style={{
                   width: '100%', height: '52px',
-                  background: C.primaryGrad,
+                  background: H.sage,
                   border: 'none', borderRadius: '14px',
-                  color: '#FFFFFF',
+                  color: '#FFFCF8',
                   fontSize: '15px', fontWeight: '700',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(255,149,0,0.4)',
+                  boxShadow: H.shadowSoft,
                   fontFamily: FONT,
                 }}
               >
