@@ -5,6 +5,7 @@ import { getEnvironmentForCoords } from '../data/zipEnvironments'
 import { normalizeZip } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
 import { track } from '../lib/analytics'
+import { FONT_IMPORT, H } from '../lib/editorialTheme'
 import { resolveUserEnvironment } from '../lib/resolveUserEnvironment'
 import type {
   DogEnergyLevel,
@@ -45,12 +46,112 @@ const SAMPLE_ADVENTURES = [
   { emoji: '🌅', title: 'Sunset Stroll', sub: 'Salt mist · big horizon' },
 ] as const
 
+const ONBOARDING_EDITORIAL_CSS = `
+${FONT_IMPORT}
+#onboarding-editorial {
+  --bg: ${H.page};
+  --bg-card: ${H.card};
+  --bg-elevated: ${H.cardSoft};
+  --border: ${H.border};
+  --border-md: ${H.borderStrong};
+  --orange: ${H.sage};
+  --text: ${H.ink};
+  --text-2: ${H.inkSoft};
+  --text-3: ${H.muted};
+  --fd: ${H.serif};
+  --fb: ${H.sans};
+  --green: ${H.sageDeep};
+  --blue: ${H.sage};
+  --orange-glow: ${H.sageSoft};
+  background: ${H.pageWash};
+  color: ${H.ink};
+  font-family: ${H.sans};
+}
+#onboarding-editorial .btn-primary {
+  width: 100%;
+  height: 52px;
+  background: ${H.sage};
+  border: none;
+  border-radius: 9999px;
+  color: #fffcf8;
+  font-family: ${H.sans};
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: ${H.shadowSoft};
+}
+#onboarding-editorial .btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#onboarding-editorial .inp {
+  width: 100%;
+  height: 48px;
+  background: ${H.card};
+  border: 1px solid ${H.borderStrong};
+  border-radius: 14px;
+  padding: 0 14px;
+  color: ${H.ink};
+  font-family: ${H.sans};
+  font-size: 15px;
+  outline: none;
+}
+#onboarding-editorial .inp::placeholder {
+  color: ${H.muted};
+}
+#onboarding-editorial .inp:focus {
+  border-color: ${H.sage};
+  box-shadow: 0 0 0 3px ${H.sageSoft};
+}
+#onboarding-editorial .ob-chip {
+  border: 1px solid ${H.border};
+  background: ${H.card};
+  color: ${H.inkSoft};
+}
+#onboarding-editorial .ob-chip-active {
+  border-color: ${H.sage};
+  background: ${H.sageSoft};
+  color: ${H.ink};
+  font-weight: 600;
+}
+#onboarding-editorial .ob-scrapbook-card {
+  background: ${H.card};
+  border: 1px solid ${H.border};
+  box-shadow: ${H.shadowSoft};
+}
+#onboarding-editorial .ob-google-btn {
+  border: 1px solid ${H.border};
+  background: ${H.card};
+  color: ${H.ink};
+}
+#onboarding-editorial .ob-google-btn:hover {
+  background: ${H.cardSoft};
+}
+#onboarding-editorial .ob-terra {
+  color: ${H.terra};
+}
+#onboarding-editorial .ob-sage-link {
+  color: ${H.sage};
+}
+#onboarding-editorial .ob-hero-mark {
+  filter: drop-shadow(0 8px 24px ${H.amberSoft});
+}
+#onboarding-editorial .ob-progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: ${H.border};
+}
+#onboarding-editorial .ob-progress-dot-active {
+  background: ${H.sage};
+  width: 18px;
+}
+`
+
 function chipButtonClass(active: boolean) {
   return [
-    'rounded-xl border px-3 py-2.5 text-left text-sm transition-colors',
-    active
-      ? 'border-[color:var(--orange)] bg-[color:rgba(255,107,53,0.12)] text-[var(--text)]'
-      : 'border-[color:var(--border-md)] bg-[var(--bg-elevated)] text-[var(--text-2)]',
+    'ob-chip rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
+    active ? 'ob-chip-active' : '',
   ].join(' ')
 }
 
@@ -250,13 +351,15 @@ export function OnboardingPage() {
   const showStepHeader = step >= 3
 
   return (
-    <section
-      className='screen active flex min-h-[100dvh] flex-col overflow-y-auto bg-[var(--bg)] px-5 pt-8'
-      style={{
-        fontFamily: 'var(--fb), DM Sans, sans-serif',
-        paddingBottom: 'calc(2rem + var(--safe-bot, 0px))',
-      }}
-      data-testid={
+    <>
+      <style dangerouslySetInnerHTML={{ __html: ONBOARDING_EDITORIAL_CSS }} />
+      <section
+        id='onboarding-editorial'
+        className='screen active flex min-h-[100dvh] flex-col overflow-y-auto px-5 pt-8'
+        style={{
+          paddingBottom: 'calc(2rem + var(--safe-bot, 0px))',
+        }}
+        data-testid={
         step === 1
           ? 'onboarding-welcome'
           : step === 2
@@ -267,36 +370,49 @@ export function OnboardingPage() {
       }
     >
       {showStepHeader ? (
-        <div className='mb-6 flex items-center justify-between'>
-          <span className='text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]'>
-            Step {step} of {TOTAL_STEPS}
-          </span>
-          <button
-            type='button'
-            className='text-sm text-[var(--text-2)]'
-            onClick={back}
-            data-testid='onboarding-back-button'
-          >
-            ← Back
-          </button>
+        <div className='mb-6'>
+          <div className='mb-3 flex items-center justify-center gap-1.5' aria-hidden>
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((n) => (
+              <span
+                key={n}
+                className={n === step ? 'ob-progress-dot ob-progress-dot-active' : 'ob-progress-dot'}
+              />
+            ))}
+          </div>
+          <div className='flex items-center justify-between'>
+            <span className='ob-terra text-[11px] font-semibold uppercase tracking-[0.14em]'>
+              Step {step} of {TOTAL_STEPS}
+            </span>
+            <button
+              type='button'
+              className='text-sm text-[var(--text-2)]'
+              onClick={back}
+              data-testid='onboarding-back-button'
+            >
+              ← Back
+            </button>
+          </div>
         </div>
       ) : null}
 
       <div className='flex flex-1 flex-col'>
         {step === 1 ? (
           <div className='mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-7 text-center'>
-            <div className='text-[11px] font-bold uppercase tracking-[0.32em] text-[var(--text-2)]'>
+            <div className='ob-terra text-[11px] font-bold uppercase tracking-[0.32em]'>
               PawStreak
             </div>
             <div
               aria-hidden
-              className='select-none text-[64px] leading-none drop-shadow-[0_0_22px_var(--orange-glow)]'
+              className='ob-hero-mark select-none text-[64px] leading-none'
             >
-              🐺
+              🐾
             </div>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-[28px] font-semibold italic leading-[1.15] text-[var(--text)]'>
-              Your dog&apos;s daily adventure starts here.
+            <h1 className='font-[family-name:var(--fd)] text-[28px] font-semibold italic leading-[1.15] text-[var(--text)]'>
+              Start a new chapter with your dog.
             </h1>
+            <p className='text-sm leading-relaxed text-[var(--text-2)]'>
+              A warm place for walks, little adventures, and memories you&apos;ll want to keep.
+            </p>
             <div className='w-full'>
               <label
                 htmlFor='dog-name-input'
@@ -342,7 +458,7 @@ export function OnboardingPage() {
               onClick={() => {
                 setGoogleNote('Google sign-in coming soon — you can start with your dog for now.')
               }}
-              className='flex w-full items-center justify-center gap-2 rounded-xl border border-[color:var(--border-md)] bg-[var(--bg-elevated)] px-4 py-3 text-sm font-semibold text-[var(--text)] transition-colors hover:bg-[color:rgba(255,255,255,0.04)]'
+              className='ob-google-btn flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors'
             >
               <span aria-hidden className='text-base'>
                 G
@@ -360,11 +476,11 @@ export function OnboardingPage() {
             ) : null}
             <p className='mt-2 text-[11px] uppercase tracking-[0.18em] text-[var(--text-3)]'>
               By continuing you agree to our{' '}
-              <Link to='/terms' className='underline-offset-2 hover:underline'>
+              <Link to='/terms' className='ob-sage-link underline-offset-2 hover:underline'>
                 Terms
               </Link>{' '}
               &amp;{' '}
-              <Link to='/privacy' className='underline-offset-2 hover:underline'>
+              <Link to='/privacy' className='ob-sage-link underline-offset-2 hover:underline'>
                 Privacy
               </Link>
               .
@@ -374,21 +490,22 @@ export function OnboardingPage() {
 
         {step === 2 ? (
           <div className='flex flex-1 flex-col'>
-            <div className='text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--text-2)]'>
+            <div className='ob-terra text-[11px] font-bold uppercase tracking-[0.18em]'>
               {dogDisplayUpper}
             </div>
-            <h1 className='mt-3 font-[family-name:var(--fd),Fraunces,serif] text-[28px] font-semibold italic leading-[1.15] text-[var(--text)]'>
+            <h1 className='mt-3 font-[family-name:var(--fd)] text-[28px] font-semibold italic leading-[1.15] text-[var(--text)]'>
               {possessiveUpper} first adventure is waiting.
             </h1>
             <p className='mt-3 text-sm leading-relaxed text-[var(--text-2)]'>
-              PawStreak turns daily walks, coffee runs, patios, parks, trails, and weird little
-              neighborhood loops into adventures worth remembering.
+              Walks, coffee runs, patios, parks, and neighborhood loops — turned into a story you
+              build together, one day at a time.
             </p>
             <div className='mt-7 flex flex-col gap-3'>
-              {SAMPLE_ADVENTURES.map((adv) => (
+              {SAMPLE_ADVENTURES.map((adv, index) => (
                 <div
                   key={adv.title}
-                  className='flex items-center gap-3 rounded-2xl border border-[color:var(--border)] bg-[var(--bg-elevated)] px-4 py-3'
+                  className='ob-scrapbook-card flex items-center gap-3 rounded-2xl px-4 py-3'
+                  style={{ transform: `rotate(${index % 2 === 0 ? '-0.6deg' : '0.5deg'})` }}
                 >
                   <span aria-hidden className='text-2xl leading-none'>
                     {adv.emoji}
@@ -405,7 +522,7 @@ export function OnboardingPage() {
 
         {step === 3 ? (
           <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-[24px] font-semibold italic text-[var(--text)]'>
+            <h1 className='font-[family-name:var(--fd)] text-[24px] font-semibold italic text-[var(--text)]'>
               {trimmedName
                 ? `Tell us a little more about ${trimmedName}.`
                 : `Tell us a little more about your dog.`}
@@ -456,7 +573,7 @@ export function OnboardingPage() {
 
         {step === 4 ? (
           <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
+            <h1 className='font-[family-name:var(--fd)] text-2xl font-semibold italic text-[var(--text)]'>
               Personality
             </h1>
             <p className='mt-2 text-sm text-[var(--text-2)]'>Pick any that fit — multi-select.</p>
@@ -477,7 +594,7 @@ export function OnboardingPage() {
 
         {step === 5 ? (
           <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
+            <h1 className='font-[family-name:var(--fd)] text-2xl font-semibold italic text-[var(--text)]'>
               Energy level
             </h1>
             <p className='mt-2 text-sm text-[var(--text-2)]'>One vibe today — you can change later.</p>
@@ -498,10 +615,12 @@ export function OnboardingPage() {
 
         {step === 6 ? (
           <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
+            <h1 className='font-[family-name:var(--fd)] text-2xl font-semibold italic text-[var(--text)]'>
               Your goals
             </h1>
-            <p className='mt-2 text-sm text-[var(--text-2)]'>Choose up to two.</p>
+            <p className='mt-2 text-sm text-[var(--text-2)]'>
+              What do you want from life together? Choose up to two.
+            </p>
             <div className='mt-6 flex flex-col gap-2'>
               {OWNER_GOAL_OPTIONS.map((g) => (
                 <button
@@ -519,11 +638,12 @@ export function OnboardingPage() {
 
         {step === 7 ? (
           <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
-              Home base
+            <h1 className='font-[family-name:var(--fd)] text-2xl font-semibold italic text-[var(--text)]'>
+              Your local world
             </h1>
             <p className='mt-3 text-sm leading-relaxed text-[var(--text-2)]'>
-              So adventures feel local and real. Share location (approximate is fine) or enter your ZIP.
+              So outings feel rooted where you live. Share location (approximate is fine) or enter your
+              ZIP.
             </p>
             <button
               type='button'
@@ -569,9 +689,12 @@ export function OnboardingPage() {
 
         {step === 8 ? (
           <>
-            <h1 className='font-[family-name:var(--fd),Fraunces,serif] text-2xl font-semibold italic text-[var(--text)]'>
+            <h1 className='font-[family-name:var(--fd)] text-2xl font-semibold italic text-[var(--text)]'>
               How should we keep {dogDisplayLower} on track?
             </h1>
+            <p className='mt-2 text-sm text-[var(--text-2)]'>
+              Gentle nudges only — you can change this anytime.
+            </p>
             <div className='mt-6 flex flex-col gap-2'>
               {(
                 [
@@ -625,6 +748,7 @@ export function OnboardingPage() {
           </button>
         </div>
       ) : null}
-    </section>
+      </section>
+    </>
   )
 }
