@@ -5,14 +5,11 @@ import { AccountStatusChip } from '../components/auth/AccountStatusChip'
 import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePrompt'
 import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
+import { TonightChapter } from '../components/dashboard/TonightChapter'
+import { TomorrowTeaseLine } from '../components/dashboard/TomorrowTeaseLine'
 import { LegalFooter } from '../components/legal/LegalFooter'
-import { localeFromZip, localeLabel } from '../data/localAdventureEngine'
 import { useAppState } from '../hooks/useAppState'
-import {
-  displayTitleForEntry,
-  memoryReturnTimeLabel,
-  narrativeForEntry,
-} from '../lib/memoryNarrative'
+import { displayTitleForEntry, narrativeForEntry } from '../lib/memoryNarrative'
 import type { AdventureEntry, DogMood, VibeArchetype } from '../types'
 
 const PLACE_IMAGES: Record<string, string> = {
@@ -127,13 +124,12 @@ export function DashboardPage() {
   const heroTitle = gm?.title ?? "Today's outing"
   const heroLocation = gm?.locationHint ?? 'Your neighborhood'
 
-  const locale = localeFromZip(state.zipCode ?? '')
-  const localeHuman = localeLabel(locale)
-
   const featuredMemory = useMemo(() => {
     const withNote = recent.find((a) => a.memoryText?.trim())
     return withNote ?? recent[0] ?? null
   }, [recent])
+
+  const isAfterglow = state.todayAdventureDone
 
   const memoryReturnEntry = useMemo(() => {
     if (!state.memoryReturnHighlightId) return null
@@ -142,6 +138,19 @@ export function DashboardPage() {
       state.latestCompletedAdventure
     )
   }, [state.memoryReturnHighlightId, state.recentAdventures, state.latestCompletedAdventure])
+
+  const tonightEntry = useMemo(() => {
+    if (!isAfterglow) return null
+    return memoryReturnEntry ?? state.latestCompletedAdventure ?? featuredMemory
+  }, [isAfterglow, memoryReturnEntry, state.latestCompletedAdventure, featuredMemory])
+
+  const rhythmHeaderLine = useMemo(() => {
+    const streak =
+      state.currentStreak > 0
+        ? `${state.currentStreak} day${state.currentStreak === 1 ? '' : 's'} together`
+        : 'First chapter starting'
+    return `${streak} · your rhythm`
+  }, [state.currentStreak])
 
   const memories = recent.slice(0, 5).map((a, index) => ({
     id: a.id,
@@ -185,6 +194,8 @@ export function DashboardPage() {
   return (
     <div
       id="s-home"
+      data-testid="dashboard-today-root"
+      data-dashboard-mode={isAfterglow ? 'afterglow' : 'anticipation'}
       style={{
         minHeight: '100dvh',
         background: H.page,
@@ -257,19 +268,18 @@ export function DashboardPage() {
               >
                 {dogDisplayName}
               </div>
-              <div
-                data-testid="dashboard-streak-summary"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}
-              >
-                <span style={{ fontSize: '14px' }} aria-hidden>
-                  🌿
-                </span>
-                <span style={{ fontSize: '13px', fontWeight: 500, color: H.muted }}>
-                  {state.currentStreak > 0
-                    ? `${state.currentStreak} day${state.currentStreak === 1 ? '' : 's'} together`
-                    : 'First chapter starting'}
-                </span>
-              </div>
+              {!isAfterglow ? (
+                <div
+                  data-testid="dashboard-streak-summary"
+                  style={{ marginTop: '4px', fontSize: '13px', fontWeight: 500, color: H.muted }}
+                >
+                  {rhythmHeaderLine}
+                </div>
+              ) : (
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: H.muted, fontStyle: 'italic' }}>
+                  Tonight&apos;s chapter is written
+                </p>
+              )}
             </div>
           </div>
           <AccountStatusChip />
@@ -280,129 +290,84 @@ export function DashboardPage() {
         <SaveProgressNudge />
         <PostAdventureSavePrompt />
 
-        {/* 1. Dog hero */}
-        <section style={{ marginBottom: '28px', paddingTop: '8px' }}>
-          <p
-            style={{
-              margin: '0 0 8px',
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: H.sage,
-            }}
-          >
-            {moodShortLabel(state.dogMood)}
-          </p>
-          <h1
-            style={{
-              margin: '0 0 12px',
-              fontFamily: H.serif,
-              fontSize: '32px',
-              fontWeight: 700,
-              lineHeight: 1.15,
-              color: H.ink,
-              letterSpacing: '-0.02em',
-            }}
-          >
-            What kind of day are we having together?
-          </h1>
-          <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
-            {moodEditorialLine(state.dogMood, dogDisplayName)}
-          </p>
-        </section>
-
-        {/* 4. Subtle streak / progress strip */}
-        <section
-          style={{
-            ...cardBase,
-            marginBottom: '24px',
-            padding: '14px 16px',
-            background: H.cardSoft,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              height: '6px',
-              borderRadius: '999px',
-              background: H.sageSoft,
-              overflow: 'hidden',
-            }}
-          >
-            <div
+        {isAfterglow ? (
+          <section style={{ marginBottom: '20px', paddingTop: '8px' }}>
+            <p
               style={{
-                height: '100%',
-                width: `${Math.min(100, state.todayAdventureDone ? 100 : state.currentStreak > 0 ? 55 : 12)}%`,
-                borderRadius: '999px',
-                background: `linear-gradient(90deg, ${H.sage} 0%, ${H.amber} 100%)`,
-                transition: 'width 0.4s ease',
+                margin: '0 0 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: H.sage,
               }}
-            />
-          </div>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: H.muted, whiteSpace: 'nowrap' }}>
-            {state.todayAdventureDone ? "Today's walk saved" : 'Your rhythm'}
-          </span>
-        </section>
+            >
+              Afterglow
+            </p>
+            <h1
+              style={{
+                margin: '0 0 10px',
+                fontFamily: H.serif,
+                fontSize: '30px',
+                fontWeight: 700,
+                lineHeight: 1.15,
+                color: H.ink,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Tonight&apos;s memory is part of your story now.
+            </h1>
+            <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
+              {moodEditorialLine(state.dogMood, dogDisplayName)}
+            </p>
+          </section>
+        ) : (
+          <section style={{ marginBottom: '22px', paddingTop: '8px' }}>
+            <p
+              style={{
+                margin: '0 0 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: H.sage,
+              }}
+            >
+              {moodShortLabel(state.dogMood)}
+            </p>
+            <h1
+              style={{
+                margin: '0 0 10px',
+                fontFamily: H.serif,
+                fontSize: '30px',
+                fontWeight: 700,
+                lineHeight: 1.15,
+                color: H.ink,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              One good outing is waiting.
+            </h1>
+            <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
+              {moodEditorialLine(state.dogMood, dogDisplayName)}
+            </p>
+          </section>
+        )}
 
-        {/* 3. Quick experience chips */}
-        <section style={{ margin: '0 -24px 24px' }}>
-          <p
-            style={{
-              margin: '0 0 10px',
-              padding: '0 24px',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: H.muted,
-            }}
-          >
-            Quick ideas for today
-          </p>
-          <div
-            data-testid="dashboard-adventure-chips"
-            style={{
-              display: 'flex',
-              gap: '8px',
-              overflowX: 'auto',
-              scrollbarWidth: 'none',
-              padding: '2px 24px 6px',
-            }}
-          >
-            {VIBE_CHIPS.map((chip) => {
-              const active = selectedChip === chip.label
-              return (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={() => handleChipClick(chip.vibe)}
-                  style={{
-                    flexShrink: 0,
-                    padding: '10px 18px',
-                    borderRadius: '999px',
-                    border: active ? 'none' : `1px solid ${H.borderStrong}`,
-                    background: active ? H.sage : H.card,
-                    color: active ? '#FFFDF9' : H.inkSoft,
-                    fontSize: '14px',
-                    fontWeight: active ? 600 : 500,
-                    cursor: 'pointer',
-                    fontFamily: H.sans,
-                    boxShadow: active ? '0 4px 14px rgba(92, 122, 107, 0.25)' : H.shadowSoft,
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {chip.label}
-                </button>
-              )
-            })}
-          </div>
-        </section>
+        {isAfterglow && tonightEntry ? (
+          <TonightChapter
+            entry={tonightEntry}
+            dogDisplayName={dogDisplayName}
+            zipCode={state.zipCode ?? ''}
+            onOpenJourney={() => openJourneyMemory(tonightEntry)}
+          />
+        ) : null}
 
-        {/* 2. Featured outing card */}
-        <section style={{ marginBottom: '24px' }}>
+        {isAfterglow ? <TomorrowTeaseLine text={state.tomorrowTease} subdued /> : null}
+
+        {!isAfterglow ? (
+          <>
+        <section style={{ marginBottom: '20px' }}>
           <p
             style={{
               margin: '0 0 12px',
@@ -485,10 +450,9 @@ export function DashboardPage() {
                 type="button"
                 data-testid="dashboard-start-adventure-cta"
                 onClick={startAdventure}
-                disabled={state.todayAdventureDone}
                 style={{
                   flexShrink: 0,
-                  background: state.todayAdventureDone ? H.muted : H.sage,
+                  background: H.sage,
                   border: 'none',
                   borderRadius: '14px',
                   color: '#FFFDF9',
@@ -496,175 +460,71 @@ export function DashboardPage() {
                   fontSize: '15px',
                   fontWeight: 700,
                   padding: '14px 20px',
-                  cursor: state.todayAdventureDone ? 'not-allowed' : 'pointer',
-                  opacity: state.todayAdventureDone ? 0.65 : 1,
-                  boxShadow: state.todayAdventureDone ? 'none' : '0 6px 20px rgba(92, 122, 107, 0.28)',
+                  cursor: 'pointer',
+                  boxShadow: '0 6px 20px rgba(92, 122, 107, 0.28)',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {state.todayAdventureDone ? 'Saved ✓' : "Let's go"}
+                Let&apos;s go
               </button>
             </div>
           </article>
         </section>
 
-        {memoryReturnEntry?.memoryNarrative ? (
-          <section style={{ marginBottom: '20px' }} data-testid="memory-return-strip">
-            <button
-              type="button"
-              onClick={() => openJourneyMemory(memoryReturnEntry)}
-              style={{
-                ...cardBase,
-                width: '100%',
-                textAlign: 'left',
-                padding: '14px 16px',
-                cursor: 'pointer',
-                fontFamily: H.sans,
-                background: H.cardSoft,
-              }}
-            >
-              <p style={{ margin: 0, fontSize: '13px', color: H.muted, lineHeight: 1.4 }}>
-                {memoryReturnTimeLabel(memoryReturnEntry.completedAt)}:{' '}
-                <span
-                  style={{
-                    fontFamily: H.serif,
-                    fontStyle: 'italic',
-                    color: H.ink,
-                    fontWeight: 600,
-                  }}
-                >
-                  {memoryReturnEntry.memoryNarrative.emotionalTitle}
-                </span>
-              </p>
-            </button>
-          </section>
-        ) : null}
-
-        {/* 5. Featured memory moment */}
-        {featuredMemory ? (
-          <section style={{ marginBottom: '24px' }}>
-            <p style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 600, color: H.muted }}>
-              A moment worth keeping
-            </p>
-            <article
-              style={{
-                ...cardBase,
-                padding: '18px 18px 16px',
-                background: `linear-gradient(145deg, #FFFCF8 0%, ${H.amberSoft} 100%)`,
-                border: `1px solid rgba(198, 123, 92, 0.15)`,
-                position: 'relative',
-              }}
-            >
-              <div
-                aria-hidden
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '16px',
-                  fontSize: '28px',
-                  opacity: 0.35,
-                  fontFamily: H.serif,
-                }}
-              >
-                “
-              </div>
-              {featuredMemory.memoryText?.trim() ? (
-                <p
-                  style={{
-                    margin: '0 0 12px',
-                    fontFamily: H.serif,
-                    fontSize: '18px',
-                    fontStyle: 'italic',
-                    lineHeight: 1.45,
-                    color: H.ink,
-                  }}
-                >
-                  {featuredMemory.memoryText.trim()}
-                </p>
-              ) : (
-                <p style={{ margin: '0 0 12px', fontSize: '15px', lineHeight: 1.5, color: H.inkSoft }}>
-                  {displayTitleForEntry(featuredMemory, dogDisplayName, state.zipCode ?? '')}
-                </p>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: H.terra }}>
-                  {relativeDayLabel(featuredMemory.completedAt)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => navigate('/story')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: H.sage,
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    fontFamily: H.sans,
-                    padding: 0,
-                  }}
-                >
-                  Open Journey →
-                </button>
-              </div>
-            </article>
-          </section>
-        ) : null}
-
-        {/* 6. Tomorrow / local tease */}
-        <section style={{ marginBottom: '28px' }}>
-          <article
+        <section style={{ margin: '0 -24px 20px' }}>
+          <p
             style={{
-              ...cardBase,
-              padding: '16px 18px',
-              background: H.card,
-              display: 'flex',
-              gap: '14px',
-              alignItems: 'flex-start',
+              margin: '0 0 8px',
+              padding: '0 24px',
+              fontSize: '12px',
+              fontWeight: 500,
+              color: H.muted,
             }}
           >
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
-                background: H.sageSoft,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                flexShrink: 0,
-              }}
-              aria-hidden
-            >
-              🌤
-            </div>
-            <div>
-              <p
-                style={{
-                  margin: '0 0 4px',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  color: H.sage,
-                }}
-              >
-                Tomorrow &amp; nearby
-              </p>
-              <p style={{ margin: '0 0 6px', fontSize: '15px', lineHeight: 1.45, color: H.ink }}>
-                {state.tomorrowTease}
-              </p>
-              <p style={{ margin: 0, fontSize: '13px', color: H.muted }}>
-                {state.zipCode
-                  ? `Rooted in your ${localeHuman} — walks that feel local to you.`
-                  : 'Add your ZIP in Profile to tune local outings.'}
-              </p>
-            </div>
-          </article>
+            Or try a different mood
+          </p>
+          <div
+            data-testid="dashboard-adventure-chips"
+            style={{
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              padding: '2px 24px 4px',
+            }}
+          >
+            {VIBE_CHIPS.map((chip) => {
+              const active = selectedChip === chip.label
+              return (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={() => handleChipClick(chip.vibe)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '7px 14px',
+                    borderRadius: '999px',
+                    border: `1px solid ${active ? 'transparent' : H.border}`,
+                    background: active ? H.sageSoft : 'transparent',
+                    color: active ? H.sageDeep : H.muted,
+                    fontSize: '13px',
+                    fontWeight: active ? 600 : 400,
+                    cursor: 'pointer',
+                    fontFamily: H.sans,
+                    boxShadow: 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {chip.label}
+                </button>
+              )
+            })}
+          </div>
         </section>
 
-        {/* 7. Recent memories */}
+        <TomorrowTeaseLine text={state.tomorrowTease} />
+
+        {/* Recent memories */}
         {memories.length > 0 ? (
           <section style={{ marginBottom: '28px' }} data-testid="dashboard-recent-memories">
             <div
@@ -887,6 +747,8 @@ export function DashboardPage() {
             )
           })}
         </section>
+          </>
+        ) : null}
 
         <div style={{ marginTop: '28px' }}>
           <LegalFooter />
