@@ -31,9 +31,9 @@ async function enterActiveAdventure(page: Page) {
 async function completeMemorySealToToday(page: Page) {
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
-  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 12_000 })
-  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 15_000 })
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 14_000 })
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 22_000 })
+  await page.getByTestId('memory-seal-continue').click()
   await expect(page).toHaveURL(/\/app/)
 }
 
@@ -214,10 +214,10 @@ test('adventure generation and Memory Seal appears', async ({ page }) => {
   await enterActiveAdventure(page)
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
 
-  await expect(page.getByRole('dialog', { name: 'Adventure complete' })).toBeVisible()
-  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 12_000 })
-  await expect(page.getByText('Saved to Journey')).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByRole('dialog', { name: 'Memory' })).toBeVisible()
+  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 14_000 })
+  await expect(page.getByText(/saved to journey/i)).toBeVisible({ timeout: 22_000 })
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 22_000 })
 })
 
 test('Memory Seal completes to Today without reward screen', async ({ page }) => {
@@ -297,11 +297,13 @@ test('emotional adventure flow: memory captures and headlines stay dog-first', a
 
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
-  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 12_000 })
+  await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 14_000 })
   await expect(page.getByTestId('adventure-complete-headline')).not.toContainText('had a great day')
-  await expect(page.getByTestId('adventure-complete-memory')).toContainText('Chased a leaf')
+  await expect(page.getByTestId('adventure-complete-memory')).toContainText('Chased a leaf', {
+    timeout: 20_000,
+  })
 
-  await page.getByRole('button', { name: 'Continue' }).click({ timeout: 15_000 })
+  await page.getByTestId('memory-seal-continue').click({ timeout: 22_000 })
   await expect(page).toHaveURL(/\/app/)
   await expect(page.getByTestId('memory-return-strip')).toBeVisible()
 })

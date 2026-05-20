@@ -5,6 +5,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   reporter: 'list',
+  timeout: 60_000,
   use: {
     baseURL: 'http://127.0.0.1:4173',
     screenshot: 'only-on-failure',

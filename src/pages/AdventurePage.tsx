@@ -297,6 +297,8 @@ export function AdventurePage() {
   }
 
   // ── ACTIVE ADVENTURE VIEW ──────────────────────────────────────────
+  const sealing = awaitingMemorySeal || Boolean(activeSealNarrative)
+
   return (
     <div style={{
       minHeight: '100dvh',
@@ -310,6 +312,9 @@ export function AdventurePage() {
       flexDirection: 'column',
       position: 'relative',
       overflow: 'hidden',
+      opacity: sealing ? 0.42 : 1,
+      transition: 'opacity 450ms ease',
+      pointerEvents: sealing ? 'none' : 'auto',
     }}>
       <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       {/* Top header */}
@@ -410,7 +415,7 @@ export function AdventurePage() {
             htmlFor="adventure-memory-input"
             style={{ fontSize: '12px', color: C.muted, fontWeight: '600', display: 'block', marginBottom: '8px' }}
           >
-            Note (optional)
+            A line you&apos;ll want to remember
           </label>
           <textarea
             id="adventure-memory-input"
@@ -419,7 +424,7 @@ export function AdventurePage() {
             onChange={(e) => setMemoryDraft(e.target.value)}
             rows={2}
             maxLength={240}
-            placeholder={`What did ${state.dogName} notice?`}
+            placeholder="Salt air, slow steps, whatever stuck with you…"
             style={{
               width: '100%',
               background: H.cardSoft,

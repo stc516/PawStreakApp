@@ -42,12 +42,25 @@ function monthDayLabel(date: Date): string {
 export function extractPlaceName(locationHint: string | undefined): string | null {
   const hint = locationHint?.trim() ?? ''
   if (!hint) return null
-  const first = hint.split('·')[0].trim()
-  if (first.length < 3 || GENERIC_PLACE_RE.test(first)) return null
-  const dogBeach = first.match(/^(.+?)\s+Dog Beach$/i)
-  if (dogBeach?.[1]) return dogBeach[1].trim()
-  if (first.length > 36) return `${first.slice(0, 33)}…`
-  return first
+  const segments = hint.split('·').map((s) => s.trim()).filter(Boolean)
+  for (const segment of segments) {
+    if (segment.length < 3 || GENERIC_PLACE_RE.test(segment)) continue
+    const dogBeach = segment.match(/^(.+?)\s+Dog Beach$/i)
+    if (dogBeach?.[1]) return dogBeach[1].trim()
+    if (segment.length > 36) return `${segment.slice(0, 33)}…`
+    return segment
+  }
+  return null
+}
+
+export function linesOverlap(a: string, b: string): boolean {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim()
+  const na = norm(a)
+  const nb = norm(b)
+  if (!na || !nb) return false
+  const short = na.length < nb.length ? na : nb
+  const long = na.length < nb.length ? nb : na
+  return long.includes(short.slice(0, Math.min(24, short.length)))
 }
 
 function pickLines<T>(pool: T[], seed: string, count: number): T[] {
@@ -91,12 +104,12 @@ const ATMOSPHERE_BY_VIBE: Record<VibeArchetype, string[]> = {
     'Unhurried miles.',
   ],
   wild: [
-    'Plot twists around the corner.',
     'Unscripted turns.',
     'Sniff-first energy.',
     'Surprise in every block.',
     'Loose-leash momentum.',
-    'Happy chaos in the air.',
+    'A route with no notes.',
+    'Curiosity leading the way.',
   ],
 }
 
@@ -182,8 +195,14 @@ export function generateAtmosphere(input: {
   const localePool = ATMOSPHERE_BY_LOCALE[locale]
   const timePool = ATMOSPHERE_BY_TIME[tod]
   const merged = [...timePool, ...vibePool, ...localePool]
-  const lines = pickLines(merged, `${input.adventureId}|atmo`, 2)
-  return lines.map((l) => l.replace(/\.$/, '') + '.')
+  const lines = pickLines(merged, `${input.adventureId}|atmo`, 3).filter((line, i, arr) => {
+    const norm = line.toLowerCase()
+    return arr.findIndex((other) => {
+      const o = other.toLowerCase()
+      return o === norm || o.includes(norm.slice(0, 12)) || norm.includes(o.slice(0, 12))
+    }) === i
+  })
+  return lines.slice(0, 2).map((l) => l.replace(/\.$/, '') + '.')
 }
 
 function composedReflection(mission: Pick<GeneratedMission, 'description' | 'flavor' | 'title'>): string | null {
@@ -253,15 +272,15 @@ export function generateAnticipationLine(input: {
       'Another surprise turn might be out there.',
     ],
   }
-  const localeLine =
-    input.locale === 'coastal'
-      ? 'The coast is never far from a good walk.'
-      : input.locale === 'trail'
-        ? 'Trails keep their quiet pull.'
-        : null
+  const localePools: Partial<Record<ZipLocale, string[]>> = {
+    coastal: ['The coast is never far from a good walk.', 'Another tide-line evening could call to you.'],
+    trail: ['Trails keep their quiet pull.', 'More green edges when the day opens.'],
+  }
+  const localeLines = localePools[input.locale]
   const vibeLines = pools[input.vibe]
-  const idx = hashString(`${name}|${input.zipCode}|anticipation`) % vibeLines.length
-  return localeLine ?? vibeLines[idx] ?? `Tomorrow holds another walk for ${name}.`
+  const pool = localeLines ?? vibeLines
+  const idx = hashString(`${name}|${input.zipCode}|anticipation`) % pool.length
+  return pool[idx] ?? `Tomorrow holds another walk for ${name}.`
 }
 
 export function buildMemoryNarrative(input: {
@@ -305,16 +324,19 @@ export function buildMemoryNarrative(input: {
     vibe: input.mission.vibe,
     locale,
   })
+  const filteredAtmosphere = atmosphere.filter(
+    (line) => !linesOverlap(line, reflection) && !linesOverlap(line, emotionalTitle),
+  )
   const journeyCardSubtitle =
     reflectionSource === 'user'
       ? reflection.length > 90
         ? `${reflection.slice(0, 87)}…`
         : reflection
-      : atmosphere[0] ?? reflection
+      : filteredAtmosphere[0] ?? reflection
 
   return {
     emotionalTitle,
-    atmosphere,
+    atmosphere: filteredAtmosphere.length > 0 ? filteredAtmosphere : atmosphere.slice(0, 1),
     reflection,
     reflectionSource,
     sealMetadata,

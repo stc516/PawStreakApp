@@ -226,9 +226,17 @@ function MemoryDetailSheet({
               ? `“${entry.memoryText.trim()}”`
               : narrative.reflection}
           </p>
-          <p style={{ fontSize: '12px', color: H.muted, margin: '0 0 24px', fontFamily: H.sans }}>
+          <p style={{ fontSize: '12px', color: H.muted, margin: '0 0 8px', fontFamily: H.sans }}>
             {narrative.sealMetadata}
           </p>
+          {entry.durationMinutes > 0 ? (
+            <p style={{ fontSize: '11px', color: H.muted, margin: '0 0 24px', fontFamily: H.sans, opacity: 0.85 }}>
+              {entry.durationMinutes} min together
+              {entry.adventureEnergy > 0 ? ` · +${entry.adventureEnergy} warmth` : ''}
+            </p>
+          ) : (
+            <div style={{ marginBottom: '24px' }} />
+          )}
           <button
             type="button"
             onClick={() => void handleShare()}
@@ -591,22 +599,6 @@ export function StoryPage() {
                               </>
                             ) : null}
                           </div>
-                          {a.adventureEnergy > 0 ? (
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                marginTop: '12px',
-                                padding: '3px 9px',
-                                borderRadius: '999px',
-                                background: H.amberSoft,
-                                fontSize: '11px',
-                                fontWeight: 600,
-                                color: H.terra,
-                              }}
-                            >
-                              +{a.adventureEnergy} warmth
-                            </span>
-                          ) : null}
                         </div>
                       </button>
                     </div>
