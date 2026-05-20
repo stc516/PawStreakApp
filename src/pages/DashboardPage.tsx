@@ -256,7 +256,7 @@ export function DashboardPage() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div
-                data-testid="dashboard-dog-name"
+                data-testid="dashboard-app-title"
                 style={{
                   fontFamily: H.serif,
                   fontSize: '20px',
@@ -266,7 +266,7 @@ export function DashboardPage() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                {dogDisplayName}
+                PawStreak
               </div>
               {!isAfterglow ? (
                 <div

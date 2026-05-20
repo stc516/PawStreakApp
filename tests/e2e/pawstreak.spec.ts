@@ -96,7 +96,8 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
   await advancePrimary(page)
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByTestId('dashboard-dog-name')).toHaveText('TestDog')
+  await expect(page.getByTestId('dashboard-app-title')).toHaveText('PawStreak')
+  await expect(page.getByTestId('dashboard-hero-status')).toHaveText('TestDog')
   await expect(page.getByTestId('dashboard-adventure-chips')).toBeVisible()
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
@@ -158,7 +159,8 @@ test('dashboard persistence after refresh', async ({ page }) => {
   await page.reload()
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByTestId('dashboard-dog-name')).toHaveText('PersistDog')
+  await expect(page.getByTestId('dashboard-app-title')).toHaveText('PawStreak')
+  await expect(page.getByTestId('dashboard-hero-status')).toHaveText('PersistDog')
 })
 
 test('bottom nav visits core tabs without blank screens', async ({ page }) => {

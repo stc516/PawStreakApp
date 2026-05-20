@@ -144,7 +144,7 @@ export function TheWildPage() {
             />
           </div>
           <div style={{ fontFamily: H.serif, fontSize: '18px', fontWeight: '700', color: C.onSurface }}>
-            {state.dogName}
+            PawStreak
           </div>
         </div>
         <div style={{ width: '40px', flexShrink: 0 }} aria-hidden />
