@@ -317,6 +317,9 @@ test('fresh onboarding with Forest Hills NY uses generic categories and requests
   expect(stored.state.generatedMission.marketId).toBeUndefined()
   await expect(page.getByRole('button', { name: 'Neighborhood walk' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Dog park' })).toBeVisible()
+  await page.getByRole('link', { name: 'Plan' }).click()
+  await expect(page.getByText('Forest Hills, New York').first()).toBeVisible()
+  await expect(page.getByText(/Coronado|San Diego|La Jolla|Mission Trails|Balboa Park|Ocean Beach/)).toHaveCount(0)
   expect(stored.expansion.at(-1)?.rawLocationInput).toBe('Forest Hills, NY')
   expect(stored.expansion.at(-1)?.geocodedLocation?.region).toBe('New York')
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
@@ -496,6 +499,7 @@ test('challenge detail shows path map and seasonal filtering', async ({ page }) 
   await page.goto('/packs')
   await expect(page.getByRole('heading', { name: 'Challenges' })).toBeVisible()
   await expect(page.getByText('Holiday Adventure Challenge')).toHaveCount(0)
+  await expect(page.getByTestId('challenge-detail-map')).toHaveCount(0)
 
   await page.getByTestId('pack-card-beach-explorer').click()
   await expect(page).toHaveURL(/\/packs\/beach-explorer/)
@@ -504,6 +508,28 @@ test('challenge detail shows path map and seasonal filtering', async ({ page }) 
   await expect(page.getByTestId('challenge-detail-progress-note')).toContainText(
     'Complete beach, shore, or salt-air adventures',
   )
+  await page.goto('/story')
+  await expect(page.getByRole('heading', { name: 'This Month With ChallengeDog' })).toBeVisible()
+  await expect(page.getByTestId('challenge-detail-map')).toHaveCount(0)
+  await page.goto('/wild')
+  await expect(page.getByRole('heading', { name: 'Path' })).toBeVisible()
+  await expect(page.getByTestId('challenge-detail-map')).toHaveCount(0)
+})
+
+test('badges and challenges avoid stock image elements', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'AssetDog', zip: '92104' })
+
+  await page.goto('/packs')
+  await expect(page.getByRole('heading', { name: 'Challenges' })).toBeVisible()
+  await expect(page.locator('main img[src*="unsplash"], section img[src*="unsplash"]')).toHaveCount(0)
+
+  await page.goto('/packs/beach-explorer')
+  await expect(page.getByTestId('challenge-detail-page')).toBeVisible()
+  await expect(page.locator('[data-testid="challenge-detail-page"] img[src*="unsplash"]')).toHaveCount(0)
+
+  await page.goto('/badges')
+  await expect(page.getByRole('heading', { name: "AssetDog's Finds" })).toBeVisible()
+  await expect(page.locator('#screen-badges img[src*="unsplash"]')).toHaveCount(0)
 })
 
 test('adventure generation and Memory Seal appears', async ({ page }) => {
@@ -528,6 +554,7 @@ test('active adventure lifecycle persists across leave, refresh, and completion'
 
   let stored = await getStoredState(page)
   expect(stored.activeAdventure?.source).toBe('home')
+  expect(stored.badges.find((badge: { id: string }) => badge.id === 'first-adventure')?.unlocked).toBe(false)
 
   const beforeLeave = timerSeconds(await page.getByTestId('adventure-milestone-eyebrow').innerText())
   await page.getByRole('button', { name: 'Leave active adventure' }).click()

@@ -24,7 +24,9 @@ const PLACE_IMG: Record<string, string> = {
   Social:  'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80',
 }
 
-const PLACES: Record<string, Array<{ name: string; city: string; distance: string; desc: string }>> = {
+type PlanPlace = { name: string; city: string; distance?: string; desc: string }
+
+const PLACES: Record<string, PlanPlace[]> = {
   Beach: [
     { name: 'Coronado Dog Beach',    city: 'Coronado, CA',  distance: '2.4 mi', desc: 'Wide sandy beach for zoomies and sunsets.' },
     { name: 'Fiesta Island',         city: 'San Diego, CA', distance: '3.1 mi', desc: 'Vast off-leash space for social pups.' },
@@ -54,6 +56,39 @@ const PLACES: Record<string, Array<{ name: string; city: string; distance: strin
     { name: "Nate's Point Dog Park", city: 'Balboa Park, CA',   distance: '2.4 mi', desc: 'Popular enclosed dog park.' },
     { name: 'OB Dog Beach Meetup',   city: 'San Diego, CA',     distance: '4.2 mi', desc: 'Weekly off-leash social hour.' },
     { name: 'Weekend Hike Group',    city: 'Mission Trails, CA', distance: '5.2 mi', desc: 'Group hikes every Saturday.' },
+  ],
+}
+
+const GENERIC_PLACES: Record<string, PlanPlace[]> = {
+  Beach: [
+    { name: 'Scenic walk', city: 'Your area', desc: 'Choose the prettiest open route nearby.' },
+    { name: 'Neighborhood walk', city: 'Your area', desc: 'A familiar loop with one new turn.' },
+    { name: 'Park', city: 'Your area', desc: 'Look for shade, grass, or a calm bench stop.' },
+  ],
+  Trail: [
+    { name: 'Trail', city: 'Your area', desc: 'Find a path, greenway, or open-space edge.' },
+    { name: 'Park', city: 'Your area', desc: 'A park loop with room for nose-led pauses.' },
+    { name: 'Scenic walk', city: 'Your area', desc: 'Pick a route with a view or quieter pace.' },
+  ],
+  Coffee: [
+    { name: 'Coffee', city: 'Your area', desc: 'A coffee stop or sidewalk loop with a pause.' },
+    { name: 'Patio', city: 'Your area', desc: 'A dog-friendly outdoor seat or courtyard.' },
+    { name: 'Neighborhood walk', city: 'Your area', desc: 'A quick local rhythm-builder.' },
+  ],
+  Brewery: [
+    { name: 'Brewery', city: 'Your area', desc: 'A dog-friendly brewery, beer garden, or patio.' },
+    { name: 'Patio', city: 'Your area', desc: 'Outdoor seating with room to settle.' },
+    { name: 'Scenic walk', city: 'Your area', desc: 'A gentle route before or after a social stop.' },
+  ],
+  Park: [
+    { name: 'Park', city: 'Your area', desc: 'A local green space, lawn loop, or shade route.' },
+    { name: 'Dog park', city: 'Your area', desc: 'A dog park or off-leash social option if available.' },
+    { name: 'Trail', city: 'Your area', desc: 'A path with a little more texture than the block.' },
+  ],
+  Social: [
+    { name: 'Dog park', city: 'Your area', desc: 'A social dog-friendly outing nearby.' },
+    { name: 'Patio', city: 'Your area', desc: 'A dog-friendly patio or low-key outdoor stop.' },
+    { name: 'Neighborhood walk', city: 'Your area', desc: 'A relaxed loop with people-watching built in.' },
   ],
 }
 
@@ -160,7 +195,17 @@ export function AdventurePage() {
 
   // ── PLAN VIEW ──────────────────────────────────────────────────────
   if (planMode) {
-    const places = PLACES[selectedCategory] || []
+    const hasCuratedPlanPlaces = Boolean(state.userProfile.homeSupportedMarket)
+    const genericAreaLabel = [
+      state.userProfile.homeResolvedCity,
+      state.userProfile.homeResolvedState,
+    ].filter(Boolean).join(', ') || 'Your area'
+    const places = hasCuratedPlanPlaces
+      ? PLACES[selectedCategory] || []
+      : (GENERIC_PLACES[selectedCategory] || GENERIC_PLACES.Park).map((place) => ({
+          ...place,
+          city: genericAreaLabel,
+        }))
     const img = PLACE_IMG[selectedCategory] || PLACE_IMG.Beach
 
     return (
@@ -288,7 +333,7 @@ export function AdventurePage() {
                     {place.name}
                   </div>
                   <div style={{ fontSize: '12px', color: H.sage, marginTop: '3px', fontWeight: '600' }}>
-                    {place.city} • {place.distance}
+                    {place.distance ? `${place.city} • ${place.distance}` : place.city}
                   </div>
                   <div style={{ fontSize: '13px', color: C.muted, marginTop: '4px', lineHeight: '1.4',
                     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const }}>
