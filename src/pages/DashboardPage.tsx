@@ -10,6 +10,19 @@ import { TomorrowTeaseLine } from '../components/dashboard/TomorrowTeaseLine'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { useAppState } from '../hooks/useAppState'
 import { displayTitleForEntry, narrativeForEntry } from '../lib/memoryNarrative'
+import {
+  missionFallbackConfidenceCue,
+  missionHeroBadge,
+  missionLocalConfidenceCue,
+  missionNeighborhoodLine,
+  missionSocialProofCue,
+  missionWhyTodayLine,
+} from '../lib/missionSurfaceCopy'
+import {
+  buildAfterglowHeadline,
+  streakRhythmLine,
+  weekendEnergyCue,
+} from '../lib/momentumCopy'
 import type { AdventureEntry, DogMood, VibeArchetype } from '../types'
 
 const PLACE_IMAGES: Record<string, string> = {
@@ -120,9 +133,16 @@ export function DashboardPage() {
 
   const dogDisplayName = state.dogName?.trim() || 'Your dog'
   const gm = state.generatedMission
-  const heroImageUrl = PLACE_IMAGES[state.selectedVibe] || PLACE_IMAGES.default
+  const heroImageUrl = gm?.image || PLACE_IMAGES[state.selectedVibe] || PLACE_IMAGES.default
   const heroTitle = gm?.title ?? "Today's outing"
-  const heroLocation = gm?.locationHint ?? 'Your neighborhood'
+  const heroLocation = gm ? missionNeighborhoodLine(gm) : 'Your neighborhood'
+  const heroBadge = gm ? missionHeroBadge(gm) : 'Suggested for you'
+  const heroConfidenceCue =
+    (gm && missionLocalConfidenceCue(gm, state.zipCode ?? '')) ||
+    (gm && missionFallbackConfidenceCue(gm, state.zipCode ?? '')) ||
+    null
+  const heroSocialProof = gm ? missionSocialProofCue(gm) : null
+  const heroWhyLine = gm ? missionWhyTodayLine(gm) : ''
 
   const featuredMemory = useMemo(() => {
     const withNote = recent.find((a) => a.memoryText?.trim())
@@ -144,13 +164,17 @@ export function DashboardPage() {
     return memoryReturnEntry ?? state.latestCompletedAdventure ?? featuredMemory
   }, [isAfterglow, memoryReturnEntry, state.latestCompletedAdventure, featuredMemory])
 
-  const rhythmHeaderLine = useMemo(() => {
-    const streak =
-      state.currentStreak > 0
-        ? `${state.currentStreak} day${state.currentStreak === 1 ? '' : 's'} together`
-        : 'First chapter starting'
-    return `${streak} · your rhythm`
-  }, [state.currentStreak])
+  const rhythmHeaderLine = useMemo(
+    () => streakRhythmLine(state.currentStreak, dogDisplayName),
+    [state.currentStreak, dogDisplayName],
+  )
+
+  const afterglowHeadline = useMemo(
+    () => buildAfterglowHeadline(tonightEntry, dogDisplayName, state.currentStreak),
+    [tonightEntry, dogDisplayName, state.currentStreak],
+  )
+
+  const weekendLine = useMemo(() => weekendEnergyCue(), [])
 
   const memories = recent.slice(0, 5).map((a, index) => ({
     id: a.id,
@@ -315,7 +339,7 @@ export function DashboardPage() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Tonight&apos;s memory is part of your story now.
+              {afterglowHeadline}
             </h1>
             <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
               {moodEditorialLine(state.dogMood, dogDisplayName)}
@@ -351,6 +375,11 @@ export function DashboardPage() {
             <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
               {moodEditorialLine(state.dogMood, dogDisplayName)}
             </p>
+            {weekendLine ? (
+              <p style={{ margin: '10px 0 0', fontSize: '14px', lineHeight: 1.5, color: H.sageDeep, fontStyle: 'italic' }}>
+                {weekendLine}
+              </p>
+            ) : null}
           </section>
         )}
 
@@ -417,7 +446,7 @@ export function DashboardPage() {
                   borderRadius: '999px',
                 }}
               >
-                {gm?.moodMatchesToday ? 'Feels right today' : 'Suggested for you'}
+                {heroBadge}
               </span>
             </div>
 
@@ -436,13 +465,26 @@ export function DashboardPage() {
                 >
                   {heroTitle}
                 </h2>
-                <p style={{ margin: '0 0 6px', fontSize: '14px', color: H.muted, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '14px', color: H.muted, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span aria-hidden>📍</span>
                   {heroLocation}
                 </p>
-                {gm?.description ? (
+                {heroConfidenceCue ? (
+                  <p
+                    data-testid="dashboard-gm-confidence"
+                    style={{ margin: '0 0 6px', fontSize: '12px', fontWeight: 600, color: H.sageDeep }}
+                  >
+                    {heroConfidenceCue}
+                  </p>
+                ) : null}
+                {heroWhyLine ? (
                   <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, color: H.inkSoft }}>
-                    {gm.description}
+                    {heroWhyLine}
+                  </p>
+                ) : null}
+                {heroSocialProof ? (
+                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: H.muted, fontStyle: 'italic' }}>
+                    {heroSocialProof}
                   </p>
                 ) : null}
               </div>

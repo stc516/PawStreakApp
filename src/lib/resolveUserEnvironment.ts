@@ -13,7 +13,7 @@ export type UserEnvironmentResolution =
     }
 
 const GENERIC_FALLBACK_MESSAGE =
-  'Local adventure tuning is coming soon for your area. For now, PawStreak will build adventures around your daily walks, parks, routines, and new places nearby.'
+  'Adventures built for your neighborhood — walks, parks, and fresh-air missions nearby.'
 
 export function resolveUserEnvironment(zip: string): UserEnvironmentResolution {
   const handcrafted = getEnvironmentForZip(zip)

@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
 import { MemorySealFlow } from '../components/memory/MemorySealFlow'
+import { AdventureReflectionFlow } from '../components/reflection/AdventureReflectionFlow'
 import { useAppState } from '../hooks/useAppState'
 import { getAdventureMilestone } from '../lib/adventureMilestones'
 import { visibleAdventureTitle } from '../lib/adventureDisplayTitle'
 import { track } from '../lib/analytics'
+import { missionSendOffSecondaryLine } from '../lib/missionSurfaceCopy'
 import { calculateAdventureXp } from '../lib/xp'
 import { FONT_IMPORT, H } from '../lib/editorialTheme'
 
@@ -69,7 +71,7 @@ const FONT = H.sans
 
 export function AdventurePage() {
   const navigate = useNavigate()
-  const { state, completeAdventure } = useAppState()
+  const { state, completeAdventure, saveAdventureReflection } = useAppState()
   const m = state.generatedMission
   const [planMode, setPlanMode] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('Beach')
@@ -77,6 +79,7 @@ export function AdventurePage() {
   const [paused, setPaused] = useState(false)
   const [memoryDraft, setMemoryDraft] = useState('')
   const [awaitingMemorySeal, setAwaitingMemorySeal] = useState(false)
+  const [awaitingReflection, setAwaitingReflection] = useState(false)
   const activeSealNarrative =
     awaitingMemorySeal && state.latestCompletedAdventure?.memoryNarrative
       ? {
@@ -126,6 +129,7 @@ export function AdventurePage() {
   )
   const timerOffset = 565 - (565 * Math.min(walkSeconds, 3600)) / 3600
   const visibleTitle = visibleAdventureTitle(m.title, state.isAway)
+  const sendOffSecondary = missionSendOffSecondaryLine(m, state.zipCode ?? '')
 
   const categoryEmoji: Record<string, string> = {
     social: '☕', exploration: '🗺️', chill: '🌅', chaos: '⚡', routine: '🏡',
@@ -298,24 +302,33 @@ export function AdventurePage() {
 
   // ── ACTIVE ADVENTURE VIEW ──────────────────────────────────────────
   const sealing = awaitingMemorySeal || Boolean(activeSealNarrative)
+  const reflecting = awaitingReflection && Boolean(state.latestCompletedAdventure)
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      background: C.bg,
-      backgroundImage: H.pageWash,
-      color: C.onSurface,
-      fontFamily: FONT,
-      maxWidth: '390px',
-      margin: '0 auto',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      overflow: 'hidden',
-      opacity: sealing ? 0.42 : 1,
-      transition: 'opacity 450ms ease',
-      pointerEvents: sealing ? 'none' : 'auto',
-    }}>
+    <div
+      style={{
+        minHeight: '100dvh',
+        maxWidth: '390px',
+        margin: '0 auto',
+        position: 'relative',
+        color: C.onSurface,
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          minHeight: '100dvh',
+          background: C.bg,
+          backgroundImage: H.pageWash,
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          overflow: 'hidden',
+          opacity: sealing || reflecting ? 0.42 : 1,
+          transition: 'opacity 450ms ease',
+          pointerEvents: sealing || reflecting ? 'none' : 'auto',
+        }}
+      >
       <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       {/* Top header */}
       <header style={{
@@ -349,9 +362,14 @@ export function AdventurePage() {
             data-testid="adventure-send-off"
             style={{ fontSize: '18px', fontWeight: '600', color: H.ink, fontFamily: H.serif }}
           >
-            {m.locationHint || visibleTitle}
+            {visibleTitle}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '2px' }}>
+          {sendOffSecondary ? (
+            <div style={{ fontSize: '12px', color: C.muted, marginTop: '4px', lineHeight: 1.35 }}>
+              {sendOffSecondary}
+            </div>
+          ) : null}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '6px' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill={C.primary}>
               <path d="M12 2c0 0-5.5 5.5-5.5 11a5.5 5.5 0 0011 0C17.5 7.5 12 2 12 2z"/>
             </svg>
@@ -523,6 +541,7 @@ export function AdventurePage() {
           </button>
         </div>
       </footer>
+      </div>
 
       {activeSealNarrative ? (
         <MemorySealFlow
@@ -530,6 +549,20 @@ export function AdventurePage() {
           vibe={activeSealNarrative.vibe}
           onComplete={() => {
             setAwaitingMemorySeal(false)
+            setAwaitingReflection(true)
+          }}
+        />
+      ) : null}
+
+      {reflecting && state.latestCompletedAdventure ? (
+        <AdventureReflectionFlow
+          adventureId={state.latestCompletedAdventure.id}
+          dogName={state.dogName}
+          onComplete={(reflection) => {
+            if (reflection) {
+              saveAdventureReflection(state.latestCompletedAdventure!.id, reflection)
+            }
+            setAwaitingReflection(false)
             navigate('/app')
           }}
         />

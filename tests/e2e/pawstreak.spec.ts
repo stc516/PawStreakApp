@@ -27,13 +27,15 @@ async function enterActiveAdventure(page: Page) {
   await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
 }
 
-/** Finish walk → Memory Seal → Today (reduced-motion timings in playwright.config). */
+/** Finish walk → Memory Seal → reflection skip → Today (reduced-motion timings in playwright.config). */
 async function completeMemorySealToToday(page: Page) {
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
   await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
   await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 14_000 })
   await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 22_000 })
   await page.getByTestId('memory-seal-continue').click()
+  await expect(page.getByTestId('adventure-reflection-modal')).toBeVisible({ timeout: 8000 })
+  await page.getByTestId('adventure-reflection-skip').click()
   await expect(page).toHaveURL(/\/app/)
 }
 
@@ -105,6 +107,9 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
 test('fresh onboarding with unsupported ZIP 83702', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
   await clearStorageAndOpen(page)
+  await page.evaluate(() => {
+    window.localStorage.setItem('pawstreak-force-local-expansion-requests', 'true')
+  })
 
   await page.getByTestId('dog-name-input').fill('FallbackDog')
   await advancePrimary(page)
@@ -118,13 +123,95 @@ test('fresh onboarding with unsupported ZIP 83702', async ({ page }) => {
   await advancePrimary(page)
 
   await page.getByPlaceholder('92107').fill('83702')
-  await expect(page.getByText('Local adventure tuning is coming soon for your area')).toBeVisible()
+  await expect(page.getByText('Adventures built for your neighborhood')).toBeVisible()
   await advancePrimary(page)
 
   await advancePrimary(page)
 
   await expect(page).toHaveURL(/\/app/)
   await expect(page.getByRole('button', { name: "Let's go" })).toBeVisible()
+  expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
+})
+
+test('fresh onboarding with Forest Hills NY uses generic categories and requests expansion', async ({ page }) => {
+  const consoleErrors = attachConsoleErrorCapture(page)
+  await page.addInitScript(() => {
+    ;(window as Window & { __PAWSTREAK_MAPBOX_ACCESS_TOKEN?: string })
+      .__PAWSTREAK_MAPBOX_ACCESS_TOKEN = 'test-token'
+  })
+  let mapboxCalls = 0
+  await page.route(/api\.mapbox\.com\/search\/geocode\/v6\/forward/, async (route) => {
+    mapboxCalls += 1
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        features: [
+          {
+            properties: {
+              name: 'Forest Hills',
+              full_address: 'Forest Hills, Queens, New York 11375, United States',
+              coordinates: { latitude: 40.7181, longitude: -73.8448 },
+              context: {
+                postcode: { name: '11375' },
+                place: { name: 'Forest Hills' },
+                district: { name: 'Queens County' },
+                region: { name: 'New York' },
+                country: { name: 'United States' },
+              },
+            },
+          },
+        ],
+      }),
+    })
+  })
+
+  await clearStorageAndOpen(page)
+  await page.evaluate(() => {
+    ;(window as Window & { __PAWSTREAK_MAPBOX_ACCESS_TOKEN?: string })
+      .__PAWSTREAK_MAPBOX_ACCESS_TOKEN = 'test-token'
+    window.localStorage.setItem('pawstreak-mapbox-test-token', 'test-token')
+    window.localStorage.setItem('pawstreak-force-local-expansion-requests', 'true')
+  })
+
+  await page.getByTestId('dog-name-input').fill('QueensDog')
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await page.getByRole('button', { name: /Social Butterfly/ }).click()
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Steady Adventurer/ }).click()
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await page.getByPlaceholder('92107').fill('Forest Hills, NY')
+  await page.getByPlaceholder('92107').blur()
+  await expect(page.getByText(/generic|Adventures built for your neighborhood/)).toBeVisible()
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await expect(page).toHaveURL(/\/app/)
+  await page.waitForFunction(() => {
+    const expansion = JSON.parse(
+      window.localStorage.getItem('pawstreak-location-expansion-requests') ?? '[]',
+    )
+    return expansion.length > 0
+  })
+  const stored = await page.evaluate(() => {
+    const state = JSON.parse(window.localStorage.getItem('pawstreak_demo_state_v4') ?? '{}')
+    const expansion = JSON.parse(
+      window.localStorage.getItem('pawstreak-location-expansion-requests') ?? '[]',
+    )
+    return { state, expansion }
+  })
+
+  expect(mapboxCalls).toBeGreaterThan(0)
+  expect(stored.state.userProfile.homeZip).toBe('11375')
+  expect(stored.state.userProfile.homeSupportedMarket).toBeNull()
+  expect(stored.state.generatedMission.localSpotId).toBeUndefined()
+  expect(stored.state.generatedMission.marketId).toBeUndefined()
+  expect(stored.expansion.at(-1)?.locationQuery).toBe('Forest Hills, NY')
+  expect(stored.expansion.at(-1)?.geocodedLocation?.region).toBe('New York')
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
@@ -306,6 +393,8 @@ test('emotional adventure flow: memory captures and headlines stay dog-first', a
   })
 
   await page.getByTestId('memory-seal-continue').click({ timeout: 22_000 })
+  await expect(page.getByTestId('adventure-reflection-modal')).toBeVisible({ timeout: 8000 })
+  await page.getByTestId('adventure-reflection-skip').click()
   await expect(page).toHaveURL(/\/app/)
   await expect(page.getByTestId('memory-return-strip')).toBeVisible()
 })

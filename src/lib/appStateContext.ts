@@ -3,6 +3,7 @@ import { createContext } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
 import type {
+  AdventureReflection,
   DogProfile,
   NotificationPrefs,
   OwnerProfile,
@@ -40,6 +41,7 @@ export interface AppStateContextValue extends AuthContextSlice {
   pickSuggestedAdventure: (index: number) => void
   selectVibe: (vibe: VibeArchetype) => void
   completeAdventure: (walkSeconds: number, options?: { memoryText?: string }) => void
+  saveAdventureReflection: (adventureId: string, reflection: AdventureReflection) => void
   setReminder: (enabled: boolean) => void
   resetRewardFlow: () => void
   dismissSaveNudge: () => void

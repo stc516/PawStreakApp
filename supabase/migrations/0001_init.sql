@@ -104,6 +104,38 @@ create index if not exists adventures_user_completed_idx
   on public.adventures (user_id, completed_at desc);
 
 -------------------------------------------------------------------------------
+-- location_expansion_requests (unsupported onboarding regions)
+-------------------------------------------------------------------------------
+create table if not exists public.location_expansion_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  location_query text not null,
+  resolved_label text,
+  city text,
+  region text,
+  postal_code text,
+  lat numeric,
+  lng numeric,
+  source text not null default 'onboarding',
+  created_at timestamptz not null default now()
+);
+
+alter table public.location_expansion_requests enable row level security;
+
+drop policy if exists "location_expansion_requests_insert" on public.location_expansion_requests;
+create policy "location_expansion_requests_insert"
+  on public.location_expansion_requests for insert
+  with check (user_id is null or auth.uid() = user_id);
+
+drop policy if exists "location_expansion_requests_select_self" on public.location_expansion_requests;
+create policy "location_expansion_requests_select_self"
+  on public.location_expansion_requests for select
+  using (auth.uid() = user_id);
+
+create index if not exists location_expansion_requests_region_idx
+  on public.location_expansion_requests (region, city, created_at desc);
+
+-------------------------------------------------------------------------------
 -- updated_at triggers
 -------------------------------------------------------------------------------
 create or replace function public.set_updated_at()

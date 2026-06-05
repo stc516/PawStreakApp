@@ -1,4 +1,5 @@
 import { getAdventureMilestone } from './adventureMilestones'
+import { buildCompletionAnticipationLine } from './momentumCopy'
 import { localeFromZip } from '../data/localAdventureEngine'
 import { hashString } from '../data/missions'
 import type {
@@ -252,35 +253,18 @@ export function generateAnticipationLine(input: {
   zipCode: string
   vibe: VibeArchetype
   locale: ZipLocale
+  mission?: GeneratedMission
+  streak?: number
+  completedAt?: Date
 }): string {
-  const name = input.dogName?.trim() || 'Your dog'
-  const pools: Record<VibeArchetype, string[]> = {
-    salt: [
-      'Salt air and quiet streets tomorrow, too.',
-      'Another horizon day might suit you both.',
-    ],
-    pulse: [
-      'A slow sidewalk morning could be next.',
-      'Another warm stop might be waiting.',
-    ],
-    wander: [
-      'More green edges when you are ready.',
-      'Another unhurried loop could feel right.',
-    ],
-    wild: [
-      'Tomorrow can stay unscripted.',
-      'Another surprise turn might be out there.',
-    ],
-  }
-  const localePools: Partial<Record<ZipLocale, string[]>> = {
-    coastal: ['The coast is never far from a good walk.', 'Another tide-line evening could call to you.'],
-    trail: ['Trails keep their quiet pull.', 'More green edges when the day opens.'],
-  }
-  const localeLines = localePools[input.locale]
-  const vibeLines = pools[input.vibe]
-  const pool = localeLines ?? vibeLines
-  const idx = hashString(`${name}|${input.zipCode}|anticipation`) % pool.length
-  return pool[idx] ?? `Tomorrow holds another walk for ${name}.`
+  return buildCompletionAnticipationLine({
+    dogName: input.dogName,
+    zipCode: input.zipCode,
+    vibe: input.vibe,
+    mission: input.mission,
+    streak: input.streak,
+    now: input.completedAt,
+  })
 }
 
 export function buildMemoryNarrative(input: {
@@ -292,6 +276,7 @@ export function buildMemoryNarrative(input: {
   zipCode: string
   completedAt: Date
   isAway?: boolean
+  streak?: number
 }): MemoryNarrative {
   const locale = localeFromZip(input.zipCode)
   const emotionalTitle = generateEmotionalTitle({
@@ -323,6 +308,9 @@ export function buildMemoryNarrative(input: {
     zipCode: input.zipCode,
     vibe: input.mission.vibe,
     locale,
+    mission: input.mission,
+    streak: input.streak,
+    completedAt: input.completedAt,
   })
   const filteredAtmosphere = atmosphere.filter(
     (line) => !linesOverlap(line, reflection) && !linesOverlap(line, emotionalTitle),

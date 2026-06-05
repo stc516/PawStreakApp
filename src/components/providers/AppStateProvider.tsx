@@ -5,6 +5,7 @@ import type { Session } from '@supabase/supabase-js'
 import { AppStateContext } from '../../lib/appStateContext'
 import { localStorageStateRepository } from '../../lib/localStorageStateRepository'
 import {
+  attachAdventureReflection,
   clearMemoryReturnHighlight,
   completeAdventure,
   completeOnboarding,
@@ -124,6 +125,9 @@ function AppStateSynced({
       },
       completeAdventure: (walkSeconds: number, options?: { memoryText?: string }) => {
         setState((currentState) => completeAdventure(currentState, walkSeconds, options))
+      },
+      saveAdventureReflection: (adventureId: string, reflection: Parameters<typeof attachAdventureReflection>[2]) => {
+        setState((currentState) => attachAdventureReflection(currentState, adventureId, reflection))
       },
       setReminder: (enabled: boolean) => {
         setState((currentState) => setReminder(currentState, enabled))

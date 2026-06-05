@@ -1,15 +1,16 @@
 import {
   flattenMission,
-  missionFromQuickPick,
+  generateTodayMission,
   normalizeZip,
-  quickAdventurePicksForZip,
   refreshTomorrowTease,
+  type TomorrowTeaseInput,
 } from '../data/localAdventureEngine'
-import { hashString, moodForDay } from '../data/missions'
+import { moodForDay } from '../data/missions'
 import { buildMemoryNarrative } from './memoryNarrative'
 import { calculateAdventureXp } from './xp'
 import type {
   AdventureEntry,
+  AdventureReflection,
   BadgeDefinition,
   DogProfile,
   GeneratedMission,
@@ -87,19 +88,69 @@ function freshProgressFields(): Pick<
   }
 }
 
-function initialSelection(
-  state: Pick<PawstreakState, 'dogName' | 'currentStreak' | 'pickNonce' | 'dogMood' | 'zipCode'>,
-): Pick<PawstreakState, 'generatedMission' | 'selectedVibe' | 'selectedMissionTitle' | 'selectedEmoji' | 'selectedRarity' | 'selectedFlavor'> {
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const idx = hashString(`init|${state.pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
+function tomorrowTeaseFor(
+  state: Pick<
+    PawstreakState,
+    | 'dogName'
+    | 'zipCode'
+    | 'dogMood'
+    | 'currentStreak'
+    | 'recentAdventures'
+    | 'generatedMission'
+    | 'selectedVibe'
+    | 'userProfile'
+  >,
+): string {
+  const input: TomorrowTeaseInput = {
+    dogName: state.dogName,
+    zipCode: state.zipCode ?? '',
+    dogMood: state.dogMood,
+    vibe: state.generatedMission?.vibe ?? state.selectedVibe,
+    streak: state.currentStreak,
+    recentAdventures: state.recentAdventures,
+    generatedMission: state.generatedMission,
+  }
+  return refreshTomorrowTease(input)
+}
+
+function recentSpotIds(state: Pick<PawstreakState, 'recentAdventures'>): string[] {
+  return state.recentAdventures
+    .map((a) => a.localSpotId)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    .slice(0, 3)
+}
+
+function buildTodayMission(
+  state: Pick<PawstreakState, 'dogName' | 'dogMood' | 'currentStreak' | 'zipCode' | 'recentAdventures' | 'userProfile'>,
+  nonce: string,
+  options?: { fixedVibe?: VibeArchetype; pickIndex?: number },
+): GeneratedMission {
+  return generateTodayMission({
+    zipCode: state.zipCode ?? '',
+    supportedMarketId: state.userProfile.homeSupportedMarket ?? null,
     dogName: state.dogName,
     dogMood: state.dogMood,
     streak: state.currentStreak,
-    nonce: `init|${state.pickNonce}`,
-    zipCode: state.zipCode ?? '',
+    nonce,
+    recentSpotIds: recentSpotIds(state),
+    fixedVibe: options?.fixedVibe,
+    pickIndex: options?.pickIndex,
   })
+}
+
+function initialSelection(
+  state: Pick<
+    PawstreakState,
+    | 'dogName'
+    | 'currentStreak'
+    | 'pickNonce'
+    | 'dogMood'
+    | 'zipCode'
+    | 'recentAdventures'
+    | 'userProfile'
+  >,
+): Pick<PawstreakState, 'generatedMission' | 'selectedVibe' | 'selectedMissionTitle' | 'selectedEmoji' | 'selectedRarity' | 'selectedFlavor'> {
+  const generatedMission = buildTodayMission(state, `init|${state.pickNonce}`)
   return {
     generatedMission,
     ...flattenMission(generatedMission),
@@ -137,6 +188,8 @@ const selectionSeed = initialSelection({
   pickNonce: 0,
   dogMood: moodForDay('Your dog', moodToday),
   zipCode: '',
+  recentAdventures: [],
+  userProfile: defaultUserProfile(),
 })
 
 const initialState: PawstreakState = {
@@ -163,7 +216,16 @@ const initialState: PawstreakState = {
   todayGroundCovered: null,
   ...freshProgressFields(),
   emergencyTreatAvailable: true,
-  tomorrowTease: refreshTomorrowTease({ dogName: 'Your dog', zipCode: '' }),
+  tomorrowTease: tomorrowTeaseFor({
+    dogName: 'Your dog',
+    zipCode: '',
+    dogMood: moodForDay('Your dog', moodToday),
+    currentStreak: 0,
+    recentAdventures: [],
+    userProfile: defaultUserProfile(),
+    generatedMission: selectionSeed.generatedMission,
+    selectedVibe: selectionSeed.selectedVibe,
+  }),
   demoStartedAt: null,
   hasAccount: false,
   nudgeDismissedAt: null,
@@ -251,6 +313,11 @@ function migrateLegacy(parsed: Record<string, unknown>): Partial<PawstreakState>
         memoryNarrative:
           a.memoryNarrative && typeof a.memoryNarrative === 'object'
             ? (a.memoryNarrative as AdventureEntry['memoryNarrative'])
+            : undefined,
+        localSpotId: typeof a.localSpotId === 'string' ? a.localSpotId : undefined,
+        reflection:
+          a.reflection && typeof a.reflection === 'object'
+            ? (a.reflection as AdventureReflection)
             : undefined,
       } satisfies AdventureEntry
     })
@@ -357,6 +424,16 @@ function ensureNestedState(merged: PawstreakState) {
         typeof merged.userProfile.homeZip === 'string'
           ? normalizeZip(merged.userProfile.homeZip)
           : normalizeZip(merged.zipCode ?? ''),
+      homeSupportedMarket:
+        merged.userProfile.homeSupportedMarket === 'san-diego' ||
+        merged.userProfile.homeSupportedMarket === 'orange-county'
+          ? merged.userProfile.homeSupportedMarket
+          : null,
+      homeGeocodeSource:
+        merged.userProfile.homeGeocodeSource === 'mapbox' ||
+        merged.userProfile.homeGeocodeSource === 'manual_zip'
+          ? merged.userProfile.homeGeocodeSource
+          : null,
     }
   }
 
@@ -391,16 +468,15 @@ function patchLoadedState(merged: PawstreakState) {
       pickNonce: merged.pickNonce,
       dogMood: merged.dogMood,
       zipCode: merged.zipCode ?? '',
+      recentAdventures: merged.recentAdventures,
+      userProfile: merged.userProfile,
     })
     Object.assign(merged, fix)
   } else {
     Object.assign(merged, flattenMission(merged.generatedMission))
   }
 
-  merged.tomorrowTease = refreshTomorrowTease({
-    dogName: merged.dogName,
-    zipCode: merged.zipCode ?? '',
-  })
+  merged.tomorrowTease = tomorrowTeaseFor(merged)
 
   if (typeof merged.emergencyTreatAvailable !== 'boolean') {
     merged.emergencyTreatAvailable = true
@@ -452,7 +528,8 @@ export function setDogName(state: PawstreakState, name: string, zipCodeRaw?: str
     pickNonce,
     tomorrowTease: refreshTomorrowTease({ dogName, zipCode }),
   }
-  return { ...next, ...initialSelection({ ...next, dogName, dogMood, zipCode }) }
+  const withSelection = { ...next, ...initialSelection({ ...next, dogName, dogMood, zipCode }) }
+  return { ...withSelection, tomorrowTease: tomorrowTeaseFor(withSelection) }
 }
 
 export function completeOnboarding(
@@ -489,22 +566,14 @@ export function completeOnboarding(
     demoStartedAt: state.demoStartedAt ?? new Date().toISOString(),
   }
 
-  const picks = quickAdventurePicksForZip(zipCode)
-  const idx = hashString(`onboard|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName,
-    dogMood,
-    streak: 0,
-    nonce: `onboard|${pickNonce}`,
-    zipCode,
-  })
-  return {
+  const generatedMission = buildTodayMission(next, `onboard|${pickNonce}`)
+  const result = {
     ...next,
     ...freshProgressFields(),
     generatedMission,
     ...flattenMission(generatedMission),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function dismissWelcomeBanner(state: PawstreakState): PawstreakState {
@@ -514,92 +583,55 @@ export function dismissWelcomeBanner(state: PawstreakState): PawstreakState {
 export function setZipCode(state: PawstreakState, zipCodeRaw: string): PawstreakState {
   const zipCode = normalizeZip(zipCodeRaw)
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(zipCode)
-  const idx = hashString(`zip|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `zip|${pickNonce}`,
-    zipCode,
-  })
-  return {
+  const next = {
     ...state,
     zipCode,
     userProfile: { ...state.userProfile, homeZip: zipCode },
     pickNonce,
+  }
+  const generatedMission = buildTodayMission(next, `zip|${pickNonce}`)
+  const result = {
+    ...next,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function rollPickForMe(state: PawstreakState): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const idx = hashString(`pick|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `pick|${pickNonce}`,
-    zipCode: state.zipCode ?? '',
-  })
-  return {
+  const generatedMission = buildTodayMission(state, `pick|${pickNonce}`)
+  const result = {
     ...state,
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function selectVibe(state: PawstreakState, vibe: VibeArchetype): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const matches = picks.map((p, i) => ({ p, i })).filter((x) => x.p.vibe === vibe)
-  const idx =
-    matches.length > 0
-      ? matches[hashString(`vibe|${pickNonce}`) % matches.length].i
-      : hashString(`vibe|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `vibe|${pickNonce}|${vibe}`,
-    zipCode: state.zipCode ?? '',
-  })
-  return {
+  const generatedMission = buildTodayMission(state, `vibe|${pickNonce}|${vibe}`, { fixedVibe: vibe })
+  const result = {
     ...state,
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function pickSuggestedAdventure(state: PawstreakState, index: number): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const pick = picks[index % Math.max(1, picks.length)]
-  const generatedMission = missionFromQuickPick({
-    pick,
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `chip|${pickNonce}|${pick.id}`,
-    zipCode: state.zipCode ?? '',
-  })
-  return {
+  const generatedMission = buildTodayMission(state, `chip|${pickNonce}|${index}`, { pickIndex: index })
+  const result = {
     ...state,
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent: AdventureEntry[]) {
@@ -657,6 +689,7 @@ export function completeAdventure(
     zipCode: state.zipCode ?? '',
     completedAt,
     isAway: state.isAway,
+    streak: nextStreak,
   })
   const completed: AdventureEntry = {
     id: adventureId,
@@ -674,6 +707,7 @@ export function completeAdventure(
     estimatedMinutesMax: gm.estimatedMinutesMax,
     memoryNarrative,
     ...(trimmedMemory ? { memoryText: trimmedMemory } : {}),
+    ...(gm.localSpotId ? { localSpotId: gm.localSpotId } : {}),
   }
 
   const nextRecent = [completed, ...state.recentAdventures].slice(0, 12)
@@ -697,6 +731,24 @@ export function completeAdventure(
     badges: nextBadges,
     latestUnlockedBadgeId,
     tomorrowTease: memoryNarrative.anticipationLine,
+  }
+}
+
+export function attachAdventureReflection(
+  state: PawstreakState,
+  adventureId: string,
+  reflection: AdventureReflection,
+): PawstreakState {
+  const patchEntry = (entry: AdventureEntry): AdventureEntry =>
+    entry.id === adventureId ? { ...entry, reflection } : entry
+
+  return {
+    ...state,
+    recentAdventures: state.recentAdventures.map(patchEntry),
+    latestCompletedAdventure:
+      state.latestCompletedAdventure?.id === adventureId
+        ? { ...state.latestCompletedAdventure, reflection }
+        : state.latestCompletedAdventure,
   }
 }
 

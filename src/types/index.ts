@@ -10,6 +10,36 @@ export type DogMood = 'restless' | 'curious' | 'explorer' | 'social' | 'zoomie' 
 
 export type ReflectionSource = 'user' | 'milestone' | 'composed' | 'fallback'
 
+/** Normalized lightweight signals for future recommendation tuning. */
+export interface AdventureReflectionSignals {
+  enjoyment?: 'great' | 'pretty-good' | 'meh' | 'too-much'
+  repeatIntent?: 'definitely' | 'sometimes' | 'not-really'
+  dogEnergy?: 'calm' | 'happy' | 'wild' | 'tired'
+  favoritePart?:
+    | 'sniffs'
+    | 'running'
+    | 'dogs'
+    | 'people'
+    | 'chilling'
+    | 'treats'
+    | 'view'
+    | 'walk'
+    | 'patio'
+    | 'exploring'
+  socialPreference?: 'high' | 'medium' | 'low'
+  activityPreference?: 'active' | 'balanced' | 'calm'
+  overstimulation?: boolean
+  calmPreference?: boolean
+}
+
+/** Optional post-adventure check-in — warm, not survey-like. */
+export interface AdventureReflection {
+  questionSetId: string
+  answers: Record<string, string>
+  signals: AdventureReflectionSignals
+  capturedAt: string
+}
+
 export interface MemoryNarrative {
   emotionalTitle: string
   atmosphere: string[]
@@ -42,6 +72,14 @@ export interface GeneratedMission {
   /** Longer mood + rarity flavor line */
   flavor: string
   vibe: VibeArchetype
+  /** Set when mission is anchored to a curated local spot */
+  localSpotId?: string
+  spotName?: string
+  atmosphere?: string
+  whyDogPeopleLoveIt?: string
+  marketId?: 'san-diego' | 'orange-county'
+  image?: string
+  isLocalSpot?: boolean
 }
 
 export interface AdventureEntry {
@@ -64,8 +102,12 @@ export interface AdventureEntry {
   /** Optional memory text the owner captured on the Adventure screen.
    *  Free-form, kept local (never sent to analytics). */
   memoryText?: string
+  /** Curated local spot id when adventure used a real place */
+  localSpotId?: string
   /** Emotional story layer generated at completion (Memory Seal). */
   memoryNarrative?: MemoryNarrative
+  /** Lightweight post-adventure check-in for future personalization. */
+  reflection?: AdventureReflection
 }
 
 export interface BadgeDefinition {
@@ -97,6 +139,9 @@ export interface UserProfile {
   homeLat: number | null
   homeLng: number | null
   homeZip: string
+  homeLocationLabel?: string
+  homeSupportedMarket?: 'san-diego' | 'orange-county' | null
+  homeGeocodeSource?: 'mapbox' | 'manual_zip' | null
 }
 
 export type NotificationCadence = 'daily' | 'weekly' | 'apponly'
@@ -187,7 +232,14 @@ export function defaultOwnerProfile(): OwnerProfile {
 }
 
 export function defaultUserProfile(): UserProfile {
-  return { homeLat: null, homeLng: null, homeZip: '' }
+  return {
+    homeLat: null,
+    homeLng: null,
+    homeZip: '',
+    homeLocationLabel: '',
+    homeSupportedMarket: null,
+    homeGeocodeSource: null,
+  }
 }
 
 export function defaultNotificationPrefs(): NotificationPrefs {
