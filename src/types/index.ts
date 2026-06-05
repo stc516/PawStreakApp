@@ -217,6 +217,19 @@ export interface PawstreakState {
   firstAdventurePromptSeenAt: string | null
   /** Adventure id to show the Today return strip after Memory Seal. */
   memoryReturnHighlightId: string | null
+  /** Persisted in-progress adventure so refresh/reopen keeps the same outing alive. */
+  activeAdventure: ActiveAdventureSession | null
+}
+
+export interface ActiveAdventureSession {
+  id: string
+  mission: GeneratedMission
+  startedAt: string
+  accumulatedSeconds: number
+  pausedAt: string | null
+  source: 'home' | 'plan' | 'challenge'
+  challengeId: string | null
+  memoryText: string
 }
 
 /** How long a brand-new user can use the app without signing up. */

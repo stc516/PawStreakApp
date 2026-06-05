@@ -217,7 +217,7 @@ export function DashboardPage() {
 
   function startAdventure() {
     if (state.todayAdventureDone) return
-    navigate('/adventure')
+    navigate('/adventure?source=home')
   }
 
   const cardBase: CSSProperties = {

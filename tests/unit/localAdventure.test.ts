@@ -11,7 +11,14 @@ import {
   getLocalSpotById,
   spotShortName,
 } from '../../src/data/localSpots'
-import { completeAdventure, getInitialPawstreakState } from '../../src/lib/pawstreakState'
+import {
+  abandonAdventureSession,
+  activeAdventureElapsedSeconds,
+  completeAdventure,
+  getInitialPawstreakState,
+  pauseAdventureSession,
+  startAdventureSession,
+} from '../../src/lib/pawstreakState'
 import type { LocalSpotBestTime } from '../../src/data/localSpots/types'
 
 const BASE_PARAMS = {
@@ -202,6 +209,47 @@ describe('completeAdventure', () => {
     const next = completeAdventure(state, 600)
 
     expect(next.recentAdventures[0]?.localSpotId).toBe(generatedMission.localSpotId)
+  })
+
+  it('persists active adventure timing and completes the active session once', () => {
+    const state = {
+      ...getInitialPawstreakState(),
+      onboardingComplete: true,
+      dogName: BASE_PARAMS.dogName,
+    }
+    const started = startAdventureSession(state, 'home', null, new Date('2026-06-05T12:00:00Z'))
+    expect(started.activeAdventure?.source).toBe('home')
+    expect(activeAdventureElapsedSeconds(started.activeAdventure, new Date('2026-06-05T12:02:05Z'))).toBe(125)
+
+    const paused = pauseAdventureSession(started, true, new Date('2026-06-05T12:02:05Z'))
+    expect(activeAdventureElapsedSeconds(paused.activeAdventure, new Date('2026-06-05T12:05:00Z'))).toBe(125)
+
+    const resumed = pauseAdventureSession(paused, false, new Date('2026-06-05T12:05:00Z'))
+    expect(activeAdventureElapsedSeconds(resumed.activeAdventure, new Date('2026-06-05T12:05:10Z'))).toBe(135)
+
+    const completed = completeAdventure(resumed, 135)
+    const duplicated = completeAdventure(completed, 135)
+
+    expect(completed.activeAdventure).toBeNull()
+    expect(completed.totalAdventures).toBe(1)
+    expect(completed.currentStreak).toBe(1)
+    expect(completed.badges.find((badge) => badge.id === 'first-adventure')?.unlocked).toBe(true)
+    expect(duplicated.totalAdventures).toBe(1)
+    expect(duplicated.recentAdventures).toHaveLength(1)
+  })
+
+  it('abandons an active adventure without awarding progress', () => {
+    const started = startAdventureSession(
+      { ...getInitialPawstreakState(), onboardingComplete: true },
+      'plan',
+      null,
+      new Date('2026-06-05T12:00:00Z'),
+    )
+    const abandoned = abandonAdventureSession(started)
+
+    expect(abandoned.activeAdventure).toBeNull()
+    expect(abandoned.totalAdventures).toBe(0)
+    expect(abandoned.currentStreak).toBe(0)
   })
 })
 

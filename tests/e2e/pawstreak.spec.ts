@@ -87,6 +87,15 @@ async function enterActiveAdventure(page: Page) {
   await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
 }
 
+async function getStoredState(page: Page) {
+  return page.evaluate(() => JSON.parse(window.localStorage.getItem('pawstreak_demo_state_v4') ?? '{}'))
+}
+
+function timerSeconds(value: string) {
+  const [hours, minutes, seconds] = value.split(':').map((part) => Number(part))
+  return hours * 3600 + minutes * 60 + seconds
+}
+
 /** Finish walk → Memory Seal → reflection skip → Today (reduced-motion timings in playwright.config). */
 async function completeMemorySealToToday(page: Page) {
   await page.getByRole('button', { name: /Wrap adventure/ }).click()
@@ -506,6 +515,110 @@ test('adventure generation and Memory Seal appears', async ({ page }) => {
   await expect(page.getByTestId('adventure-complete-headline')).toBeVisible({ timeout: 14_000 })
   await expect(page.getByText(/saved to journey/i)).toBeVisible({ timeout: 22_000 })
   await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible({ timeout: 22_000 })
+})
+
+test('active adventure lifecycle persists across leave, refresh, and completion', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'LifecycleDog', zip: '92104' })
+
+  await enterActiveAdventure(page)
+  await page.getByTestId('adventure-memory-input').fill('Lifecycle memory saved.')
+  await expect
+    .poll(async () => timerSeconds(await page.getByTestId('adventure-milestone-eyebrow').innerText()))
+    .toBeGreaterThanOrEqual(1)
+
+  let stored = await getStoredState(page)
+  expect(stored.activeAdventure?.source).toBe('home')
+
+  const beforeLeave = timerSeconds(await page.getByTestId('adventure-milestone-eyebrow').innerText())
+  await page.getByRole('button', { name: 'Leave active adventure' }).click()
+  await expect(page).toHaveURL(/\/app/)
+
+  await page.goto('/adventure')
+  await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
+  await expect
+    .poll(async () => timerSeconds(await page.getByTestId('adventure-milestone-eyebrow').innerText()))
+    .toBeGreaterThanOrEqual(beforeLeave)
+
+  const beforeRefresh = timerSeconds(await page.getByTestId('adventure-milestone-eyebrow').innerText())
+  await page.reload()
+  await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
+  await expect
+    .poll(async () => timerSeconds(await page.getByTestId('adventure-milestone-eyebrow').innerText()))
+    .toBeGreaterThanOrEqual(beforeRefresh)
+
+  await page.goto('/privacy')
+  await page.goto('/adventure')
+  await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
+
+  await page.getByRole('button', { name: /Wrap adventure/ }).dblclick()
+  await expect(page.getByTestId('adventure-complete-modal')).toBeVisible()
+  await page.getByTestId('memory-seal-continue').click({ timeout: 22_000 })
+  await expect(page.getByTestId('adventure-reflection-modal')).toBeVisible({ timeout: 8000 })
+  await page.getByTestId('adventure-reflection-skip').click()
+  await expect(page).toHaveURL(/\/app/)
+
+  stored = await getStoredState(page)
+  expect(stored.activeAdventure).toBeNull()
+  expect(stored.totalAdventures).toBe(1)
+  expect(stored.recentAdventures).toHaveLength(1)
+  expect(stored.totalAdventureEnergy).toBeGreaterThan(0)
+  expect(stored.currentStreak).toBe(1)
+  expect(stored.badges.find((badge: { id: string }) => badge.id === 'first-adventure')?.unlocked).toBe(true)
+
+  await page.goto('/story')
+  await expect(page.getByText('Lifecycle memory saved.')).toBeVisible()
+})
+
+test('plan can start an active adventure session', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'PlanStartDog', zip: '92104' })
+
+  await page.getByRole('link', { name: 'Plan' }).click()
+  await expect(page).toHaveURL(/\/adventure/)
+  await page.getByRole('button', { name: 'Start' }).first().click()
+  await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
+
+  const stored = await getStoredState(page)
+  expect(stored.activeAdventure?.source).toBe('plan')
+})
+
+test('challenge-linked adventure updates challenge progress', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'ChallengeStartDog', zip: '92104' })
+
+  await page.goto('/packs')
+  await page.getByTestId('pack-card-beach-explorer').click()
+  await page.getByTestId('challenge-start-adventure').click()
+  await expect(page).toHaveURL(/\/adventure.*source=challenge/)
+  await page.getByRole('button', { name: 'Start' }).first().click()
+  await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
+
+  let stored = await getStoredState(page)
+  expect(stored.activeAdventure?.source).toBe('challenge')
+  expect(stored.activeAdventure?.challengeId).toBe('beach-explorer')
+
+  await completeMemorySealToToday(page)
+  stored = await getStoredState(page)
+  expect(`${stored.recentAdventures[0]?.missionTitle} ${stored.recentAdventures[0]?.locationHint}`).toMatch(
+    /beach|shore|coast|ocean|salt/i,
+  )
+
+  await page.goto('/packs/beach-explorer')
+  await expect(page.getByTestId('challenge-detail-page')).toBeVisible()
+  await expect(page.getByText('1/4')).toBeVisible()
+})
+
+test('abandoned active adventure clears cleanly without progress', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'AbandonDog', zip: '92104' })
+
+  await enterActiveAdventure(page)
+  await expect(page.getByRole('button', { name: /Wrap adventure/ })).toBeVisible()
+  await page.getByRole('button', { name: 'Abandon adventure' }).click()
+  await expect(page).toHaveURL(/\/app/)
+
+  const stored = await getStoredState(page)
+  expect(stored.activeAdventure).toBeNull()
+  expect(stored.totalAdventures).toBe(0)
+  expect(stored.currentStreak).toBe(0)
+  expect(stored.recentAdventures ?? []).toHaveLength(0)
 })
 
 test('Memory Seal completes to Today without reward screen', async ({ page }) => {

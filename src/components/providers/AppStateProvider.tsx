@@ -6,6 +6,7 @@ import { AppStateContext } from '../../lib/appStateContext'
 import { localStorageStateRepository } from '../../lib/localStorageStateRepository'
 import {
   attachAdventureReflection,
+  abandonAdventureSession,
   clearMemoryReturnHighlight,
   completeAdventure,
   completeOnboarding,
@@ -13,6 +14,7 @@ import {
   dismissWelcomeBanner,
   evaluateAwayFromCoords,
   markFirstAdventurePromptSeen,
+  pauseAdventureSession,
   pickSuggestedAdventure,
   resetRewardFlow,
   rollPickForMe,
@@ -20,6 +22,8 @@ import {
   setDogName,
   setReminder,
   setZipCode,
+  startAdventureSession,
+  updateAdventureMemoryDraft,
 } from '../../lib/pawstreakState'
 import { createSupabaseStateRepository } from '../../lib/supabaseStateRepository'
 import { getSupabaseClient } from '../../lib/supabaseClient'
@@ -122,6 +126,21 @@ function AppStateSynced({
       },
       selectVibe: (vibe: Parameters<typeof selectVibe>[1]) => {
         setState((currentState) => selectVibe(currentState, vibe))
+      },
+      startAdventureSession: (
+        source: Parameters<typeof startAdventureSession>[1],
+        challengeId: string | null = null,
+      ) => {
+        setState((currentState) => startAdventureSession(currentState, source, challengeId))
+      },
+      pauseAdventureSession: (paused: boolean) => {
+        setState((currentState) => pauseAdventureSession(currentState, paused))
+      },
+      updateAdventureMemoryDraft: (memoryText: string) => {
+        setState((currentState) => updateAdventureMemoryDraft(currentState, memoryText))
+      },
+      abandonAdventureSession: () => {
+        setState((currentState) => abandonAdventureSession(currentState))
       },
       completeAdventure: (walkSeconds: number, options?: { memoryText?: string }) => {
         setState((currentState) => completeAdventure(currentState, walkSeconds, options))

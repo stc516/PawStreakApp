@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { BottomNav } from '../components/BottomNav'
 import { MemorySealFlow } from '../components/memory/MemorySealFlow'
@@ -11,6 +11,7 @@ import { track } from '../lib/analytics'
 import { missionSendOffSecondaryLine } from '../lib/missionSurfaceCopy'
 import { calculateAdventureXp } from '../lib/xp'
 import { FONT_IMPORT, H } from '../lib/editorialTheme'
+import { activeAdventureElapsedSeconds } from '../lib/pawstreakState'
 
 const CATEGORY_PILLS = ['Beach', 'Trail', 'Coffee', 'Brewery', 'Park', 'Social'] as const
 
@@ -71,15 +72,25 @@ const FONT = H.sans
 
 export function AdventurePage() {
   const navigate = useNavigate()
-  const { state, completeAdventure, saveAdventureReflection } = useAppState()
-  const m = state.generatedMission
-  const [planMode, setPlanMode] = useState(true)
+  const [searchParams] = useSearchParams()
+  const {
+    state,
+    abandonAdventureSession,
+    completeAdventure,
+    pauseAdventureSession,
+    saveAdventureReflection,
+    startAdventureSession,
+    updateAdventureMemoryDraft,
+  } = useAppState()
+  const activeAdventure = state.activeAdventure
+  const m = activeAdventure?.mission ?? state.generatedMission
+  const [planMode, setPlanMode] = useState(!activeAdventure)
   const [selectedCategory, setSelectedCategory] = useState('Beach')
-  const [walkSeconds, setWalkSeconds] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const [memoryDraft, setMemoryDraft] = useState('')
+  const [nowTick, setNowTick] = useState(() => Date.now())
   const [awaitingMemorySeal, setAwaitingMemorySeal] = useState(false)
   const [awaitingReflection, setAwaitingReflection] = useState(false)
+  const [completing, setCompleting] = useState(false)
+  const completingRef = useRef(false)
   const activeSealNarrative =
     awaitingMemorySeal && state.latestCompletedAdventure?.memoryNarrative
       ? {
@@ -104,12 +115,23 @@ export function AdventurePage() {
   }, [state.onboardingComplete, m.category, m.rarity, state.isAway])
 
   useEffect(() => {
-    if (paused || planMode) return
+    if (activeAdventure) setPlanMode(false)
+  }, [activeAdventure])
+
+  useEffect(() => {
+    if (!activeAdventure || activeAdventure.pausedAt || planMode) return
     const interval = window.setInterval(() => {
-      setWalkSeconds((prev) => prev + 1)
+      setNowTick(Date.now())
     }, 1000)
     return () => window.clearInterval(interval)
-  }, [paused, planMode])
+  }, [activeAdventure, planMode])
+
+  const walkSeconds = useMemo(
+    () => activeAdventureElapsedSeconds(activeAdventure, new Date(nowTick)),
+    [activeAdventure, nowTick],
+  )
+  const paused = Boolean(activeAdventure?.pausedAt)
+  const memoryDraft = activeAdventure?.memoryText ?? ''
 
   const walkTime = useMemo(() => {
     const hours = Math.floor(walkSeconds / 3600).toString().padStart(2, '0')
@@ -275,7 +297,17 @@ export function AdventurePage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setPlanMode(false)}
+                  onClick={() => {
+                    const requestedSource = searchParams.get('source')
+                    const source =
+                      requestedSource === 'challenge' || requestedSource === 'home'
+                        ? requestedSource
+                        : 'plan'
+                    const challengeId = searchParams.get('challenge')
+                    startAdventureSession(source, challengeId)
+                    setPlanMode(false)
+                    setNowTick(Date.now())
+                  }}
                   style={{
                     flexShrink: 0,
                     width: '48px', height: '48px', borderRadius: '50%',
@@ -340,6 +372,7 @@ export function AdventurePage() {
       }}>
         <button
           type="button"
+          aria-label="Leave active adventure"
           onClick={() => navigate('/app')}
           style={{
             width: '40px', height: '40px', borderRadius: '50%',
@@ -439,7 +472,7 @@ export function AdventurePage() {
             id="adventure-memory-input"
             data-testid="adventure-memory-input"
             value={memoryDraft}
-            onChange={(e) => setMemoryDraft(e.target.value)}
+            onChange={(e) => updateAdventureMemoryDraft(e.target.value)}
             rows={2}
             maxLength={240}
             placeholder="Salt air, slow steps, whatever stuck with you…"
@@ -483,7 +516,7 @@ export function AdventurePage() {
           <button
             type="button"
             className="btn-pause"
-            onClick={() => setPaused((v) => !v)}
+            onClick={() => pauseAdventureSession(!paused)}
             style={{
               flex: 1,
               height: '56px',
@@ -510,8 +543,12 @@ export function AdventurePage() {
             type="button"
             className="btn-end"
             aria-label="Wrap adventure"
+            disabled={completing || !activeAdventure}
             onClick={() => {
-              const memoryText = memoryDraft.trim()
+              if (completingRef.current || !activeAdventure) return
+              completingRef.current = true
+              setCompleting(true)
+              const memoryText = activeAdventure.memoryText.trim()
               completeAdventure(walkSeconds, { memoryText })
               track('adventure_completed', {
                 adventure_category: m.category,
@@ -520,7 +557,6 @@ export function AdventurePage() {
                 streak_count: state.currentStreak + 1,
                 is_away: state.isAway,
               })
-              setPaused(true)
               setAwaitingMemorySeal(true)
             }}
             style={{
@@ -532,7 +568,8 @@ export function AdventurePage() {
               color: '#FFFCF8',
               fontSize: '17px',
               fontWeight: '700',
-              cursor: 'pointer',
+              cursor: completing || !activeAdventure ? 'not-allowed' : 'pointer',
+              opacity: completing || !activeAdventure ? 0.72 : 1,
               boxShadow: H.shadowSoft,
               fontFamily: FONT,
             }}
@@ -540,6 +577,29 @@ export function AdventurePage() {
             Finish
           </button>
         </div>
+        <button
+          type="button"
+          aria-label="Abandon adventure"
+          onClick={() => {
+            abandonAdventureSession()
+            navigate('/app')
+          }}
+          style={{
+            marginTop: '12px',
+            width: '100%',
+            border: 'none',
+            background: 'transparent',
+            color: C.muted,
+            fontFamily: FONT,
+            fontSize: '12px',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+          }}
+        >
+          Abandon adventure
+        </button>
       </footer>
       </div>
 

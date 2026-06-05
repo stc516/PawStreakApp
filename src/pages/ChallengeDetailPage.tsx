@@ -6,11 +6,25 @@ import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { useAppState } from '../hooks/useAppState'
 import { findVisiblePackProgress } from '../lib/monthlyPacks'
+import type { VibeArchetype } from '../types'
+
+const CHALLENGE_VIBE_BY_ILLUSTRATION: Record<string, VibeArchetype> = {
+  beach: 'salt',
+  trail: 'wander',
+  coffee: 'pulse',
+  brewery: 'wild',
+  park: 'wander',
+  'dog-park': 'wild',
+  scenic: 'salt',
+  neighborhood: 'pulse',
+  patio: 'pulse',
+  adventure: 'wander',
+}
 
 export function ChallengeDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { state } = useAppState()
+  const { state, selectVibe } = useAppState()
   const progress = useMemo(
     () => (id ? findVisiblePackProgress(id, state.recentAdventures) : null),
     [id, state.recentAdventures],
@@ -93,6 +107,17 @@ export function ChallengeDetailPage() {
                   : `${remaining} more ${remaining === 1 ? 'adventure' : 'adventures'} to become ${pack.identity}.`}
             </p>
           </div>
+          {!state.todayAdventureDone ? (
+            <Link
+              to={`/adventure?source=challenge&challenge=${encodeURIComponent(pack.id)}`}
+              data-testid="challenge-start-adventure"
+              onClick={() => selectVibe(CHALLENGE_VIBE_BY_ILLUSTRATION[pack.illustration] ?? 'wander')}
+              className="mt-4 flex h-12 items-center justify-center rounded-full bg-[color:var(--orange)] text-[13px] font-bold text-[var(--bg)] shadow-[0_12px_28px_-18px_var(--orange-glow)]"
+              style={{ textDecoration: 'none' }}
+            >
+              Start challenge adventure
+            </Link>
+          ) : null}
         </div>
       </header>
 
