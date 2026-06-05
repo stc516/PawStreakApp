@@ -1,4 +1,4 @@
-import { MONTHLY_PACKS, type MonthlyPack } from '../data/monthlyPacks'
+import { visibleMonthlyPacks, type MonthlyPack } from '../data/monthlyPacks'
 import type { AdventureEntry } from '../types'
 
 export interface PackProgress {
@@ -27,8 +27,17 @@ export function deriveProgress(pack: MonthlyPack, history: AdventureEntry[]): Pa
   }
 }
 
-export function deriveAllProgress(history: AdventureEntry[]): PackProgress[] {
-  return MONTHLY_PACKS.map((pack) => deriveProgress(pack, history))
+export function deriveAllProgress(history: AdventureEntry[], date = new Date()): PackProgress[] {
+  return visibleMonthlyPacks(date).map((pack) => deriveProgress(pack, history))
+}
+
+export function findVisiblePackProgress(
+  id: string,
+  history: AdventureEntry[],
+  date = new Date(),
+): PackProgress | null {
+  const pack = visibleMonthlyPacks(date).find((p) => p.id === id)
+  return pack ? deriveProgress(pack, history) : null
 }
 
 /** Pick the pack to highlight on the dashboard.

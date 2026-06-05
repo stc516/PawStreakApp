@@ -45,18 +45,19 @@ function localDayKey(d = new Date()) {
 }
 
 const defaultBadges: BadgeDefinition[] = [
-  { id: 'first-step', name: 'First walk', icon: '🐾', description: 'You started.', unlocked: true },
-  { id: 'three-day-streak', name: 'Three days', icon: '✨', description: 'Three walks in a row.', unlocked: true },
-  { id: 'beach-dog', name: 'Beach day', icon: '🌅', description: 'First beach-style walk.', unlocked: true },
-  { id: 'week-warrior', name: 'Week streak', icon: '🫶', description: 'Seven days in a row.', unlocked: false },
-  { id: 'explorer', name: 'Wildcard', icon: '🧭', description: 'One surprise-route walk.', unlocked: false },
-  { id: 'park-regular', name: 'Park regular', icon: '🌿', description: 'Five park-style walks.', unlocked: false },
-  { id: 'mystery-one', name: 'Sampler', icon: '🎭', description: 'Tried every vibe once.', unlocked: false, mystery: true },
-  { id: 'mystery-two', name: '???', icon: '❓', description: 'Keep walking.', unlocked: false, mystery: true },
+  { id: 'welcome', name: 'Welcome to PawStreak', icon: '🐾', description: 'The first page of your dog’s adventure life.', unlocked: true },
+  { id: 'first-adventure', name: 'First Adventure', icon: '🧭', description: 'Complete your first real outing together.', unlocked: false },
+  { id: 'three-day-streak', name: 'Three Day Rhythm', icon: '✨', description: 'Three adventures in a row.', unlocked: false },
+  { id: 'beach-dog', name: 'Beach Explorer', icon: '🌊', description: 'Earned through salt-air adventures.', unlocked: false },
+  { id: 'week-warrior', name: 'Week Streak', icon: '🫶', description: 'Seven days in a row.', unlocked: false },
+  { id: 'explorer', name: 'Wildcard Route', icon: '🗺️', description: 'One surprise-route walk.', unlocked: false },
+  { id: 'park-regular', name: 'Park Regular', icon: '🌳', description: 'Five park-style walks.', unlocked: false },
+  { id: 'mystery-one', name: 'Sampler', icon: '🎭', description: 'Try every vibe once.', unlocked: false, mystery: true },
+  { id: 'mystery-two', name: 'Hidden Badge', icon: '✦', description: 'A premium milestone waiting in the wings.', unlocked: false, mystery: true },
 ]
 
 function freshBadges(): BadgeDefinition[] {
-  return defaultBadges.map((badge) => ({ ...badge, unlocked: false }))
+  return defaultBadges.map((badge) => ({ ...badge }))
 }
 
 function freshProgressFields(): Pick<
@@ -455,6 +456,16 @@ function ensureNestedState(merged: PawstreakState) {
   if (typeof merged.welcomeBannerDismissed !== 'boolean') {
     merged.welcomeBannerDismissed = merged.onboardingComplete === true
   }
+
+  const byId = new Map((Array.isArray(merged.badges) ? merged.badges : []).map((badge) => [badge.id, badge]))
+  merged.badges = defaultBadges.map((badge) => {
+    const existing = byId.get(badge.id)
+    const unlocked =
+      badge.id === 'welcome' ||
+      (badge.id === 'first-adventure' && merged.totalAdventures > 0) ||
+      (existing?.unlocked === true && merged.totalAdventures > 0)
+    return { ...badge, unlocked }
+  })
 }
 
 function patchLoadedState(merged: PawstreakState) {
@@ -648,6 +659,9 @@ function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent
 
   const nextBadges = state.badges.map((badge) => {
     let unlocked = badge.unlocked
+    if (badge.id === 'welcome') unlocked = true
+    if (badge.id === 'first-adventure' && nextRecent.length >= 1) unlocked = true
+    if (badge.id === 'three-day-streak' && nextStreak >= 3) unlocked = true
     if (badge.id === 'week-warrior' && nextStreak >= 7) unlocked = true
     if (badge.id === 'explorer' && wildCount >= 1) unlocked = true
     if (badge.id === 'park-regular' && wanderCount >= 5) unlocked = true

@@ -442,7 +442,7 @@ test('bottom nav visits core tabs without blank screens', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Journey' }).click()
   await expect(page).toHaveURL(/\/story/)
-  await expect(page.getByRole('heading', { name: 'Journey' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'This Month With NavDog' })).toBeVisible()
 
   await page.getByRole('link', { name: 'Path' }).click()
   await expect(page).toHaveURL(/\/wild/)
@@ -479,6 +479,22 @@ test('Path page shows progression nodes', async ({ page }) => {
   }
   const currentTiers = page.locator('[data-testid^="wild-tier-"][data-current="true"]')
   await expect(currentTiers).toHaveCount(1)
+})
+
+test('challenge detail shows path map and seasonal filtering', async ({ page }) => {
+  await completeOnboarding(page, { dogName: 'ChallengeDog', zip: '92104' })
+
+  await page.goto('/packs')
+  await expect(page.getByRole('heading', { name: 'Challenges' })).toBeVisible()
+  await expect(page.getByText('Holiday Adventure Challenge')).toHaveCount(0)
+
+  await page.getByTestId('pack-card-beach-explorer').click()
+  await expect(page).toHaveURL(/\/packs\/beach-explorer/)
+  await expect(page.getByTestId('challenge-detail-page')).toBeVisible()
+  await expect(page.getByTestId('challenge-detail-map')).toContainText('Challenge map')
+  await expect(page.getByTestId('challenge-detail-progress-note')).toContainText(
+    'Complete beach, shore, or salt-air adventures',
+  )
 })
 
 test('adventure generation and Memory Seal appears', async ({ page }) => {

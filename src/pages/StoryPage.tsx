@@ -351,7 +351,7 @@ export function StoryPage() {
             color: H.terra,
           }}
         >
-          Your story together
+          Life story
         </p>
         <h1
           style={{
@@ -363,11 +363,10 @@ export function StoryPage() {
             lineHeight: 1.15,
           }}
         >
-          Journey
+          This Month With {dogName}
         </h1>
         <p style={{ fontSize: '15px', color: H.inkSoft, margin: 0, lineHeight: 1.5, maxWidth: '320px' }}>
-          The evolving story of life with {dogName} — walks, places, and the little moments you&apos;ll want to
-          remember.
+          The chapter you and {dogName} are writing right now — walks, places, and the little moments you&apos;ll want to remember.
         </p>
         {adventures.length > 0 ? (
           <p

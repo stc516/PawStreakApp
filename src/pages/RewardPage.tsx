@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { LevelProgressCard } from '../components/LevelProgressCard'
 import { ProgressBar } from '../components/ProgressBar'
 import { RewardCard } from '../components/RewardCard'
+import { CategoryIllustration, categoryFromText } from '../components/challenges/CategoryIllustration'
 import { bondArcProgress, identityArc } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
 import { confettiPalette, FONT_IMPORT, H } from '../lib/editorialTheme'
@@ -26,6 +27,9 @@ export function RewardPage() {
   const { state, setReminder, resetRewardFlow } = useAppState()
   const [shareFeedback, setShareFeedback] = useState('')
   const latest = state.latestCompletedAdventure
+  const illustrationCategory = categoryFromText(
+    `${latest?.missionTitle ?? state.selectedMissionTitle} ${latest?.locationHint ?? state.generatedMission?.locationHint ?? ''}`,
+  )
   const bond = bondArcProgress(state.currentStreak)
   const identity = identityArc(state.totalAdventureEnergy, state.currentStreak)
 
@@ -288,11 +292,20 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
             borderRadius: '16px', overflow: 'hidden',
             marginBottom: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
           }}>
-            <img
-              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
-              alt={`${state.dogName} on adventure`}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <div
+              aria-label={`${state.dogName} adventure illustration`}
+              role="img"
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(145deg, #E9E5D8 0%, #DDEBDA 56%, #F4E4D4 100%)',
+              }}
+            >
+              <CategoryIllustration category={illustrationCategory} size={190} />
+            </div>
             <div style={{
               position: 'absolute', inset: 0,
               background: 'linear-gradient(to top, rgba(44, 36, 25, 0.55) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)',
