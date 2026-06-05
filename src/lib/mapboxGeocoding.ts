@@ -8,9 +8,18 @@ type MapboxContextItem = {
 }
 
 type MapboxFeature = {
+  id?: string
+  relevance?: number
+  score?: number
   properties?: {
     name?: string
     full_address?: string
+    mapbox_id?: string
+    relevance?: number
+    score?: number
+    match_code?: {
+      confidence?: string
+    }
     coordinates?: {
       latitude?: number
       longitude?: number
@@ -35,6 +44,9 @@ export type GeocodedLocation = {
   region: string
   district: string
   country: string
+  mapboxId: string
+  relevance: number | null
+  confidence: string
   supportedMarket: LocalMarketId | null
   source: 'mapbox'
 }
@@ -72,18 +84,10 @@ function inBounds(
   return lat != null && lng != null && lat >= bounds.minLat && lat <= bounds.maxLat && lng >= bounds.minLng && lng <= bounds.maxLng
 }
 
-export function supportedMarketForGeocodedLocation(
-  input: Pick<GeocodedLocation, 'lat' | 'lng' | 'district' | 'region' | 'city'>,
+export function developedRegionForCoordinates(
+  input: Pick<GeocodedLocation, 'lat' | 'lng'>,
 ): LocalMarketId | null {
-  const region = input.region.toLowerCase()
-  if (region !== 'california' && region !== 'ca') return null
-
-  const district = input.district.toLowerCase()
-  const city = input.city.toLowerCase()
-
   if (
-    district.includes('san diego') ||
-    city === 'san diego' ||
     inBounds(input.lat, input.lng, {
       minLat: 32.5,
       maxLat: 33.55,
@@ -95,11 +99,6 @@ export function supportedMarketForGeocodedLocation(
   }
 
   if (
-    district.includes('orange') ||
-    city.includes('huntington beach') ||
-    city.includes('newport beach') ||
-    city.includes('costa mesa') ||
-    city.includes('irvine') ||
     inBounds(input.lat, input.lng, {
       minLat: 33.35,
       maxLat: 33.98,
@@ -113,6 +112,12 @@ export function supportedMarketForGeocodedLocation(
   return null
 }
 
+export function supportedMarketForGeocodedLocation(
+  input: Pick<GeocodedLocation, 'lat' | 'lng'> & Partial<Pick<GeocodedLocation, 'district' | 'region' | 'city'>>,
+): LocalMarketId | null {
+  return developedRegionForCoordinates(input)
+}
+
 function parseFeature(feature: MapboxFeature): GeocodedLocation | null {
   const props = feature.properties
   const lat = props?.coordinates?.latitude
@@ -124,6 +129,7 @@ function parseFeature(feature: MapboxFeature): GeocodedLocation | null {
   const district = contextName(context?.district)
   const country = contextName(context?.country)
   const zip = normalizeZip(contextName(context?.postcode) || label)
+  const relevance = props?.relevance ?? props?.score ?? feature.relevance ?? feature.score ?? null
 
   if (!label && !zip && lat == null && lng == null) return null
 
@@ -136,13 +142,16 @@ function parseFeature(feature: MapboxFeature): GeocodedLocation | null {
     region,
     district,
     country,
+    mapboxId: props?.mapbox_id ?? feature.id ?? '',
+    relevance,
+    confidence: props?.match_code?.confidence ?? '',
     supportedMarket: null,
     source: 'mapbox',
   }
 
   return {
     ...location,
-    supportedMarket: supportedMarketForGeocodedLocation(location),
+    supportedMarket: developedRegionForCoordinates(location),
   }
 }
 

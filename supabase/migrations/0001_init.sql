@@ -109,16 +109,29 @@ create index if not exists adventures_user_completed_idx
 create table if not exists public.location_expansion_requests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete set null,
-  location_query text not null,
-  resolved_label text,
-  city text,
-  region text,
-  postal_code text,
-  lat numeric,
-  lng numeric,
-  source text not null default 'onboarding',
-  created_at timestamptz not null default now()
+  dog_id uuid,
+  raw_location_input text,
+  resolved_city text,
+  resolved_state text,
+  resolved_country text,
+  latitude numeric,
+  longitude numeric,
+  source text default 'onboarding_location',
+  status text default 'new',
+  notes text,
+  created_at timestamptz default now()
 );
+
+alter table public.location_expansion_requests
+  add column if not exists dog_id uuid,
+  add column if not exists raw_location_input text,
+  add column if not exists resolved_city text,
+  add column if not exists resolved_state text,
+  add column if not exists resolved_country text,
+  add column if not exists latitude numeric,
+  add column if not exists longitude numeric,
+  add column if not exists status text default 'new',
+  add column if not exists notes text;
 
 alter table public.location_expansion_requests enable row level security;
 
@@ -133,7 +146,7 @@ create policy "location_expansion_requests_select_self"
   using (auth.uid() = user_id);
 
 create index if not exists location_expansion_requests_region_idx
-  on public.location_expansion_requests (region, city, created_at desc);
+  on public.location_expansion_requests (resolved_state, resolved_city, created_at desc);
 
 -------------------------------------------------------------------------------
 -- updated_at triggers

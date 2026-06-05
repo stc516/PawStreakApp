@@ -20,6 +20,66 @@ async function advancePrimary(page: Page) {
   await page.getByTestId('onboarding-primary-button').click()
 }
 
+type MockLocation = {
+  label: string
+  zip: string
+  city: string
+  district: string
+  region: string
+  country?: string
+  lat: number
+  lng: number
+  mapboxId: string
+  relevance?: number
+}
+
+async function installMapboxForwardMock(
+  page: Page,
+  locations: Record<string, MockLocation | null>,
+) {
+  await page.route(/api\.mapbox\.com\/search\/geocode\/v6\/forward/, async (route) => {
+    const url = new URL(route.request().url())
+    const q = url.searchParams.get('q') ?? ''
+    const location = locations[q] ?? null
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        features: location
+          ? [
+              {
+                id: location.mapboxId,
+                properties: {
+                  name: location.city,
+                  full_address: location.label,
+                  mapbox_id: location.mapboxId,
+                  relevance: location.relevance ?? 0.96,
+                  match_code: { confidence: 'high' },
+                  coordinates: { latitude: location.lat, longitude: location.lng },
+                  context: {
+                    postcode: { name: location.zip },
+                    place: { name: location.city },
+                    district: { name: location.district },
+                    region: { name: location.region },
+                    country: { name: location.country ?? 'United States' },
+                  },
+                },
+              },
+            ]
+          : [],
+      }),
+    })
+  })
+}
+
+async function enableTestGeocoding(page: Page) {
+  await page.evaluate(() => {
+    ;(window as Window & { __PAWSTREAK_MAPBOX_ACCESS_TOKEN?: string })
+      .__PAWSTREAK_MAPBOX_ACCESS_TOKEN = 'test-token'
+    window.localStorage.setItem('pawstreak-mapbox-test-token', 'test-token')
+    window.localStorage.setItem('pawstreak-force-local-expansion-requests', 'true')
+  })
+}
+
 async function enterActiveAdventure(page: Page) {
   await page.getByTestId('dashboard-start-adventure-cta').click()
   await expect(page).toHaveURL(/\/adventure/)
@@ -40,7 +100,20 @@ async function completeMemorySealToToday(page: Page) {
 }
 
 async function completeOnboarding(page: Page, options: { dogName: string; zip: string }) {
+  await installMapboxForwardMock(page, {
+    [options.zip]: {
+      label: `San Diego, California ${options.zip}, United States`,
+      zip: options.zip,
+      city: 'San Diego',
+      district: 'San Diego County',
+      region: 'California',
+      lat: 32.7492,
+      lng: -117.1304,
+      mapboxId: `postcode.${options.zip}`,
+    },
+  })
   await clearStorageAndOpen(page)
+  await enableTestGeocoding(page)
 
   await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
   await page.getByTestId('dog-name-input').fill(options.dogName)
@@ -61,15 +134,29 @@ async function completeOnboarding(page: Page, options: { dogName: string; zip: s
   await advancePrimary(page)
 
   await page.getByPlaceholder('92107').fill(options.zip)
+  await page.getByPlaceholder('92107').blur()
   await advancePrimary(page)
 
   await advancePrimary(page)
   await expect(page).toHaveURL(/\/app/)
 }
 
-test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
+test('fresh onboarding with San Diego CA shows curated SD spots', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
+  await installMapboxForwardMock(page, {
+    'San Diego, CA': {
+      label: 'San Diego, California 92104, United States',
+      zip: '92104',
+      city: 'San Diego',
+      district: 'San Diego County',
+      region: 'California',
+      lat: 32.7492,
+      lng: -117.1304,
+      mapboxId: 'place.sd-test',
+    },
+  })
   await clearStorageAndOpen(page)
+  await enableTestGeocoding(page)
 
   await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
   await page.getByTestId('dog-name-input').fill('TestDog')
@@ -91,7 +178,8 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
   await advancePrimary(page)
   await advancePrimary(page)
 
-  await page.getByPlaceholder('92107').fill('92104')
+  await page.getByPlaceholder('92107').fill('San Diego, CA')
+  await page.getByPlaceholder('92107').blur()
   await expect(page.getByText('Local tuning ready for')).toBeVisible()
   await advancePrimary(page)
 
@@ -101,17 +189,36 @@ test('fresh onboarding with supported ZIP 92104', async ({ page }) => {
   await expect(page.getByTestId('dashboard-app-title')).toHaveText('PawStreak')
   await expect(page.getByTestId('dashboard-hero-status')).toHaveText('TestDog')
   await expect(page.getByTestId('dashboard-adventure-chips')).toBeVisible()
+  const stored = await page.evaluate(() => {
+    return JSON.parse(window.localStorage.getItem('pawstreak_demo_state_v4') ?? '{}')
+  })
+  expect(stored.userProfile.homeRawLocationInput).toBe('San Diego, CA')
+  expect(stored.userProfile.homeResolvedCity).toBe('San Diego')
+  expect(stored.userProfile.homeResolvedState).toBe('California')
+  expect(stored.userProfile.homeMapboxPlaceId).toBe('place.sd-test')
+  expect(stored.userProfile.homeSupportedMarket).toBe('san-diego')
+  expect(stored.generatedMission.marketId).toBe('san-diego')
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
-test('fresh onboarding with unsupported ZIP 83702', async ({ page }) => {
+test('fresh onboarding with Orange County CA shows curated OC spots', async ({ page }) => {
   const consoleErrors = attachConsoleErrorCapture(page)
-  await clearStorageAndOpen(page)
-  await page.evaluate(() => {
-    window.localStorage.setItem('pawstreak-force-local-expansion-requests', 'true')
+  await installMapboxForwardMock(page, {
+    'Orange County, CA': {
+      label: 'Orange County, California 92648, United States',
+      zip: '92648',
+      city: 'Huntington Beach',
+      district: 'Orange County',
+      region: 'California',
+      lat: 33.6595,
+      lng: -117.9988,
+      mapboxId: 'place.oc-test',
+    },
   })
+  await clearStorageAndOpen(page)
+  await enableTestGeocoding(page)
 
-  await page.getByTestId('dog-name-input').fill('FallbackDog')
+  await page.getByTestId('dog-name-input').fill('OCDog')
   await advancePrimary(page)
   await advancePrimary(page)
   await advancePrimary(page)
@@ -122,14 +229,18 @@ test('fresh onboarding with unsupported ZIP 83702', async ({ page }) => {
   await advancePrimary(page)
   await advancePrimary(page)
 
-  await page.getByPlaceholder('92107').fill('83702')
-  await expect(page.getByText('Adventures built for your neighborhood')).toBeVisible()
+  await page.getByPlaceholder('92107').fill('Orange County, CA')
+  await page.getByPlaceholder('92107').blur()
+  await expect(page.getByText('Local tuning ready for')).toBeVisible()
   await advancePrimary(page)
-
   await advancePrimary(page)
 
   await expect(page).toHaveURL(/\/app/)
-  await expect(page.getByRole('button', { name: "Let's go" })).toBeVisible()
+  const stored = await page.evaluate(() => {
+    return JSON.parse(window.localStorage.getItem('pawstreak_demo_state_v4') ?? '{}')
+  })
+  expect(stored.userProfile.homeSupportedMarket).toBe('orange-county')
+  expect(stored.generatedMission.marketId).toBe('orange-county')
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
@@ -139,39 +250,21 @@ test('fresh onboarding with Forest Hills NY uses generic categories and requests
     ;(window as Window & { __PAWSTREAK_MAPBOX_ACCESS_TOKEN?: string })
       .__PAWSTREAK_MAPBOX_ACCESS_TOKEN = 'test-token'
   })
-  let mapboxCalls = 0
-  await page.route(/api\.mapbox\.com\/search\/geocode\/v6\/forward/, async (route) => {
-    mapboxCalls += 1
-    await route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        features: [
-          {
-            properties: {
-              name: 'Forest Hills',
-              full_address: 'Forest Hills, Queens, New York 11375, United States',
-              coordinates: { latitude: 40.7181, longitude: -73.8448 },
-              context: {
-                postcode: { name: '11375' },
-                place: { name: 'Forest Hills' },
-                district: { name: 'Queens County' },
-                region: { name: 'New York' },
-                country: { name: 'United States' },
-              },
-            },
-          },
-        ],
-      }),
-    })
+  await installMapboxForwardMock(page, {
+    'Forest Hills, NY': {
+      label: 'Forest Hills, Queens, New York 11375, United States',
+      zip: '11375',
+      city: 'Forest Hills',
+      district: 'Queens County',
+      region: 'New York',
+      lat: 40.7181,
+      lng: -73.8448,
+      mapboxId: 'place.forest-hills-test',
+    },
   })
 
   await clearStorageAndOpen(page)
-  await page.evaluate(() => {
-    ;(window as Window & { __PAWSTREAK_MAPBOX_ACCESS_TOKEN?: string })
-      .__PAWSTREAK_MAPBOX_ACCESS_TOKEN = 'test-token'
-    window.localStorage.setItem('pawstreak-mapbox-test-token', 'test-token')
-    window.localStorage.setItem('pawstreak-force-local-expansion-requests', 'true')
-  })
+  await enableTestGeocoding(page)
 
   await page.getByTestId('dog-name-input').fill('QueensDog')
   await advancePrimary(page)
@@ -186,7 +279,7 @@ test('fresh onboarding with Forest Hills NY uses generic categories and requests
 
   await page.getByPlaceholder('92107').fill('Forest Hills, NY')
   await page.getByPlaceholder('92107').blur()
-  await expect(page.getByText(/generic|Adventures built for your neighborhood/)).toBeVisible()
+  await expect(page.getByText(/We don’t have curated local spots here yet/)).toBeVisible()
   await advancePrimary(page)
   await advancePrimary(page)
 
@@ -205,14 +298,104 @@ test('fresh onboarding with Forest Hills NY uses generic categories and requests
     return { state, expansion }
   })
 
-  expect(mapboxCalls).toBeGreaterThan(0)
   expect(stored.state.userProfile.homeZip).toBe('11375')
+  expect(stored.state.userProfile.homeRawLocationInput).toBe('Forest Hills, NY')
+  expect(stored.state.userProfile.homeResolvedCity).toBe('Forest Hills')
+  expect(stored.state.userProfile.homeResolvedState).toBe('New York')
+  expect(stored.state.userProfile.homeMapboxPlaceId).toBe('place.forest-hills-test')
   expect(stored.state.userProfile.homeSupportedMarket).toBeNull()
   expect(stored.state.generatedMission.localSpotId).toBeUndefined()
   expect(stored.state.generatedMission.marketId).toBeUndefined()
-  expect(stored.expansion.at(-1)?.locationQuery).toBe('Forest Hills, NY')
+  await expect(page.getByRole('button', { name: 'Neighborhood walk' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Dog park' })).toBeVisible()
+  expect(stored.expansion.at(-1)?.rawLocationInput).toBe('Forest Hills, NY')
   expect(stored.expansion.at(-1)?.geocodedLocation?.region).toBe('New York')
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
+})
+
+test('fresh onboarding with Chicago IL uses unsupported behavior', async ({ page }) => {
+  const consoleErrors = attachConsoleErrorCapture(page)
+  await installMapboxForwardMock(page, {
+    'Chicago, IL': {
+      label: 'Chicago, Illinois 60614, United States',
+      zip: '60614',
+      city: 'Chicago',
+      district: 'Cook County',
+      region: 'Illinois',
+      lat: 41.92,
+      lng: -87.65,
+      mapboxId: 'place.chicago-test',
+    },
+  })
+  await clearStorageAndOpen(page)
+  await enableTestGeocoding(page)
+
+  await page.getByTestId('dog-name-input').fill('ChicagoDog')
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Social Butterfly/ }).click()
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Steady Adventurer/ }).click()
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await page.getByPlaceholder('92107').fill('Chicago, IL')
+  await page.getByPlaceholder('92107').blur()
+  await expect(page.getByText(/We don’t have curated local spots here yet/)).toBeVisible()
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await expect(page).toHaveURL(/\/app/)
+  await expect(page.getByRole('button', { name: 'Neighborhood walk' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Dog park' })).toBeVisible()
+  const stored = await page.evaluate(() => {
+    const state = JSON.parse(window.localStorage.getItem('pawstreak_demo_state_v4') ?? '{}')
+    const expansion = JSON.parse(
+      window.localStorage.getItem('pawstreak-location-expansion-requests') ?? '[]',
+    )
+    return { state, expansion }
+  })
+  expect(stored.state.userProfile.homeSupportedMarket).toBeNull()
+  expect(stored.state.generatedMission.localSpotId).toBeUndefined()
+  expect(stored.expansion.at(-1)?.rawLocationInput).toBe('Chicago, IL')
+  expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
+})
+
+test('onboarding invalid location asks for clarification', async ({ page }) => {
+  await installMapboxForwardMock(page, { 'Not A Real Place Nope': null })
+  await clearStorageAndOpen(page)
+  await enableTestGeocoding(page)
+
+  await page.getByTestId('dog-name-input').fill('LostDog')
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Social Butterfly/ }).click()
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Steady Adventurer/ }).click()
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await page.getByPlaceholder('92107').fill('Not A Real Place Nope')
+  await page.getByPlaceholder('92107').blur()
+  await expect(page.getByText(/couldn’t verify that location/i)).toBeVisible()
+  await expect(page).not.toHaveURL(/\/app/)
+})
+
+test('onboarding blank location cannot continue', async ({ page }) => {
+  await clearStorageAndOpen(page)
+  await page.getByTestId('dog-name-input').fill('BlankDog')
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Social Butterfly/ }).click()
+  await advancePrimary(page)
+  await page.getByRole('button', { name: /Steady Adventurer/ }).click()
+  await advancePrimary(page)
+  await advancePrimary(page)
+
+  await expect(page.getByTestId('onboarding-primary-button')).toBeDisabled()
 })
 
 test('welcome step button label updates with name + Google fallback note', async ({ page }) => {

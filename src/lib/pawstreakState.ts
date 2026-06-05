@@ -434,6 +434,10 @@ function ensureNestedState(merged: PawstreakState) {
         merged.userProfile.homeGeocodeSource === 'manual_zip'
           ? merged.userProfile.homeGeocodeSource
           : null,
+      homeMapboxRelevance:
+        typeof merged.userProfile.homeMapboxRelevance === 'number'
+          ? merged.userProfile.homeMapboxRelevance
+          : null,
     }
   }
 

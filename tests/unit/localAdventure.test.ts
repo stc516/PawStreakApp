@@ -70,7 +70,11 @@ function fixedDateForBucket(bucket: LocalSpotBestTime): Date {
 
 describe('generateTodayMission', () => {
   it('returns a local mission for supported San Diego ZIP 92104', () => {
-    const mission = generateTodayMission({ ...BASE_PARAMS, zipCode: '92104' })
+    const mission = generateTodayMission({
+      ...BASE_PARAMS,
+      zipCode: '92104',
+      supportedMarketId: 'san-diego',
+    })
 
     expect(mission.isLocalSpot).toBe(true)
     expect(mission.localSpotId).toBeTruthy()
@@ -78,18 +82,70 @@ describe('generateTodayMission', () => {
   })
 
   it('returns a local mission for supported Orange County ZIP 92648', () => {
-    const mission = generateTodayMission({ ...BASE_PARAMS, zipCode: '92648' })
+    const mission = generateTodayMission({
+      ...BASE_PARAMS,
+      zipCode: '92648',
+      supportedMarketId: 'orange-county',
+    })
 
     expect(mission.isLocalSpot).toBe(true)
     expect(mission.localSpotId).toBeTruthy()
   })
 
   it('returns generic fallback for unsupported ZIP 83702 without localSpotId', () => {
-    const mission = generateTodayMission({ ...BASE_PARAMS, zipCode: '83702' })
+    const mission = generateTodayMission({ ...BASE_PARAMS, zipCode: '83702', supportedMarketId: null })
 
     expect(mission.isLocalSpot).toBeFalsy()
     expect(mission.localSpotId).toBeUndefined()
     expect(GENERIC_FALLBACK_TITLES.has(mission.title)).toBe(true)
+  })
+
+  it('returns generic fallback for Chicago without localSpotId', () => {
+    const mission = generateTodayMission({
+      ...BASE_PARAMS,
+      zipCode: '60614',
+      supportedMarketId: supportedMarketForGeocodedLocation({
+        lat: 41.92,
+        lng: -87.65,
+        city: 'Chicago',
+        district: 'Cook County',
+        region: 'Illinois',
+      }),
+    })
+
+    expect(mission.isLocalSpot).toBeFalsy()
+    expect(mission.localSpotId).toBeUndefined()
+    expect(GENERIC_FALLBACK_TITLES.has(mission.title)).toBe(true)
+  })
+
+  it('detects developed regions from coordinates only', () => {
+    expect(
+      supportedMarketForGeocodedLocation({
+        lat: 32.7157,
+        lng: -117.1611,
+        city: 'San Diego',
+        district: 'San Diego County',
+        region: 'California',
+      }),
+    ).toBe('san-diego')
+    expect(
+      supportedMarketForGeocodedLocation({
+        lat: 33.6595,
+        lng: -117.9988,
+        city: 'Huntington Beach',
+        district: 'Orange County',
+        region: 'California',
+      }),
+    ).toBe('orange-county')
+    expect(
+      supportedMarketForGeocodedLocation({
+        lat: 40.7181,
+        lng: -73.8448,
+        city: 'San Diego',
+        district: 'San Diego County',
+        region: 'California',
+      }),
+    ).toBeNull()
   })
 
   it('does not return SoCal curated spots for Forest Hills NY', () => {
@@ -129,7 +185,11 @@ describe('generateTodayMission', () => {
 
 describe('completeAdventure', () => {
   it('persists localSpotId when the mission came from a curated spot', () => {
-    const generatedMission = generateTodayMission({ ...BASE_PARAMS, zipCode: '92104' })
+    const generatedMission = generateTodayMission({
+      ...BASE_PARAMS,
+      zipCode: '92104',
+      supportedMarketId: 'san-diego',
+    })
     expect(generatedMission.localSpotId).toBeTruthy()
 
     const state = {
@@ -172,12 +232,14 @@ describe('vibe selection regression', () => {
     const salt = generateTodayMission({
       ...BASE_PARAMS,
       zipCode: '92104',
+      supportedMarketId: 'san-diego',
       nonce: 'vibe-regression',
       fixedVibe: 'salt',
     })
     const pulse = generateTodayMission({
       ...BASE_PARAMS,
       zipCode: '92104',
+      supportedMarketId: 'san-diego',
       nonce: 'vibe-regression',
       fixedVibe: 'pulse',
     })

@@ -488,12 +488,14 @@ const SD_COASTAL_QUICK: QuickAdventurePick[] = [
 ]
 
 const GENERIC_QUICK: QuickAdventurePick[] = [
-  { id: 'g-sunset', title: 'Sunset Walk', emoji: '🌅', place: 'Golden hour nearby', vibe: 'salt', category: 'exploration', estMin: 18, estMax: 35, idealMoods: ['chill'] },
-  { id: 'g-park', title: 'Park Day', emoji: '🌳', place: 'Neighborhood park', vibe: 'wander', category: 'routine', estMin: 20, estMax: 38, idealMoods: ['social', 'chill'] },
-  { id: 'g-coffee', title: 'Coffee Run', emoji: '☕', place: 'Around the corner', vibe: 'pulse', category: 'social', estMin: 12, estMax: 24, idealMoods: ['chill', 'curious'] },
-  { id: 'g-neighborhood', title: 'Neighborhood Loop', emoji: '🏡', place: 'Your usual blocks', vibe: 'pulse', category: 'routine', estMin: 15, estMax: 28, idealMoods: ['curious'] },
-  { id: 'g-explore', title: 'Explore Somewhere New', emoji: '🗺️', place: 'Somewhere new nearby', vibe: 'wander', category: 'exploration', estMin: 22, estMax: 40, idealMoods: ['explorer', 'curious'] },
-  { id: 'g-golden', title: 'Golden Hour Walk', emoji: '🌇', place: 'Fresh air nearby', vibe: 'salt', category: 'chill', estMin: 18, estMax: 32, idealMoods: ['chill', 'social'] },
+  { id: 'g-neighborhood-walk', title: 'Neighborhood walk', emoji: '🏡', place: 'Nearby blocks', vibe: 'pulse', category: 'routine', estMin: 15, estMax: 28, idealMoods: ['curious', 'chill'] },
+  { id: 'g-park', title: 'Park', emoji: '🌳', place: 'Local green space', vibe: 'wander', category: 'routine', estMin: 20, estMax: 38, idealMoods: ['social', 'chill'] },
+  { id: 'g-trail', title: 'Trail', emoji: '🥾', place: 'Trail or open space', vibe: 'wander', category: 'exploration', estMin: 28, estMax: 50, idealMoods: ['explorer', 'restless'] },
+  { id: 'g-coffee', title: 'Coffee', emoji: '☕', place: 'Nearby coffee stop', vibe: 'pulse', category: 'social', estMin: 12, estMax: 24, idealMoods: ['chill', 'curious'] },
+  { id: 'g-patio', title: 'Patio', emoji: '🪑', place: 'Dog-friendly patio', vibe: 'pulse', category: 'social', estMin: 18, estMax: 34, idealMoods: ['social', 'chill'] },
+  { id: 'g-brewery', title: 'Brewery', emoji: '🍺', place: 'Dog-friendly brewery', vibe: 'wild', category: 'social', estMin: 20, estMax: 36, idealMoods: ['social', 'restless'] },
+  { id: 'g-dog-park', title: 'Dog park', emoji: '🐕', place: 'Local dog park', vibe: 'wild', category: 'social', estMin: 18, estMax: 34, idealMoods: ['social', 'zoomie'] },
+  { id: 'g-scenic-walk', title: 'Scenic walk', emoji: '🌄', place: 'Somewhere pretty nearby', vibe: 'salt', category: 'exploration', estMin: 22, estMax: 40, idealMoods: ['explorer', 'chill'] },
 ]
 
 const URBAN_QUICK: QuickAdventurePick[] = [
@@ -529,6 +531,10 @@ export function quickAdventurePicksForZip(zip: string): QuickAdventurePick[] {
   if (locale === 'urban') return URBAN_QUICK
   if (locale === 'trail') return TRAIL_QUICK
   if (locale === 'suburban') return SUBURBAN_QUICK
+  return GENERIC_QUICK
+}
+
+export function genericAdventureTypePicks(): QuickAdventurePick[] {
   return GENERIC_QUICK
 }
 
@@ -615,7 +621,10 @@ export function generateTodayMission(params: GenerateTodayMissionParams): Genera
     })
   }
 
-  const picks = quickAdventurePicksForZip(params.zipCode)
+  const picks =
+    params.supportedMarketId
+      ? quickAdventurePicksForZip(params.zipCode)
+      : genericAdventureTypePicks()
   const idx =
     params.pickIndex !== undefined
       ? params.pickIndex % Math.max(1, picks.length)

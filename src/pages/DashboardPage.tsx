@@ -44,6 +44,17 @@ const VIBE_CHIPS: { label: string; vibe: VibeArchetype }[] = [
   { label: 'City Walk', vibe: 'pulse' },
 ]
 
+const GENERIC_ADVENTURE_CHIPS: { label: string; vibe: VibeArchetype }[] = [
+  { label: 'Neighborhood walk', vibe: 'pulse' },
+  { label: 'Park', vibe: 'wander' },
+  { label: 'Trail', vibe: 'wander' },
+  { label: 'Coffee', vibe: 'pulse' },
+  { label: 'Patio', vibe: 'pulse' },
+  { label: 'Brewery', vibe: 'wild' },
+  { label: 'Dog park', vibe: 'wild' },
+  { label: 'Scenic walk', vibe: 'salt' },
+]
+
 /** Home-only editorial palette — light, warm, lifestyle */
 const H = {
   page: '#FAF7F2',
@@ -133,6 +144,7 @@ export function DashboardPage() {
 
   const dogDisplayName = state.dogName?.trim() || 'Your dog'
   const gm = state.generatedMission
+  const adventureChips = state.userProfile.homeSupportedMarket ? VIBE_CHIPS : GENERIC_ADVENTURE_CHIPS
   const heroImageUrl = gm?.image || PLACE_IMAGES[state.selectedVibe] || PLACE_IMAGES.default
   const heroTitle = gm?.title ?? "Today's outing"
   const heroLocation = gm ? missionNeighborhoodLine(gm) : 'Your neighborhood'
@@ -535,7 +547,7 @@ export function DashboardPage() {
               padding: '2px 24px 4px',
             }}
           >
-            {VIBE_CHIPS.map((chip) => {
+            {adventureChips.map((chip) => {
               const active = selectedChip === chip.label
               return (
                 <button

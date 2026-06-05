@@ -114,7 +114,7 @@ function scoreSpot(
 export function selectLocalSpot(params: SelectLocalSpotParams): LocalSpot | null {
   const zip = params.zipCode.replace(/\D/g, '').slice(0, 5)
   const zipMarket = getLocalMarketForZip(zip)
-  const market = params.supportedMarketId === undefined ? zipMarket?.id : params.supportedMarketId
+  const market = params.supportedMarketId ?? null
   if (!market || market !== zipMarket?.id) return null
 
   let pool = getLocalSpotsByZip(zip, { activeOnly: true })

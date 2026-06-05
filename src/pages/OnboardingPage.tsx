@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { getEnvironmentForCoords } from '../data/zipEnvironments'
 import { normalizeZip } from '../data/localAdventureEngine'
-import { getLocalMarketForZip } from '../data/localSpots/markets'
 import { useAppState } from '../hooks/useAppState'
 import { track } from '../lib/analytics'
 import { FONT_IMPORT } from '../lib/editorialTheme'
@@ -476,6 +475,8 @@ export function OnboardingPage() {
   )
   const [geocodedLocation, setGeocodedLocation] = useState<GeocodedLocation | null>(null)
   const [locationMessage, setLocationMessage] = useState<string | null>(null)
+  const [locationNeedsClarification, setLocationNeedsClarification] = useState(false)
+  const [isResolvingLocation, setIsResolvingLocation] = useState(false)
   const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'denied'>('idle')
 
   const [cadence, setCadence] = useState<NotificationCadence>(state.notificationPrefs.cadence)
@@ -535,6 +536,7 @@ export function OnboardingPage() {
 
   async function applyGeocodedLocation(location: GeocodedLocation) {
     setGeocodedLocation(location)
+    setLocationNeedsClarification(false)
     setHomeLat(location.lat)
     setHomeLng(location.lng)
     setHomeZip(location.zip)
@@ -542,7 +544,7 @@ export function OnboardingPage() {
     setLocationMessage(
       location.supportedMarket
         ? `Local tuning ready for ${location.city || location.label}.`
-        : 'Adventures built for your neighborhood — walks, parks, and fresh-air missions nearby.',
+        : 'We don’t have curated local spots here yet, but PawStreak still works. We’ll build adventures around your area and use this to improve local recommendations.',
     )
   }
 
@@ -550,30 +552,18 @@ export function OnboardingPage() {
     const query = locationQuery.trim()
     if (!query) return null
 
+    setIsResolvingLocation(true)
     const result = await geocodeLocationQuery(query)
+    setIsResolvingLocation(false)
     if (result.ok) {
       await applyGeocodedLocation(result.location)
       return result.location
     }
 
-    const zip = normalizeZip(query)
-    if (zip) {
-      const localMarket = getLocalMarketForZip(zip)
-      setHomeZip(zip)
-      setHomeLocationLabel(zip)
-      setLocationMessage(
-        localMarket && result.reason === 'missing_token'
-          ? `Local tuning ready for ${localMarket.name}.`
-          : result.reason === 'missing_token'
-          ? 'Adventures built for your neighborhood — walks, parks, and fresh-air missions nearby.'
-          : 'Could not verify that ZIP with Mapbox, so we’ll keep this generic for now.',
-      )
-      return null
-    }
-
-    setHomeZip('')
+    setLocationNeedsClarification(true)
+    setGeocodedLocation(null)
     setHomeLocationLabel(query)
-    setLocationMessage('We’ll keep this generic for now and add your region to our expansion list.')
+    setLocationMessage('We couldn’t verify that location. Try a city and state, ZIP, or full address.')
     return null
   }
 
@@ -620,7 +610,7 @@ export function OnboardingPage() {
       const queryOk = locationQuery.trim().length >= 3
       const coordsOk =
         homeLat != null && homeLng != null && Number.isFinite(homeLat) && Number.isFinite(homeLng)
-      return coordsOk || zipOk || queryOk
+      return (coordsOk || zipOk || queryOk) && !locationNeedsClarification && !isResolvingLocation
     }
     return true
   }
@@ -646,11 +636,12 @@ export function OnboardingPage() {
     const ageParsed = ageRaw.trim() === '' ? null : Number.parseInt(ageRaw, 10)
     const age = ageParsed != null && !Number.isNaN(ageParsed) && ageParsed >= 0 ? ageParsed : null
     const resolvedLocation = await resolveTypedLocation()
+    if (!resolvedLocation && locationQuery.trim()) return
     const finalZip = normalizeZip(resolvedLocation?.zip || homeZip)
     const supportedMarket =
       resolvedLocation?.supportedMarket ??
       geocodedLocation?.supportedMarket ??
-      (resolvedLocation ? null : getLocalMarketForZip(finalZip)?.id ?? null)
+      null
     const finalResolution = resolveUserEnvironment(finalZip)
     const zipSupported = supportedMarket !== null
 
@@ -667,9 +658,16 @@ export function OnboardingPage() {
         homeLat: resolvedLocation?.lat ?? homeLat,
         homeLng: resolvedLocation?.lng ?? homeLng,
         homeZip: finalZip,
+        homeRawLocationInput: locationQuery.trim(),
         homeLocationLabel: resolvedLocation?.label ?? homeLocationLabel ?? locationQuery.trim(),
+        homeResolvedCity: resolvedLocation?.city ?? '',
+        homeResolvedState: resolvedLocation?.region ?? '',
+        homeResolvedCountry: resolvedLocation?.country ?? '',
+        homeMapboxPlaceId: resolvedLocation?.mapboxId ?? '',
+        homeMapboxRelevance: resolvedLocation?.relevance ?? null,
+        homeMapboxConfidence: resolvedLocation?.confidence ?? '',
         homeSupportedMarket: supportedMarket,
-        homeGeocodeSource: resolvedLocation ? 'mapbox' : finalZip ? 'manual_zip' : null,
+        homeGeocodeSource: resolvedLocation ? 'mapbox' : null,
       },
       notificationPrefs: {
         cadence,
@@ -684,17 +682,17 @@ export function OnboardingPage() {
       supported_market: supportedMarket,
     })
     if (!supportedMarket) {
+      console.log(`New unsupported location request: ${locationQuery.trim() || resolvedLocation?.label || finalZip}`)
       void createLocationExpansionRequest({
-        locationQuery: locationQuery.trim() || finalZip,
+        rawLocationInput: locationQuery.trim() || finalZip,
         geocodedLocation: resolvedLocation,
-        source: 'onboarding',
+        source: 'onboarding_location',
       })
     }
     navigate('/app')
   }
 
   const zipResolution = resolveUserEnvironment(homeZip)
-  const zipMarketFallback = getLocalMarketForZip(homeZip)
 
   const primaryLabel = useMemo(() => {
     if (step === 1) return trimmedName ? `Meet ${trimmedName} →` : `Let's go →`
@@ -1209,6 +1207,7 @@ export function OnboardingPage() {
                       setLocationQuery(value)
                       setLocationMessage(null)
                       setGeocodedLocation(null)
+                      setLocationNeedsClarification(false)
                       const zip = normalizeZip(value)
                       setHomeZip(zip)
                       if (!zip) {
@@ -1230,7 +1229,7 @@ export function OnboardingPage() {
                   </p>
                 ) : normalizeZip(homeZip).length === 5 ? (
                   zipResolution.source === 'handcrafted' &&
-                  (geocodedLocation?.supportedMarket || zipMarketFallback) ? (
+                  geocodedLocation?.supportedMarket ? (
                     <p className='ob-sage text-xs font-semibold'>
                       ✓ Local tuning ready for {zipResolution.environment.neighborhood}.
                     </p>

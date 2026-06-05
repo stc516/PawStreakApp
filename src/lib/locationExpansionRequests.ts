@@ -2,9 +2,10 @@ import { getSupabaseClient } from './supabaseClient'
 import type { GeocodedLocation } from './mapboxGeocoding'
 
 type ExpansionRequestInput = {
-  locationQuery: string
+  rawLocationInput: string
   geocodedLocation?: GeocodedLocation | null
-  source: 'onboarding'
+  source: 'onboarding_location'
+  dogId?: string | null
 }
 
 export async function createLocationExpansionRequest(input: ExpansionRequestInput): Promise<void> {
@@ -19,23 +20,29 @@ export async function createLocationExpansionRequest(input: ExpansionRequestInpu
     return
   }
 
-  const { data } = await supabase.auth.getUser()
-  const userId = data.user?.id ?? null
-  const location = input.geocodedLocation
-  const { error } = await supabase.from('location_expansion_requests').insert({
-    user_id: userId,
-    location_query: input.locationQuery,
-    resolved_label: location?.label ?? null,
-    city: location?.city ?? null,
-    region: location?.region ?? null,
-    postal_code: location?.zip ?? null,
-    lat: location?.lat ?? null,
-    lng: location?.lng ?? null,
-    source: input.source,
-  })
+  try {
+    const { data } = await supabase.auth.getUser()
+    const userId = data.user?.id ?? null
+    const location = input.geocodedLocation
+    const { error } = await supabase.from('location_expansion_requests').insert({
+      user_id: userId,
+      dog_id: input.dogId ?? null,
+      raw_location_input: input.rawLocationInput,
+      resolved_city: location?.city ?? null,
+      resolved_state: location?.region ?? null,
+      resolved_country: location?.country ?? null,
+      latitude: location?.lat ?? null,
+      longitude: location?.lng ?? null,
+      source: input.source,
+      status: 'new',
+      notes: 'User outside developed region',
+    })
 
-  if (error) {
+    if (!error) return
     console.warn('[locationExpansionRequests] insert failed', error.message)
+    saveLocalExpansionRequest(input)
+  } catch (error) {
+    console.warn('[locationExpansionRequests] insert failed', error)
     saveLocalExpansionRequest(input)
   }
 }
@@ -51,9 +58,12 @@ function saveLocalExpansionRequest(input: ExpansionRequestInput) {
   const existing = window.localStorage.getItem(key)
   const parsed = existing ? (JSON.parse(existing) as unknown[]) : []
   parsed.push({
-    locationQuery: input.locationQuery,
+    rawLocationInput: input.rawLocationInput,
+    locationQuery: input.rawLocationInput,
     geocodedLocation: input.geocodedLocation ?? null,
     source: input.source,
+    status: 'new',
+    notes: 'User outside developed region',
     createdAt: new Date().toISOString(),
   })
   window.localStorage.setItem(key, JSON.stringify(parsed.slice(-25)))

@@ -139,7 +139,14 @@ export interface UserProfile {
   homeLat: number | null
   homeLng: number | null
   homeZip: string
+  homeRawLocationInput?: string
   homeLocationLabel?: string
+  homeResolvedCity?: string
+  homeResolvedState?: string
+  homeResolvedCountry?: string
+  homeMapboxPlaceId?: string
+  homeMapboxRelevance?: number | null
+  homeMapboxConfidence?: string
   homeSupportedMarket?: 'san-diego' | 'orange-county' | null
   homeGeocodeSource?: 'mapbox' | 'manual_zip' | null
 }
@@ -236,7 +243,14 @@ export function defaultUserProfile(): UserProfile {
     homeLat: null,
     homeLng: null,
     homeZip: '',
+    homeRawLocationInput: '',
     homeLocationLabel: '',
+    homeResolvedCity: '',
+    homeResolvedState: '',
+    homeResolvedCountry: '',
+    homeMapboxPlaceId: '',
+    homeMapboxRelevance: null,
+    homeMapboxConfidence: '',
     homeSupportedMarket: null,
     homeGeocodeSource: null,
   }
