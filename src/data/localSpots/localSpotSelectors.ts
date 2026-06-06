@@ -27,7 +27,7 @@ const MOOD_ENERGY: Record<DogMood, LocalSpotDogEnergy> = {
 
 const VIBE_CATEGORIES: Record<VibeArchetype, Set<LocalSpot['category']>> = {
   salt: new Set(['beach', 'sunset', 'park']),
-  wander: new Set(['trail', 'park', 'sunset']),
+  wander: new Set(['trail', 'park']),
   pulse: new Set(['coffee', 'brewery', 'patio', 'social', 'weekend']),
   wild: new Set(['beach', 'park', 'social', 'weekend', 'brewery']),
 }

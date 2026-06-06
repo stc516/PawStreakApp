@@ -189,6 +189,19 @@ describe('generateTodayMission', () => {
     expect(mission.isLocalSpot).toBeFalsy()
     expect(mission.localSpotId).toBeUndefined()
   })
+
+  it('keeps Trail chip picks out of sunset-only curated spots', () => {
+    const mission = generateTodayMission({
+      ...BASE_PARAMS,
+      zipCode: '92104',
+      supportedMarketId: 'san-diego',
+      fixedVibe: 'wander',
+      nonce: 'trail-chip-regression',
+    })
+
+    expect(mission.isLocalSpot).toBe(true)
+    expect(`${mission.title} ${mission.locationHint}`).not.toMatch(/sunset cliffs/i)
+  })
 })
 
 describe('completeAdventure', () => {
