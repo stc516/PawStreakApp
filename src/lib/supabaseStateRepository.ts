@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import {
+  demoStorageKey,
   hydratePawstreakState,
   loadPawstreakState,
   savePawstreakState,
@@ -33,6 +34,23 @@ export function createSupabaseStateRepository({
   let pendingSaveTimer: ReturnType<typeof setTimeout> | null = null
   let pendingState: PawstreakState | null = null
 
+  function progressScore(state: PawstreakState) {
+    return [
+      state.onboardingComplete ? 100 : 0,
+      state.totalAdventures * 10,
+      state.recentAdventures.length * 5,
+      state.dogName && state.dogName !== 'Your dog' ? 3 : 0,
+      state.zipCode ? 2 : 0,
+      state.demoStartedAt ? 1 : 0,
+    ].reduce((sum, value) => sum + value, 0)
+  }
+
+  function loadBestLocalSeed(): PawstreakState {
+    const userScoped = loadPawstreakState(storageKey)
+    const demo = loadPawstreakState(demoStorageKey())
+    return progressScore(demo) > progressScore(userScoped) ? demo : userScoped
+  }
+
   function flushRemoteSave() {
     if (!pendingState) return
     const payload = pendingState
@@ -58,7 +76,8 @@ export function createSupabaseStateRepository({
 
   return {
     load(): PawstreakState {
-      const local = loadPawstreakState(storageKey)
+      const local = loadBestLocalSeed()
+      savePawstreakState({ ...local, hasAccount: true }, storageKey)
       return { ...local, hasAccount: true }
     },
 
@@ -83,8 +102,8 @@ export function createSupabaseStateRepository({
       }
 
       if (!data) {
-        // First time signing in — seed remote with whatever the local cache holds.
-        const seedState = loadPawstreakState(storageKey)
+        // First time signing in — seed remote with the best local progress.
+        const seedState = loadBestLocalSeed()
         const seedWithAccount: PawstreakState = { ...seedState, hasAccount: true }
         savePawstreakState(seedWithAccount, storageKey)
         await supabase

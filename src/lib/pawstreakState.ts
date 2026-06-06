@@ -129,6 +129,10 @@ export function userScopedStorageKey(userId: string): string {
   return `pawstreak_user_${userId}_v4`
 }
 
+export function demoStorageKey(): string {
+  return STORAGE_KEY
+}
+
 export function getInitialPawstreakState(): PawstreakState {
   return initialState
 }
