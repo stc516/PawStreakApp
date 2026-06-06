@@ -44,4 +44,25 @@ describe('auth helpers', () => {
     expect(result.ok).toBe(false)
     expect(result.error?.message).toBe('Email rate limit exceeded')
   })
+
+  it('restores the current Supabase session', async () => {
+    const session = { user: { id: 'user-123' } }
+    authApi.getSession.mockResolvedValueOnce({ data: { session } })
+    const { getCurrentSession } = await import('../../src/lib/auth')
+
+    await expect(getCurrentSession()).resolves.toBe(session)
+  })
+
+  it('cleans up Supabase auth state subscriptions', async () => {
+    const unsubscribe = vi.fn()
+    authApi.onAuthStateChange.mockReturnValueOnce({
+      data: { subscription: { unsubscribe } },
+    })
+    const { onAuthStateChange } = await import('../../src/lib/auth')
+
+    const cleanup = onAuthStateChange(() => {})
+    cleanup()
+
+    expect(unsubscribe).toHaveBeenCalledTimes(1)
+  })
 })

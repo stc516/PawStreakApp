@@ -693,6 +693,26 @@ test('account password reset is available in sign-in mode when auth is configure
   await expect(page.getByText(/Password reset link sent/)).toBeVisible()
 })
 
+test('account auth surface survives refresh without losing session integration state', async ({ page }) => {
+  const consoleErrors = attachConsoleErrorCapture(page)
+  await completeOnboarding(page, { dogName: 'SessionDog', zip: '92104' })
+  await page.goto('/account')
+  await page.reload()
+
+  await expect(page).toHaveURL(/\/account$/)
+  await expect(page.getByTestId('account-page')).toBeVisible()
+
+  if (await page.getByTestId('account-auth-not-configured').count()) {
+    await expect(page.getByTestId('account-auth-not-configured')).toBeVisible()
+  } else {
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    await expect(page.getByTestId('account-email-input')).toBeVisible()
+    await expect(page.getByTestId('account-password-reset')).toBeVisible()
+  }
+
+  expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
+})
+
 test('save-progress nudge appears, dismisses, and re-surfaces after an adventure', async ({
   page,
 }) => {
