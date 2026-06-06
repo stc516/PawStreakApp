@@ -410,7 +410,7 @@ test('onboarding blank location cannot continue', async ({ page }) => {
   await expect(page.getByTestId('onboarding-primary-button')).toBeDisabled()
 })
 
-test('welcome step button label updates with name + Google fallback note', async ({ page }) => {
+test('welcome step button label updates with name and hides unavailable Google auth', async ({ page }) => {
   await clearStorageAndOpen(page)
 
   await expect(page.getByTestId('onboarding-welcome')).toBeVisible()
@@ -418,9 +418,8 @@ test('welcome step button label updates with name + Google fallback note', async
 
   await page.getByTestId('dog-name-input').fill('Bailey')
   await expect(page.getByTestId('onboarding-primary-button')).toHaveText(/Meet Bailey/)
-
-  await page.getByTestId('onboarding-google-button').click()
-  await expect(page.getByText('Google sign-in coming soon')).toBeVisible()
+  await expect(page.getByTestId('onboarding-google-button')).toHaveCount(0)
+  await expect(page.getByText(/Continue with Google|Google sign-in coming soon/)).toHaveCount(0)
 })
 
 test('empty name does not save Bailey as the dog name', async ({ page }) => {
