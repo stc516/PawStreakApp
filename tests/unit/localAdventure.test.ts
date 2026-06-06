@@ -16,6 +16,7 @@ import {
   activeAdventureElapsedSeconds,
   completeAdventure,
   getInitialPawstreakState,
+  hydratePawstreakState,
   pauseAdventureSession,
   startAdventureSession,
 } from '../../src/lib/pawstreakState'
@@ -250,6 +251,51 @@ describe('completeAdventure', () => {
     expect(abandoned.activeAdventure).toBeNull()
     expect(abandoned.totalAdventures).toBe(0)
     expect(abandoned.currentStreak).toBe(0)
+  })
+
+  it('counts streaks by local calendar day, not completion count', () => {
+    const base = {
+      ...getInitialPawstreakState(),
+      onboardingComplete: true,
+      dogName: BASE_PARAMS.dogName,
+      todayAdventureDone: false,
+      currentStreak: 4,
+      lastAdventureDayKey: '2026-06-04',
+    }
+
+    const continued = completeAdventure(base, 600, {
+      completedAt: new Date('2026-06-05T12:00:00'),
+    })
+    expect(continued.currentStreak).toBe(5)
+    expect(continued.lastAdventureDayKey).toBe('2026-06-05')
+
+    const sameDay = completeAdventure(
+      { ...base, currentStreak: 5, lastAdventureDayKey: '2026-06-05' },
+      600,
+      { completedAt: new Date('2026-06-05T18:00:00') },
+    )
+    expect(sameDay.currentStreak).toBe(5)
+
+    const afterGap = completeAdventure(
+      { ...base, currentStreak: 5, lastAdventureDayKey: '2026-06-02' },
+      600,
+      { completedAt: new Date('2026-06-05T12:00:00') },
+    )
+    expect(afterGap.currentStreak).toBe(1)
+  })
+
+  it('reopens Today when loaded state is from an earlier calendar day', () => {
+    const loaded = hydratePawstreakState({
+      ...getInitialPawstreakState(),
+      todayAdventureDone: true,
+      todayDurationMinutes: 22,
+      todayGroundCovered: 0.8,
+      lastAdventureDayKey: '2000-01-01',
+    })
+
+    expect(loaded.todayAdventureDone).toBe(false)
+    expect(loaded.todayDurationMinutes).toBeNull()
+    expect(loaded.todayGroundCovered).toBeNull()
   })
 })
 

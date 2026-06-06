@@ -177,6 +177,8 @@ export interface PawstreakState {
   /** Daily rotating mood — same as “daily dog mood” */
   dogMood: DogMood
   currentStreak: number
+  /** Local calendar day key for the last adventure counted toward streaks. */
+  lastAdventureDayKey: string | null
   longestStreak: number
   totalAdventures: number
   totalGroundCovered: number

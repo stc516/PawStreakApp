@@ -160,6 +160,7 @@ function freshBadges(): BadgeDefinition[] {
 function freshProgressFields(): Pick<
   PawstreakState,
   | 'currentStreak'
+  | 'lastAdventureDayKey'
   | 'longestStreak'
   | 'totalAdventures'
   | 'totalGroundCovered'
@@ -173,6 +174,7 @@ function freshProgressFields(): Pick<
 > {
   return {
     currentStreak: 0,
+    lastAdventureDayKey: null,
     longestStreak: 0,
     totalAdventures: 0,
     totalGroundCovered: 0,
@@ -592,6 +594,16 @@ function ensureNestedState(merged: PawstreakState) {
       (existing?.unlocked === true && merged.totalAdventures > 0)
     return { ...badge, unlocked }
   })
+
+  if (typeof merged.lastAdventureDayKey !== 'string' && merged.lastAdventureDayKey !== null) {
+    const latestDay = merged.recentAdventures
+      .map((adventure) => {
+        const completedAt = new Date(adventure.completedAt)
+        return Number.isNaN(completedAt.getTime()) ? null : localDayKey(completedAt)
+      })
+      .find((day): day is string => Boolean(day))
+    merged.lastAdventureDayKey = latestDay ?? null
+  }
 }
 
 function patchLoadedState(merged: PawstreakState) {
@@ -642,6 +654,11 @@ function patchLoadedState(merged: PawstreakState) {
   }
   if (merged.memoryReturnHighlightId !== null && typeof merged.memoryReturnHighlightId !== 'string') {
     merged.memoryReturnHighlightId = null
+  }
+  if (merged.lastAdventureDayKey !== todayKey && merged.todayAdventureDone) {
+    merged.todayAdventureDone = false
+    merged.todayDurationMinutes = null
+    merged.todayGroundCovered = null
   }
 }
 
@@ -899,6 +916,32 @@ function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent
 export interface CompleteAdventureOptions {
   /** Optional memory text the owner typed during the adventure. */
   memoryText?: string
+  /** Test/restore hook for calendar-correct streak calculations. */
+  completedAt?: Date
+}
+
+function dayDiff(fromDayKey: string, toDayKey: string): number | null {
+  const [fromYear, fromMonth, fromDay] = fromDayKey.split('-').map(Number)
+  const [toYear, toMonth, toDay] = toDayKey.split('-').map(Number)
+  if (
+    !fromYear || !fromMonth || !fromDay ||
+    !toYear || !toMonth || !toDay
+  ) return null
+  const fromUtc = Date.UTC(fromYear, fromMonth - 1, fromDay)
+  const toUtc = Date.UTC(toYear, toMonth - 1, toDay)
+  return Math.round((toUtc - fromUtc) / 86_400_000)
+}
+
+function nextCalendarStreak(
+  currentStreak: number,
+  lastAdventureDayKey: string | null,
+  completedDayKey: string,
+): number {
+  if (!lastAdventureDayKey) return Math.max(1, currentStreak + 1)
+  if (lastAdventureDayKey === completedDayKey) return Math.max(1, currentStreak)
+  const diff = dayDiff(lastAdventureDayKey, completedDayKey)
+  if (diff === 1) return currentStreak + 1
+  return 1
 }
 
 export function completeAdventure(
@@ -915,10 +958,15 @@ export function completeAdventure(
   const minutes = xpBreakdown.minutes
   const ground = xpBreakdown.ground
   const adventureEnergy = xpBreakdown.xp
-  const nextStreak = state.currentStreak + 1
+  const completedAt = options.completedAt ?? new Date()
+  const completedDayKey = localDayKey(completedAt)
+  const nextStreak = nextCalendarStreak(
+    state.currentStreak,
+    state.lastAdventureDayKey ?? null,
+    completedDayKey,
+  )
 
   const trimmedMemory = options.memoryText?.trim() ?? ''
-  const completedAt = new Date()
   const adventureId = crypto.randomUUID()
   const memoryNarrative = buildMemoryNarrative({
     adventureId,
@@ -956,6 +1004,7 @@ export function completeAdventure(
   return {
     ...state,
     todayAdventureDone: true,
+    lastAdventureDayKey: completedDayKey,
     currentStreak: nextStreak,
     longestStreak: Math.max(state.longestStreak, nextStreak),
     totalAdventures: state.totalAdventures + 1,
