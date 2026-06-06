@@ -53,6 +53,15 @@ export async function signInWithMagicLink(email: string): Promise<AuthResult> {
   return error ? { ok: false, error: { message: error.message } } : { ok: true }
 }
 
+export async function sendPasswordReset(email: string): Promise<AuthResult> {
+  const supabase = getSupabaseClient()
+  if (!supabase) return notConfigured()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: siteRedirectUrl(),
+  })
+  return error ? { ok: false, error: { message: error.message } } : { ok: true }
+}
+
 export async function signOut(): Promise<AuthResult> {
   const supabase = getSupabaseClient()
   if (!supabase) return notConfigured()

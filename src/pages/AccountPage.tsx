@@ -7,6 +7,7 @@ import { useAppState } from '../hooks/useAppState'
 import {
   signInWithMagicLink,
   signInWithPassword,
+  sendPasswordReset,
   signUpWithPassword,
   signOut,
 } from '../lib/auth'
@@ -44,7 +45,7 @@ export function AccountPage() {
   const [mode, setMode] = useState<Mode>('signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [busy, setBusy] = useState<'password' | 'magic-link' | 'sign-out' | null>(null)
+  const [busy, setBusy] = useState<'password' | 'magic-link' | 'password-reset' | 'sign-out' | null>(null)
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
 
   const isAuthed = Boolean(session)
@@ -102,6 +103,26 @@ export function AccountPage() {
         return
       }
       setFeedback({ tone: 'success', message: 'Magic link sent — check your email.' })
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function handlePasswordReset() {
+    if (busy) return
+    if (!email) {
+      setFeedback({ tone: 'error', message: 'Enter your email first.' })
+      return
+    }
+    setBusy('password-reset')
+    setFeedback(null)
+    try {
+      const result = await sendPasswordReset(email)
+      if (!result.ok) {
+        setFeedback({ tone: 'error', message: result.error?.message ?? 'Could not send reset link.' })
+        return
+      }
+      setFeedback({ tone: 'success', message: 'Password reset link sent — check your email.' })
     } finally {
       setBusy(null)
     }
@@ -347,6 +368,28 @@ export function AccountPage() {
               }}>
                 {busy === 'magic-link' ? 'Sending…' : '✨ Send magic link instead'}
               </button>
+              {mode === 'signin' ? (
+                <button
+                  type="button"
+                  data-testid="account-password-reset"
+                  onClick={handlePasswordReset}
+                  disabled={Boolean(busy)}
+                  style={{
+                    width: '100%',
+                    height: '40px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: C.primary,
+                    fontSize: '13px',
+                    cursor: busy ? 'not-allowed' : 'pointer',
+                    fontFamily: FONT,
+                    opacity: busy ? 0.6 : 1,
+                    marginTop: '8px',
+                  }}
+                >
+                  {busy === 'password-reset' ? 'Sending…' : 'Forgot password? Send reset link'}
+                </button>
+              ) : null}
             </div>
           ) : (
             <div

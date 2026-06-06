@@ -671,6 +671,29 @@ test('account status chip routes to profile', async ({ page }) => {
   await expect(page).toHaveURL(/\/app$/)
 })
 
+test('account password reset is available in sign-in mode when auth is configured', async ({ page }) => {
+  await page.route(/\/auth\/v1\/recover/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({}),
+    })
+  })
+  await completeOnboarding(page, { dogName: 'ResetDog', zip: '92104' })
+  await page.goto('/account')
+
+  if (await page.getByTestId('account-auth-not-configured').count()) {
+    await expect(page.getByTestId('account-password-reset')).toHaveCount(0)
+    return
+  }
+
+  await page.getByRole('button', { name: 'Sign in' }).click()
+  await expect(page.getByTestId('account-password-reset')).toBeVisible()
+  await page.getByTestId('account-email-input').fill('resetdog@example.com')
+  await page.getByTestId('account-password-reset').click()
+  await expect(page.getByText(/Password reset link sent/)).toBeVisible()
+})
+
 test('save-progress nudge appears, dismisses, and re-surfaces after an adventure', async ({
   page,
 }) => {
