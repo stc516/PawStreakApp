@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+
+import { CategoryIllustration } from './challenges/CategoryIllustration'
 import type { PackProgress } from '../lib/monthlyPacks'
 
 interface PackCardProps {
@@ -11,21 +14,10 @@ interface PackCardProps {
 export function PackCard({ progress, variant = 'full' }: PackCardProps) {
   const { pack, completed, required, percent, isComplete, remaining } = progress
   const isFeatured = variant === 'featured'
-
-  return (
-    <article
-      data-testid={`pack-card-${pack.id}`}
-      data-pack-complete={isComplete ? 'true' : 'false'}
-      className={[
-        'tap-card relative flex flex-col gap-4 overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(155deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))]',
-        isComplete
-          ? 'border-[color:rgba(255,107,53,0.45)] shadow-[0_0_24px_-6px_var(--orange-glow)]'
-          : 'border-[color:var(--border)]',
-        isFeatured ? 'p-5' : 'p-4',
-      ]
-        .join(' ')
-        .trim()}
-    >
+  const hasProgress = completed > 0
+  const locked = !isComplete && !hasProgress
+  const content = (
+    <>
       {pack.seasonal ? (
         <div className='absolute right-3 top-3 rounded-full border border-[color:var(--border-md)] bg-[var(--bg-elevated)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--text-3)]'>
           {pack.seasonal}
@@ -36,13 +28,15 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
         <div
           aria-hidden
           className={[
-            'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-3xl',
+            'flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border',
             isComplete
-              ? 'border-[color:rgba(255,107,53,0.45)] bg-[rgba(255,107,53,0.1)] drop-shadow-[0_0_10px_var(--orange-glow)]'
-              : 'border-[color:var(--border)] bg-[var(--bg-elevated)]',
+              ? 'border-[color:rgba(255,107,53,0.45)] bg-[rgba(255,107,53,0.08)] drop-shadow-[0_0_10px_var(--orange-glow)]'
+              : locked
+                ? 'border-[color:rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.04)]'
+                : 'border-[color:var(--border)] bg-[var(--bg-elevated)]',
           ].join(' ')}
         >
-          {pack.icon}
+          <CategoryIllustration category={pack.illustration} size={58} locked={locked} />
         </div>
         <div className='min-w-0 flex-1'>
           <div className='text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
@@ -56,7 +50,7 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
               <span
                 aria-hidden
                 className='flex h-5 w-5 items-center justify-center rounded-full bg-[color:var(--orange)] text-[11px] font-bold text-[var(--bg)]'
-                title='Pack completed'
+                title='Challenge completed'
               >
                 ✓
               </span>
@@ -73,8 +67,8 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
 
       <div>
         <div className='flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em]'>
-          <span className={isComplete ? 'text-[color:var(--orange)]' : 'text-[var(--text-3)]'}>
-            {isComplete ? 'Region known' : 'Region familiarity'}
+          <span className={isComplete ? 'text-[color:var(--orange)]' : hasProgress ? 'text-[var(--text-3)]' : 'text-[color:var(--gold)]'}>
+            {isComplete ? 'Challenge earned' : hasProgress ? 'Challenge progress' : 'Locked · ready to earn'}
           </span>
           <span className='text-[var(--text-3)]'>
             {completed}/{required}
@@ -88,12 +82,14 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
                 ? 'bg-[color:var(--orange)]'
                 : 'bg-gradient-to-r from-[color:var(--orange)] to-[color:var(--gold)]',
             ].join(' ')}
-            style={{ width: `${Math.max(percent, 4)}%` }}
+            style={{ width: `${Math.max(percent, locked ? 2 : 4)}%` }}
           />
         </div>
         <div className='mt-2 text-[11px] text-[var(--text-2)]'>
           {isComplete ? (
             <span>{pack.completedFlavor}</span>
+          ) : locked ? (
+            <span>{pack.lockedHint}</span>
           ) : remaining === 1 ? (
             <span>One more memory to become {pack.identity}.</span>
           ) : (
@@ -106,6 +102,29 @@ export function PackCard({ progress, variant = 'full' }: PackCardProps) {
           {pack.xpBonusLabel}
         </div>
       </div>
-    </article>
+    </>
+  )
+
+  return (
+    <Link
+      to={`/packs/${pack.id}`}
+      data-testid={`pack-card-${pack.id}`}
+      data-pack-complete={isComplete ? 'true' : 'false'}
+      aria-label={`Open ${pack.title} challenge`}
+      className={[
+        'tap-card relative flex flex-col gap-4 overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(155deg,rgba(22,27,34,0.98),rgba(12,18,28,0.96))]',
+        isComplete
+          ? 'border-[color:rgba(255,107,53,0.45)] shadow-[0_0_24px_-6px_var(--orange-glow)]'
+          : locked
+            ? 'border-[color:rgba(245,158,11,0.24)] shadow-[0_0_22px_-12px_var(--gold)]'
+            : 'border-[color:var(--border)]',
+        isFeatured ? 'p-5' : 'p-4',
+      ]
+        .join(' ')
+        .trim()}
+      style={{ textDecoration: 'none' }}
+    >
+      {content}
+    </Link>
   )
 }

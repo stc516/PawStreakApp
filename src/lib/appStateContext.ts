@@ -3,6 +3,8 @@ import { createContext } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
 import type {
+  AdventureReflection,
+  ActiveAdventureSession,
   DogProfile,
   NotificationPrefs,
   OwnerProfile,
@@ -39,11 +41,17 @@ export interface AppStateContextValue extends AuthContextSlice {
   rollPickForMe: () => void
   pickSuggestedAdventure: (index: number) => void
   selectVibe: (vibe: VibeArchetype) => void
+  startAdventureSession: (source: ActiveAdventureSession['source'], challengeId?: string | null) => void
+  pauseAdventureSession: (paused: boolean) => void
+  updateAdventureMemoryDraft: (memoryText: string) => void
+  abandonAdventureSession: () => void
   completeAdventure: (walkSeconds: number, options?: { memoryText?: string }) => void
+  saveAdventureReflection: (adventureId: string, reflection: AdventureReflection) => void
   setReminder: (enabled: boolean) => void
   resetRewardFlow: () => void
   dismissSaveNudge: () => void
   markFirstAdventurePromptSeen: () => void
+  clearMemoryReturnHighlight: () => void
 }
 
 export const AppStateContext = createContext<AppStateContextValue | null>(null)

@@ -1,14 +1,16 @@
 import {
   flattenMission,
-  missionFromQuickPick,
+  generateTodayMission,
   normalizeZip,
-  quickAdventurePicksForZip,
   refreshTomorrowTease,
+  type TomorrowTeaseInput,
 } from '../data/localAdventureEngine'
-import { hashString, moodForDay } from '../data/missions'
+import { moodForDay } from '../data/missions'
+import { buildMemoryNarrative } from './memoryNarrative'
 import { calculateAdventureXp } from './xp'
 import type {
   AdventureEntry,
+  AdventureReflection,
   BadgeDefinition,
   DogProfile,
   GeneratedMission,
@@ -28,6 +30,99 @@ import { getEnvironmentForZip, haversineKm } from '../data/zipEnvironments'
 
 const STORAGE_KEY = 'pawstreak_demo_state_v4'
 
+const challengeVibeById: Record<string, VibeArchetype> = {
+  'beach-explorer': 'salt',
+  'trail-scout': 'wander',
+  'coffee-walk-champion': 'pulse',
+  'patio-pup': 'pulse',
+  'brewery-buddy': 'wild',
+  'park-hopper': 'wander',
+  'scenic-sniffer': 'salt',
+  'dog-park-regular': 'wild',
+  'weekend-explorer': 'wander',
+  'sunset-stroller': 'salt',
+  'early-bird-walker': 'pulse',
+  'neighborhood-navigator': 'pulse',
+}
+
+const challengeMissionOverrides: Record<
+  string,
+  Pick<GeneratedMission, 'title' | 'emoji' | 'vibe' | 'category' | 'locationHint' | 'description'>
+> = {
+  'beach-explorer': {
+    title: 'Beach Explorer Walk',
+    emoji: '🌊',
+    vibe: 'salt',
+    category: 'exploration',
+    locationHint: 'Beach or shoreline route',
+    description: 'Find a beach, shoreline, or salt-air route and let the horizon be part of the outing.',
+  },
+  'trail-scout': {
+    title: 'Trail Scout Outing',
+    emoji: '🥾',
+    vibe: 'wander',
+    category: 'exploration',
+    locationHint: 'Trail or open-space route',
+    description: 'Choose a trail, canyon, or dirt-path route with room for curious sniffing.',
+  },
+  'coffee-walk-champion': {
+    title: 'Coffee Walk Loop',
+    emoji: '☕',
+    vibe: 'pulse',
+    category: 'social',
+    locationHint: 'Coffee stop nearby',
+    description: 'Build a simple coffee walk ritual with a dog-friendly pause.',
+  },
+  'patio-pup': {
+    title: 'Patio Pup Hang',
+    emoji: '🪑',
+    vibe: 'pulse',
+    category: 'social',
+    locationHint: 'Dog-friendly patio',
+    description: 'Pick a dog-friendly patio or courtyard and practice settling in together.',
+  },
+  'brewery-buddy': {
+    title: 'Brewery Buddy Visit',
+    emoji: '🍺',
+    vibe: 'wild',
+    category: 'social',
+    locationHint: 'Dog-friendly brewery',
+    description: 'Choose a relaxed brewery or beer-garden outing with room to people-watch.',
+  },
+  'park-hopper': {
+    title: 'Park Hopper Loop',
+    emoji: '🌳',
+    vibe: 'wander',
+    category: 'routine',
+    locationHint: 'Park or green space',
+    description: 'Visit a park or green space and find one new favorite corner.',
+  },
+  'scenic-sniffer': {
+    title: 'Scenic Sniffer Walk',
+    emoji: '🌄',
+    vibe: 'salt',
+    category: 'exploration',
+    locationHint: 'Scenic walk or overlook',
+    description: 'Take a view-first route with plenty of nose-led pauses.',
+  },
+  'dog-park-regular': {
+    title: 'Dog Park Regular Visit',
+    emoji: '🐕',
+    vibe: 'wild',
+    category: 'social',
+    locationHint: 'Dog park or off-leash area',
+    description: 'Head to a dog park or off-leash social spot and let the regular energy build.',
+  },
+  'neighborhood-navigator': {
+    title: 'Neighborhood Navigator Loop',
+    emoji: '🏡',
+    vibe: 'pulse',
+    category: 'routine',
+    locationHint: 'Neighborhood loop',
+    description: 'Choose a familiar block and add one small new turn.',
+  },
+}
+
 /** Storage key for a signed-in Supabase user. Namespaced so multiple
  *  accounts on the same device do not clobber each other's local cache. */
 export function userScopedStorageKey(userId: string): string {
@@ -43,18 +138,19 @@ function localDayKey(d = new Date()) {
 }
 
 const defaultBadges: BadgeDefinition[] = [
-  { id: 'first-step', name: 'First walk', icon: '🐾', description: 'You started.', unlocked: true },
-  { id: 'three-day-streak', name: 'Three days', icon: '✨', description: 'Three walks in a row.', unlocked: true },
-  { id: 'beach-dog', name: 'Beach day', icon: '🌅', description: 'First beach-style walk.', unlocked: true },
-  { id: 'week-warrior', name: 'Week streak', icon: '🫶', description: 'Seven days in a row.', unlocked: false },
-  { id: 'explorer', name: 'Wildcard', icon: '🧭', description: 'One surprise-route walk.', unlocked: false },
-  { id: 'park-regular', name: 'Park regular', icon: '🌿', description: 'Five park-style walks.', unlocked: false },
-  { id: 'mystery-one', name: 'Sampler', icon: '🎭', description: 'Tried every vibe once.', unlocked: false, mystery: true },
-  { id: 'mystery-two', name: '???', icon: '❓', description: 'Keep walking.', unlocked: false, mystery: true },
+  { id: 'welcome', name: 'Welcome to PawStreak', icon: '🐾', description: 'The first page of your dog’s adventure life.', unlocked: true },
+  { id: 'first-adventure', name: 'First Adventure', icon: '🧭', description: 'Complete your first real outing together.', unlocked: false },
+  { id: 'three-day-streak', name: 'Three Day Rhythm', icon: '✨', description: 'Three adventures in a row.', unlocked: false },
+  { id: 'beach-dog', name: 'Beach Explorer', icon: '🌊', description: 'Earned through salt-air adventures.', unlocked: false },
+  { id: 'week-warrior', name: 'Week Streak', icon: '🫶', description: 'Seven days in a row.', unlocked: false },
+  { id: 'explorer', name: 'Wildcard Route', icon: '🗺️', description: 'One surprise-route walk.', unlocked: false },
+  { id: 'park-regular', name: 'Park Regular', icon: '🌳', description: 'Five park-style walks.', unlocked: false },
+  { id: 'mystery-one', name: 'Sampler', icon: '🎭', description: 'Try every vibe once.', unlocked: false, mystery: true },
+  { id: 'mystery-two', name: 'Hidden Badge', icon: '✦', description: 'A premium milestone waiting in the wings.', unlocked: false, mystery: true },
 ]
 
 function freshBadges(): BadgeDefinition[] {
-  return defaultBadges.map((badge) => ({ ...badge, unlocked: false }))
+  return defaultBadges.map((badge) => ({ ...badge }))
 }
 
 function freshProgressFields(): Pick<
@@ -86,18 +182,69 @@ function freshProgressFields(): Pick<
   }
 }
 
-function initialSelection(
-  state: Pick<PawstreakState, 'dogName' | 'currentStreak' | 'pickNonce' | 'dogMood' | 'zipCode'>,
-): Pick<PawstreakState, 'generatedMission' | 'selectedVibe' | 'selectedMissionTitle' | 'selectedEmoji' | 'selectedRarity' | 'selectedFlavor'> {
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const idx = hashString(`init|${state.pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
+function tomorrowTeaseFor(
+  state: Pick<
+    PawstreakState,
+    | 'dogName'
+    | 'zipCode'
+    | 'dogMood'
+    | 'currentStreak'
+    | 'recentAdventures'
+    | 'generatedMission'
+    | 'selectedVibe'
+    | 'userProfile'
+  >,
+): string {
+  const input: TomorrowTeaseInput = {
+    dogName: state.dogName,
+    zipCode: state.zipCode ?? '',
+    dogMood: state.dogMood,
+    vibe: state.generatedMission?.vibe ?? state.selectedVibe,
+    streak: state.currentStreak,
+    recentAdventures: state.recentAdventures,
+    generatedMission: state.generatedMission,
+  }
+  return refreshTomorrowTease(input)
+}
+
+function recentSpotIds(state: Pick<PawstreakState, 'recentAdventures'>): string[] {
+  return state.recentAdventures
+    .map((a) => a.localSpotId)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    .slice(0, 3)
+}
+
+function buildTodayMission(
+  state: Pick<PawstreakState, 'dogName' | 'dogMood' | 'currentStreak' | 'zipCode' | 'recentAdventures' | 'userProfile'>,
+  nonce: string,
+  options?: { fixedVibe?: VibeArchetype; pickIndex?: number },
+): GeneratedMission {
+  return generateTodayMission({
+    zipCode: state.zipCode ?? '',
+    supportedMarketId: state.userProfile.homeSupportedMarket ?? null,
     dogName: state.dogName,
     dogMood: state.dogMood,
     streak: state.currentStreak,
-    nonce: `init|${state.pickNonce}`,
+    nonce,
+    recentSpotIds: recentSpotIds(state),
+    fixedVibe: options?.fixedVibe,
+    pickIndex: options?.pickIndex,
   })
+}
+
+function initialSelection(
+  state: Pick<
+    PawstreakState,
+    | 'dogName'
+    | 'currentStreak'
+    | 'pickNonce'
+    | 'dogMood'
+    | 'zipCode'
+    | 'recentAdventures'
+    | 'userProfile'
+  >,
+): Pick<PawstreakState, 'generatedMission' | 'selectedVibe' | 'selectedMissionTitle' | 'selectedEmoji' | 'selectedRarity' | 'selectedFlavor'> {
+  const generatedMission = buildTodayMission(state, `init|${state.pickNonce}`)
   return {
     generatedMission,
     ...flattenMission(generatedMission),
@@ -135,6 +282,8 @@ const selectionSeed = initialSelection({
   pickNonce: 0,
   dogMood: moodForDay('Your dog', moodToday),
   zipCode: '',
+  recentAdventures: [],
+  userProfile: defaultUserProfile(),
 })
 
 const initialState: PawstreakState = {
@@ -161,11 +310,22 @@ const initialState: PawstreakState = {
   todayGroundCovered: null,
   ...freshProgressFields(),
   emergencyTreatAvailable: true,
-  tomorrowTease: refreshTomorrowTease({ dogName: 'Your dog', zipCode: '' }),
+  tomorrowTease: tomorrowTeaseFor({
+    dogName: 'Your dog',
+    zipCode: '',
+    dogMood: moodForDay('Your dog', moodToday),
+    currentStreak: 0,
+    recentAdventures: [],
+    userProfile: defaultUserProfile(),
+    generatedMission: selectionSeed.generatedMission,
+    selectedVibe: selectionSeed.selectedVibe,
+  }),
   demoStartedAt: null,
   hasAccount: false,
   nudgeDismissedAt: null,
   firstAdventurePromptSeenAt: null,
+  memoryReturnHighlightId: null,
+  activeAdventure: null,
 }
 
 function isBrowser() {
@@ -244,6 +404,16 @@ function migrateLegacy(parsed: Record<string, unknown>): Partial<PawstreakState>
         missionDescription: typeof a.missionDescription === 'string' ? a.missionDescription : undefined,
         estimatedMinutesMin: typeof a.estimatedMinutesMin === 'number' ? a.estimatedMinutesMin : undefined,
         estimatedMinutesMax: typeof a.estimatedMinutesMax === 'number' ? a.estimatedMinutesMax : undefined,
+        memoryText: typeof a.memoryText === 'string' ? a.memoryText : undefined,
+        memoryNarrative:
+          a.memoryNarrative && typeof a.memoryNarrative === 'object'
+            ? (a.memoryNarrative as AdventureEntry['memoryNarrative'])
+            : undefined,
+        localSpotId: typeof a.localSpotId === 'string' ? a.localSpotId : undefined,
+        reflection:
+          a.reflection && typeof a.reflection === 'object'
+            ? (a.reflection as AdventureReflection)
+            : undefined,
       } satisfies AdventureEntry
     })
   }
@@ -349,6 +519,20 @@ function ensureNestedState(merged: PawstreakState) {
         typeof merged.userProfile.homeZip === 'string'
           ? normalizeZip(merged.userProfile.homeZip)
           : normalizeZip(merged.zipCode ?? ''),
+      homeSupportedMarket:
+        merged.userProfile.homeSupportedMarket === 'san-diego' ||
+        merged.userProfile.homeSupportedMarket === 'orange-county'
+          ? merged.userProfile.homeSupportedMarket
+          : null,
+      homeGeocodeSource:
+        merged.userProfile.homeGeocodeSource === 'mapbox' ||
+        merged.userProfile.homeGeocodeSource === 'manual_zip'
+          ? merged.userProfile.homeGeocodeSource
+          : null,
+      homeMapboxRelevance:
+        typeof merged.userProfile.homeMapboxRelevance === 'number'
+          ? merged.userProfile.homeMapboxRelevance
+          : null,
     }
   }
 
@@ -366,6 +550,44 @@ function ensureNestedState(merged: PawstreakState) {
   if (typeof merged.welcomeBannerDismissed !== 'boolean') {
     merged.welcomeBannerDismissed = merged.onboardingComplete === true
   }
+
+  if (!merged.activeAdventure || typeof merged.activeAdventure !== 'object') {
+    merged.activeAdventure = null
+  } else {
+    merged.activeAdventure = {
+      ...merged.activeAdventure,
+      accumulatedSeconds:
+        typeof merged.activeAdventure.accumulatedSeconds === 'number'
+          ? Math.max(0, merged.activeAdventure.accumulatedSeconds)
+          : 0,
+      pausedAt:
+        typeof merged.activeAdventure.pausedAt === 'string' ? merged.activeAdventure.pausedAt : null,
+      source:
+        merged.activeAdventure.source === 'home' ||
+        merged.activeAdventure.source === 'plan' ||
+        merged.activeAdventure.source === 'challenge'
+          ? merged.activeAdventure.source
+          : 'plan',
+      challengeId:
+        typeof merged.activeAdventure.challengeId === 'string'
+          ? merged.activeAdventure.challengeId
+          : null,
+      memoryText:
+        typeof merged.activeAdventure.memoryText === 'string'
+          ? merged.activeAdventure.memoryText.slice(0, 240)
+          : '',
+    }
+  }
+
+  const byId = new Map((Array.isArray(merged.badges) ? merged.badges : []).map((badge) => [badge.id, badge]))
+  merged.badges = defaultBadges.map((badge) => {
+    const existing = byId.get(badge.id)
+    const unlocked =
+      badge.id === 'welcome' ||
+      (badge.id === 'first-adventure' && merged.totalAdventures > 0) ||
+      (existing?.unlocked === true && merged.totalAdventures > 0)
+    return { ...badge, unlocked }
+  })
 }
 
 function patchLoadedState(merged: PawstreakState) {
@@ -383,16 +605,15 @@ function patchLoadedState(merged: PawstreakState) {
       pickNonce: merged.pickNonce,
       dogMood: merged.dogMood,
       zipCode: merged.zipCode ?? '',
+      recentAdventures: merged.recentAdventures,
+      userProfile: merged.userProfile,
     })
     Object.assign(merged, fix)
   } else {
     Object.assign(merged, flattenMission(merged.generatedMission))
   }
 
-  merged.tomorrowTease = refreshTomorrowTease({
-    dogName: merged.dogName,
-    zipCode: merged.zipCode ?? '',
-  })
+  merged.tomorrowTease = tomorrowTeaseFor(merged)
 
   if (typeof merged.emergencyTreatAvailable !== 'boolean') {
     merged.emergencyTreatAvailable = true
@@ -414,6 +635,9 @@ function patchLoadedState(merged: PawstreakState) {
     merged.firstAdventurePromptSeenAt !== null
   ) {
     merged.firstAdventurePromptSeenAt = null
+  }
+  if (merged.memoryReturnHighlightId !== null && typeof merged.memoryReturnHighlightId !== 'string') {
+    merged.memoryReturnHighlightId = null
   }
 }
 
@@ -441,7 +665,8 @@ export function setDogName(state: PawstreakState, name: string, zipCodeRaw?: str
     pickNonce,
     tomorrowTease: refreshTomorrowTease({ dogName, zipCode }),
   }
-  return { ...next, ...initialSelection({ ...next, dogName, dogMood, zipCode }) }
+  const withSelection = { ...next, ...initialSelection({ ...next, dogName, dogMood, zipCode }) }
+  return { ...withSelection, tomorrowTease: tomorrowTeaseFor(withSelection) }
 }
 
 export function completeOnboarding(
@@ -478,21 +703,14 @@ export function completeOnboarding(
     demoStartedAt: state.demoStartedAt ?? new Date().toISOString(),
   }
 
-  const picks = quickAdventurePicksForZip(zipCode)
-  const idx = hashString(`onboard|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName,
-    dogMood,
-    streak: 0,
-    nonce: `onboard|${pickNonce}`,
-  })
-  return {
+  const generatedMission = buildTodayMission(next, `onboard|${pickNonce}`)
+  const result = {
     ...next,
     ...freshProgressFields(),
     generatedMission,
     ...flattenMission(generatedMission),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function dismissWelcomeBanner(state: PawstreakState): PawstreakState {
@@ -502,88 +720,150 @@ export function dismissWelcomeBanner(state: PawstreakState): PawstreakState {
 export function setZipCode(state: PawstreakState, zipCodeRaw: string): PawstreakState {
   const zipCode = normalizeZip(zipCodeRaw)
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(zipCode)
-  const idx = hashString(`zip|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `zip|${pickNonce}`,
-  })
-  return {
+  const next = {
     ...state,
     zipCode,
     userProfile: { ...state.userProfile, homeZip: zipCode },
     pickNonce,
+  }
+  const generatedMission = buildTodayMission(next, `zip|${pickNonce}`)
+  const result = {
+    ...next,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function rollPickForMe(state: PawstreakState): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const idx = hashString(`pick|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `pick|${pickNonce}`,
-  })
-  return {
+  const generatedMission = buildTodayMission(state, `pick|${pickNonce}`)
+  const result = {
     ...state,
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function selectVibe(state: PawstreakState, vibe: VibeArchetype): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const matches = picks.map((p, i) => ({ p, i })).filter((x) => x.p.vibe === vibe)
-  const idx =
-    matches.length > 0
-      ? matches[hashString(`vibe|${pickNonce}`) % matches.length].i
-      : hashString(`vibe|${pickNonce}`) % Math.max(1, picks.length)
-  const generatedMission = missionFromQuickPick({
-    pick: picks[idx],
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `vibe|${pickNonce}|${vibe}`,
-  })
-  return {
+  const generatedMission = buildTodayMission(state, `vibe|${pickNonce}|${vibe}`, { fixedVibe: vibe })
+  const result = {
     ...state,
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
 }
 
 export function pickSuggestedAdventure(state: PawstreakState, index: number): PawstreakState {
   const pickNonce = state.pickNonce + 1
-  const picks = quickAdventurePicksForZip(state.zipCode ?? '')
-  const pick = picks[index % Math.max(1, picks.length)]
-  const generatedMission = missionFromQuickPick({
-    pick,
-    dogName: state.dogName,
-    dogMood: state.dogMood,
-    streak: state.currentStreak,
-    nonce: `chip|${pickNonce}|${pick.id}`,
-  })
-  return {
+  const generatedMission = buildTodayMission(state, `chip|${pickNonce}|${index}`, { pickIndex: index })
+  const result = {
     ...state,
     pickNonce,
     generatedMission,
     ...flattenMission(generatedMission),
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
   }
+  return { ...result, tomorrowTease: tomorrowTeaseFor(result) }
+}
+
+export function activeAdventureElapsedSeconds(
+  activeAdventure: PawstreakState['activeAdventure'],
+  now: Date = new Date(),
+): number {
+  if (!activeAdventure) return 0
+  const startedAtMs = new Date(activeAdventure.startedAt).getTime()
+  if (!Number.isFinite(startedAtMs)) return Math.max(0, Math.floor(activeAdventure.accumulatedSeconds))
+  const runningUntilMs = activeAdventure.pausedAt
+    ? new Date(activeAdventure.pausedAt).getTime()
+    : now.getTime()
+  const elapsed = Math.max(0, Math.floor((runningUntilMs - startedAtMs) / 1000))
+  return Math.max(0, Math.floor(activeAdventure.accumulatedSeconds) + elapsed)
+}
+
+export function startAdventureSession(
+  state: PawstreakState,
+  source: NonNullable<PawstreakState['activeAdventure']>['source'] = 'plan',
+  challengeId: string | null = null,
+  now: Date = new Date(),
+): PawstreakState {
+  if (state.todayAdventureDone) return state
+  if (state.activeAdventure) return state
+  const challengeVibe = challengeId ? challengeVibeById[challengeId] : undefined
+  const baseMission =
+    source === 'challenge' && challengeVibe
+      ? buildTodayMission(state, `challenge|${state.pickNonce}|${challengeId}`, { fixedVibe: challengeVibe })
+      : state.generatedMission
+  const mission =
+    source === 'challenge' && challengeId && challengeMissionOverrides[challengeId]
+      ? { ...baseMission, ...challengeMissionOverrides[challengeId] }
+      : baseMission
+  return {
+    ...state,
+    activeAdventure: {
+      id: crypto.randomUUID(),
+      mission,
+      startedAt: now.toISOString(),
+      accumulatedSeconds: 0,
+      pausedAt: null,
+      source,
+      challengeId,
+      memoryText: '',
+    },
+  }
+}
+
+export function updateAdventureMemoryDraft(
+  state: PawstreakState,
+  memoryText: string,
+): PawstreakState {
+  if (!state.activeAdventure) return state
+  return {
+    ...state,
+    activeAdventure: {
+      ...state.activeAdventure,
+      memoryText: memoryText.slice(0, 240),
+    },
+  }
+}
+
+export function pauseAdventureSession(
+  state: PawstreakState,
+  paused: boolean,
+  now: Date = new Date(),
+): PawstreakState {
+  const activeAdventure = state.activeAdventure
+  if (!activeAdventure) return state
+  if (paused) {
+    if (activeAdventure.pausedAt) return state
+    return {
+      ...state,
+      activeAdventure: {
+        ...activeAdventure,
+        pausedAt: now.toISOString(),
+      },
+    }
+  }
+
+  if (!activeAdventure.pausedAt) return state
+  return {
+    ...state,
+    activeAdventure: {
+      ...activeAdventure,
+      startedAt: now.toISOString(),
+      accumulatedSeconds: activeAdventureElapsedSeconds(activeAdventure, now),
+      pausedAt: null,
+    },
+  }
+}
+
+export function abandonAdventureSession(state: PawstreakState): PawstreakState {
+  if (!state.activeAdventure) return state
+  return { ...state, activeAdventure: null }
 }
 
 function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent: AdventureEntry[]) {
@@ -596,6 +876,9 @@ function applyBadgeUnlocks(state: PawstreakState, nextStreak: number, nextRecent
 
   const nextBadges = state.badges.map((badge) => {
     let unlocked = badge.unlocked
+    if (badge.id === 'welcome') unlocked = true
+    if (badge.id === 'first-adventure' && nextRecent.length >= 1) unlocked = true
+    if (badge.id === 'three-day-streak' && nextStreak >= 3) unlocked = true
     if (badge.id === 'week-warrior' && nextStreak >= 7) unlocked = true
     if (badge.id === 'explorer' && wildCount >= 1) unlocked = true
     if (badge.id === 'park-regular' && wanderCount >= 5) unlocked = true
@@ -619,19 +902,33 @@ export function completeAdventure(
   walkSeconds: number,
   options: CompleteAdventureOptions = {},
 ): PawstreakState {
+  if (state.todayAdventureDone && !state.activeAdventure) return state
+  const gm = state.activeAdventure?.mission ?? state.generatedMission
   const xpBreakdown = calculateAdventureXp({
     walkSeconds,
-    rarity: state.generatedMission.rarity,
+    rarity: gm.rarity,
   })
   const minutes = xpBreakdown.minutes
   const ground = xpBreakdown.ground
   const adventureEnergy = xpBreakdown.xp
   const nextStreak = state.currentStreak + 1
-  const gm = state.generatedMission
 
   const trimmedMemory = options.memoryText?.trim() ?? ''
+  const completedAt = new Date()
+  const adventureId = crypto.randomUUID()
+  const memoryNarrative = buildMemoryNarrative({
+    adventureId,
+    walkSeconds,
+    dogName: state.dogName,
+    memoryText: trimmedMemory || undefined,
+    mission: gm,
+    zipCode: state.zipCode ?? '',
+    completedAt,
+    isAway: state.isAway,
+    streak: nextStreak,
+  })
   const completed: AdventureEntry = {
-    id: crypto.randomUUID(),
+    id: adventureId,
     vibe: gm.vibe,
     missionTitle: gm.title,
     emoji: gm.emoji,
@@ -639,12 +936,14 @@ export function completeAdventure(
     adventureEnergy,
     durationMinutes: minutes,
     groundCovered: ground,
-    completedAt: new Date().toISOString(),
+    completedAt: completedAt.toISOString(),
     locationHint: gm.locationHint,
     missionDescription: gm.description,
     estimatedMinutesMin: gm.estimatedMinutesMin,
     estimatedMinutesMax: gm.estimatedMinutesMax,
+    memoryNarrative,
     ...(trimmedMemory ? { memoryText: trimmedMemory } : {}),
+    ...(gm.localSpotId ? { localSpotId: gm.localSpotId } : {}),
   }
 
   const nextRecent = [completed, ...state.recentAdventures].slice(0, 12)
@@ -664,10 +963,35 @@ export function completeAdventure(
     reminderSet: false,
     recentAdventures: nextRecent,
     latestCompletedAdventure: completed,
+    memoryReturnHighlightId: adventureId,
     badges: nextBadges,
     latestUnlockedBadgeId,
-    tomorrowTease: refreshTomorrowTease({ dogName: state.dogName, zipCode: state.zipCode ?? '' }),
+    tomorrowTease: memoryNarrative.anticipationLine,
+    activeAdventure: null,
   }
+}
+
+export function attachAdventureReflection(
+  state: PawstreakState,
+  adventureId: string,
+  reflection: AdventureReflection,
+): PawstreakState {
+  const patchEntry = (entry: AdventureEntry): AdventureEntry =>
+    entry.id === adventureId ? { ...entry, reflection } : entry
+
+  return {
+    ...state,
+    recentAdventures: state.recentAdventures.map(patchEntry),
+    latestCompletedAdventure:
+      state.latestCompletedAdventure?.id === adventureId
+        ? { ...state.latestCompletedAdventure, reflection }
+        : state.latestCompletedAdventure,
+  }
+}
+
+export function clearMemoryReturnHighlight(state: PawstreakState): PawstreakState {
+  if (!state.memoryReturnHighlightId) return state
+  return { ...state, memoryReturnHighlightId: null }
 }
 
 export function setReminder(state: PawstreakState, value: boolean): PawstreakState {

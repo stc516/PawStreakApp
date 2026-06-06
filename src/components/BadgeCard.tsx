@@ -1,3 +1,5 @@
+import { CategoryIllustration, categoryFromText } from './challenges/CategoryIllustration'
+
 interface BadgeCardProps {
   icon: string
   name: string
@@ -26,9 +28,17 @@ export function BadgeCard({
 
   return (
     <div className={`badge-card ${!unlocked ? 'locked' : ''} ${mystery ? 'mystery' : ''}`.trim()}>
-      <div className='badge-card-icon'>{icon}</div>
+      <div className='badge-card-icon' aria-hidden>
+        <CategoryIllustration
+          category={categoryFromText(`${name} ${description}`)}
+          size={58}
+          locked={!unlocked}
+        />
+      </div>
       <div className='badge-card-name'>{name}</div>
-      <div className='badge-card-desc'>{description}</div>
+      <div className='badge-card-desc'>
+        {unlocked ? description : mystery ? 'A hidden milestone is waiting for the right pattern.' : description}
+      </div>
     </div>
   )
 }

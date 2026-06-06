@@ -104,6 +104,51 @@ create index if not exists adventures_user_completed_idx
   on public.adventures (user_id, completed_at desc);
 
 -------------------------------------------------------------------------------
+-- location_expansion_requests (unsupported onboarding regions)
+-------------------------------------------------------------------------------
+create table if not exists public.location_expansion_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  dog_id uuid,
+  raw_location_input text,
+  resolved_city text,
+  resolved_state text,
+  resolved_country text,
+  latitude numeric,
+  longitude numeric,
+  source text default 'onboarding_location',
+  status text default 'new',
+  notes text,
+  created_at timestamptz default now()
+);
+
+alter table public.location_expansion_requests
+  add column if not exists dog_id uuid,
+  add column if not exists raw_location_input text,
+  add column if not exists resolved_city text,
+  add column if not exists resolved_state text,
+  add column if not exists resolved_country text,
+  add column if not exists latitude numeric,
+  add column if not exists longitude numeric,
+  add column if not exists status text default 'new',
+  add column if not exists notes text;
+
+alter table public.location_expansion_requests enable row level security;
+
+drop policy if exists "location_expansion_requests_insert" on public.location_expansion_requests;
+create policy "location_expansion_requests_insert"
+  on public.location_expansion_requests for insert
+  with check (user_id is null or auth.uid() = user_id);
+
+drop policy if exists "location_expansion_requests_select_self" on public.location_expansion_requests;
+create policy "location_expansion_requests_select_self"
+  on public.location_expansion_requests for select
+  using (auth.uid() = user_id);
+
+create index if not exists location_expansion_requests_region_idx
+  on public.location_expansion_requests (resolved_state, resolved_city, created_at desc);
+
+-------------------------------------------------------------------------------
 -- updated_at triggers
 -------------------------------------------------------------------------------
 create or replace function public.set_updated_at()

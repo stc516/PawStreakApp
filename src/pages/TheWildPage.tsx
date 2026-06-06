@@ -4,6 +4,7 @@ import { BottomNav } from '../components/BottomNav'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { LevelProgressCard } from '../components/LevelProgressCard'
 import { useAppState } from '../hooks/useAppState'
+import { FONT_IMPORT, H } from '../lib/editorialTheme'
 import { getCurrentLevel } from '../utils/xpLevels'
 
 const PATH_NODES = [
@@ -16,18 +17,18 @@ const PATH_NODES = [
 ]
 
 const C = {
-  bg:          '#0A0A0A',
-  surface:     '#201f1f',
-  surfaceLow:  '#1c1b1b',
-  surfaceMin:  '#0e0e0e',
-  primary:     '#ffbd7f',
-  onSurface:   '#e5e2e1',
-  muted:       '#dbc2ad',
-  border5:     'rgba(255,255,255,0.05)',
-  border10:    'rgba(255,255,255,0.10)',
-  outline:     'rgba(85,67,52,0.5)',
+  bg: H.page,
+  surface: H.card,
+  surfaceLow: H.cardSoft,
+  surfaceMin: H.cardSoft,
+  primary: H.sage,
+  onSurface: H.ink,
+  muted: H.muted,
+  border5: H.border,
+  border10: H.borderStrong,
+  outline: H.border,
 }
-const FONT = "'Inter', sans-serif"
+const FONT = H.sans
 
 function PathNodeIcon({ id, color, size = 28 }: { id: string; color: string; size?: number }) {
   const b = {
@@ -97,6 +98,7 @@ export function TheWildPage() {
       style={{
         minHeight: '100dvh',
         background: C.bg,
+        backgroundImage: H.pageWash,
         color: C.onSurface,
         fontFamily: FONT,
         maxWidth: '390px',
@@ -105,6 +107,7 @@ export function TheWildPage() {
         overflowX: 'hidden',
       }}
     >
+      <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes wild-pulse {
           0% { transform: scale(0.9); opacity: 0.7; }
@@ -121,7 +124,7 @@ export function TheWildPage() {
         transform: 'translateX(-50%)',
         width: '100%', maxWidth: '390px',
         zIndex: 50,
-        background: 'rgba(0,0,0,0.80)',
+        background: 'rgba(250, 247, 242, 0.92)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         display: 'flex',
@@ -132,7 +135,7 @@ export function TheWildPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '40px', height: '40px', borderRadius: '50%',
-            overflow: 'hidden', border: '2px solid rgba(255,189,127,0.2)', flexShrink: 0,
+            overflow: 'hidden', border: `2px solid ${H.sage}`, flexShrink: 0,
           }}>
             <img
               src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"
@@ -140,8 +143,8 @@ export function TheWildPage() {
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
-          <div style={{ fontSize: '18px', fontWeight: '700', color: C.primary }}>
-            {state.dogName}
+          <div style={{ fontFamily: H.serif, fontSize: '18px', fontWeight: '700', color: C.onSurface }}>
+            PawStreak
           </div>
         </div>
         <div style={{ width: '40px', flexShrink: 0 }} aria-hidden />
@@ -152,7 +155,7 @@ export function TheWildPage() {
 
         {/* Page title */}
         <section style={{ textAlign: 'center', marginBottom: '32px', paddingTop: '16px' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: '700', color: C.onSurface, margin: '0 0 8px', lineHeight: '1.2' }}>
+          <h2 style={{ fontFamily: H.serif, fontSize: '32px', fontWeight: '700', color: C.onSurface, margin: '0 0 8px', lineHeight: '1.2' }}>
             Path
           </h2>
           <p style={{ fontSize: '15px', color: C.muted, margin: 0 }}>
@@ -165,17 +168,18 @@ export function TheWildPage() {
           data-testid="wild-current-card"
           style={{
             marginBottom: '32px',
-            background: 'linear-gradient(135deg, rgba(255,149,0,0.10), rgba(255,94,0,0.04))',
-            border: '1px solid rgba(255,149,0,0.20)',
+            background: H.card,
+            border: `1px solid ${H.border}`,
             borderRadius: '20px',
+            boxShadow: H.shadowSoft,
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{
               width: '48px', height: '48px', borderRadius: '14px',
-              background: 'rgba(255,149,0,0.15)',
-              border: '1px solid rgba(255,149,0,0.3)',
+              background: H.sageSoft,
+              border: `1px solid ${H.border}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '24px', flexShrink: 0,
             }}>
@@ -225,7 +229,7 @@ export function TheWildPage() {
             position: 'absolute',
             top: '40px', bottom: '40px',
             width: '2px',
-            backgroundImage: 'radial-gradient(circle, rgba(255,149,0,0.6) 1.5px, transparent 1.5px)',
+            backgroundImage: `radial-gradient(circle, ${H.sage} 1.5px, transparent 1.5px)`,
             backgroundSize: '2px 16px',
             opacity: 0.3,
           }} />
@@ -256,7 +260,7 @@ export function TheWildPage() {
                       top: '-8px', left: '-8px',
                       width: '80px', height: '80px',
                       borderRadius: '50%',
-                      background: 'rgba(255,189,127,0.20)',
+                      background: H.sageSoft,
                     }}
                   />
                 )}
@@ -268,9 +272,9 @@ export function TheWildPage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                   ...(completed ? {
-                    background: 'linear-gradient(180deg, #FFB874 0%, #FF9500 100%)',
-                    boxShadow: '0 4px 0 0 #D17A00',
-                    filter: 'drop-shadow(0 0 12px rgba(255,149,0,0.6))',
+                    background: H.sage,
+                    boxShadow: H.shadowSoft,
+                    filter: 'none',
                   } : isActive ? {
                     background: C.surfaceLow,
                     border: `3px solid ${C.primary}`,
@@ -281,7 +285,7 @@ export function TheWildPage() {
                 }}>
                   <PathNodeIcon
                     id={node.id}
-                    color={completed ? '#4b2800' : locked ? C.muted : C.primary}
+                    color={completed ? '#FFFCF8' : locked ? C.muted : C.primary}
                     size={28}
                   />
                   {/* SVG progress arc for active progress node */}
@@ -313,7 +317,7 @@ export function TheWildPage() {
                   </p>
                   {isActive && node.isProgress && (
                     <>
-                      <div style={{ width: '128px', height: '6px', background: '#353534', borderRadius: '9999px', overflow: 'hidden', margin: '0 auto 4px' }}>
+                      <div style={{ width: '128px', height: '6px', background: H.amberSoft, borderRadius: '9999px', overflow: 'hidden', margin: '0 auto 4px' }}>
                         <div style={{ height: '100%', width: `${nodeProgress * 100}%`, background: C.primary, borderRadius: '9999px' }} />
                       </div>
                       <p style={{ fontSize: '10px', fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0 }}>

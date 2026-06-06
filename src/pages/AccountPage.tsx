@@ -10,6 +10,7 @@ import {
   signUpWithPassword,
   signOut,
 } from '../lib/auth'
+import { FONT_IMPORT, H, editorialCard } from '../lib/editorialTheme'
 
 type Mode = 'signin' | 'signup'
 
@@ -21,26 +22,20 @@ interface FeedbackState {
 const SAMPLE_DOG_PHOTO = 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80'
 
 const C = {
-  bg:          '#0A0A0A',
-  surface:     '#1A1A1A',
-  surfaceLow:  '#131313',
-  primary:     '#ffbd7f',
-  primaryHex:  '#ff9500',
-  onSurface:   '#e5e2e1',
-  muted:       '#dbc2ad',
-  border5:     'rgba(255,255,255,0.05)',
-  border8:     'rgba(255,255,255,0.08)',
+  bg: H.page,
+  surface: H.card,
+  surfaceLow: H.cardSoft,
+  primary: H.sage,
+  primaryHex: H.sage,
+  onSurface: H.ink,
+  muted: H.muted,
+  border5: H.border,
+  border8: H.borderStrong,
 }
-const FONT = "'Inter', sans-serif"
+const FONT = H.sans
 
 function floatingCard(extra?: CSSProperties): CSSProperties {
-  return {
-    background: C.surface,
-    border: `1px solid ${C.border5}`,
-    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-    borderRadius: '16px',
-    ...extra,
-  }
+  return editorialCard(extra)
 }
 
 export function AccountPage() {
@@ -121,7 +116,7 @@ export function AccountPage() {
   const inputStyle: CSSProperties = {
     width: '100%',
     height: '48px',
-    background: 'rgba(255,255,255,0.04)',
+    background: H.cardSoft,
     border: `1px solid ${C.border8}`,
     borderRadius: '12px',
     padding: '0 14px',
@@ -139,6 +134,7 @@ export function AccountPage() {
       style={{
         minHeight: '100dvh',
         background: C.bg,
+        backgroundImage: H.pageWash,
         color: C.onSurface,
         fontFamily: FONT,
         maxWidth: '390px',
@@ -147,6 +143,7 @@ export function AccountPage() {
         overflowX: 'hidden',
       }}
     >
+      <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       {/* Fixed header */}
       <header style={{
         position: 'fixed',
@@ -154,7 +151,7 @@ export function AccountPage() {
         transform: 'translateX(-50%)',
         width: '100%', maxWidth: '390px',
         zIndex: 50,
-        background: 'rgba(10,10,10,0.80)',
+        background: 'rgba(250, 247, 242, 0.92)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         display: 'flex',
@@ -165,11 +162,11 @@ export function AccountPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '50%',
-            overflow: 'hidden', border: '1px solid rgba(255,189,127,0.3)', flexShrink: 0,
+            overflow: 'hidden', border: `2px solid ${H.sage}`, flexShrink: 0,
           }}>
             <img src={SAMPLE_DOG_PHOTO} alt={dogName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <span style={{ fontSize: '20px', fontWeight: '700', color: C.primary }}>PawStreak</span>
+          <span style={{ fontFamily: H.serif, fontSize: '20px', fontWeight: '700', color: C.onSurface }}>PawStreak</span>
         </div>
         <button
           type="button"
@@ -198,7 +195,7 @@ export function AccountPage() {
           <div style={{
             position: 'absolute', top: '-48px',
             width: '320px', height: '320px',
-            background: 'radial-gradient(circle, rgba(255,149,0,0.15) 0%, rgba(10,10,10,0) 70%)',
+            background: 'radial-gradient(circle, rgba(212, 149, 106, 0.15) 0%, rgba(250, 247, 242, 0) 70%)',
             pointerEvents: 'none',
             zIndex: 0,
           }} />
@@ -207,8 +204,8 @@ export function AccountPage() {
           <div style={{ position: 'relative', marginBottom: '20px', zIndex: 1 }}>
             <div style={{
               width: '144px', height: '144px', borderRadius: '50%',
-              border: '3px solid #ff9500',
-              boxShadow: '0 0 25px rgba(255,149,0,0.3)',
+              border: `3px solid ${H.sage}`,
+              boxShadow: H.shadowSoft,
               background: C.surface,
               overflow: 'hidden',
             }}>
@@ -222,10 +219,10 @@ export function AccountPage() {
 
           {/* Name + subtitle */}
           <div style={{ textAlign: 'center', zIndex: 1 }}>
-            <h1 style={{ fontSize: '36px', fontWeight: '700', color: C.onSurface, margin: '0 0 4px', letterSpacing: '-0.01em' }}>
+            <h1 style={{ fontFamily: H.serif, fontSize: '36px', fontWeight: '700', color: C.onSurface, margin: '0 0 4px', letterSpacing: '-0.01em' }}>
               {dogName}
             </h1>
-            <p style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,189,127,0.8)', textTransform: 'uppercase', letterSpacing: '0.2em', margin: 0 }}>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: H.terra, textTransform: 'uppercase', letterSpacing: '0.2em', margin: 0 }}>
               Adventure Dog
             </p>
           </div>
@@ -293,8 +290,8 @@ export function AccountPage() {
                   <button key={m} type="button" onClick={() => { setMode(m); clearFeedback() }} style={{
                     flex: 1, height: '40px', borderRadius: '10px',
                     fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT,
-                    background: mode === m ? 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)' : 'transparent',
-                    color: mode === m ? '#FFFFFF' : C.muted,
+                    background: mode === m ? H.sage : 'transparent',
+                    color: mode === m ? '#FFFCF8' : C.muted,
                     border: mode === m ? 'none' : `1px solid ${C.border8}`,
                   }}>
                     {m === 'signup' ? 'Sign up' : 'Sign in'}
@@ -329,13 +326,13 @@ export function AccountPage() {
                 )}
                 <button type="submit" data-testid="account-password-submit" disabled={Boolean(busy)} style={{
                   width: '100%', height: '52px',
-                  background: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
+                  background: H.sage,
                   border: 'none', borderRadius: '12px',
-                  color: '#FFFFFF', fontSize: '16px', fontWeight: '700',
+                  color: '#FFFCF8', fontSize: '16px', fontWeight: '700',
                   cursor: busy ? 'not-allowed' : 'pointer',
                   fontFamily: FONT,
                   opacity: busy ? 0.6 : 1,
-                  boxShadow: '0 4px 16px rgba(255,149,0,0.35)',
+                  boxShadow: H.shadowSoft,
                   marginBottom: '10px',
                 }}>
                   {busy === 'password' ? 'Working…' : mode === 'signup' ? 'Create account' : 'Sign in'}

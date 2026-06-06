@@ -33,18 +33,18 @@ export function PacksPage() {
     >
       <header className='px-5 pt-10'>
         <div className='text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--text-3)]'>
-          {state.dogName}&apos;s world map
+          {state.dogName}&apos;s challenge board
         </div>
         <h1 className='mt-1 font-[family-name:var(--fd),Fraunces,serif] text-[28px] font-semibold italic leading-[1.1] text-[var(--text)]'>
-          World Regions
+          Challenges
         </h1>
         <p className='mt-2 text-[13px] leading-relaxed text-[var(--text-2)]'>
-          Packs are places with an identity. Every repeated adventure makes the world feel more like
-          {state.dogName}&apos;s.
+          Premium milestones for the habits you and {state.dogName} are actually building.
+          Every badge has to be earned.
         </p>
         <div className='mt-3 text-[11px] uppercase tracking-[0.14em] text-[var(--text-3)]'>
           <span>
-            <span className='font-bold text-[color:var(--orange)]'>{summary.completed}</span> / {summary.total} regions known
+            <span className='font-bold text-[color:var(--orange)]'>{summary.completed}</span> / {summary.total} challenges earned
           </span>
           <span aria-hidden className='mx-2'>·</span>
           <span>{summary.inProgress} being explored</span>
@@ -58,16 +58,16 @@ export function PacksPage() {
               <MascotBadge mascot='duo' size='md' />
             </div>
             <h2 className='mt-3 font-[family-name:var(--fd),Fraunces,serif] text-[18px] font-semibold italic text-[var(--text)]'>
-              {state.dogName}&apos;s collection starts today.
+              {state.dogName}&apos;s challenge shelf starts today.
             </h2>
             <p className='mt-1 text-[13px] leading-relaxed text-[var(--text-2)]'>
-              Choose a region below. The first visit makes the first mark on the atlas.
+              Pick a challenge below. The first matching adventure lights up its path.
             </p>
           </div>
         ) : null}
 
         {inProgress.length > 0 ? (
-          <PackSection title='Being explored' subtitle='Regions your dog is beginning to know.'>
+          <PackSection title='In progress' subtitle='Challenges already starting to glow.'>
             {inProgress.map((p) => (
               <PackCard key={p.pack.id} progress={p} />
             ))}
@@ -75,7 +75,7 @@ export function PacksPage() {
         ) : null}
 
         {fresh.length > 0 ? (
-          <PackSection title='Undiscovered regions' subtitle='World identities waiting for the right day.'>
+          <PackSection title='Locked challenges' subtitle='Aspirational badges waiting for the right outing.'>
             {fresh.map((p) => (
               <PackCard key={p.pack.id} progress={p} />
             ))}
@@ -83,7 +83,7 @@ export function PacksPage() {
         ) : null}
 
         {done.length > 0 ? (
-          <PackSection title='Known regions' subtitle='Earned identities — places that now feel like yours.'>
+          <PackSection title='Earned challenges' subtitle='Premium badges that now belong to your story.'>
             {done.map((p) => (
               <PackCard key={p.pack.id} progress={p} />
             ))}

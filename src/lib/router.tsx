@@ -4,6 +4,7 @@ import { AccountPage } from '../pages/AccountPage'
 import { AdventurePage } from '../pages/AdventurePage'
 import { BadgesPage } from '../pages/BadgesPage'
 import { CharacterMomentPage } from '../pages/CharacterMomentPage'
+import { ChallengeDetailPage } from '../pages/ChallengeDetailPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
 import { PacksPage } from '../pages/PacksPage'
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
   {
     path: '/packs',
     element: <PacksPage />,
+  },
+  {
+    path: '/packs/:id',
+    element: <ChallengeDetailPage />,
   },
   {
     path: '/privacy',

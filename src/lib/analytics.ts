@@ -24,6 +24,7 @@ export interface AnalyticsEventMap {
     reminder_cadence?: 'daily' | 'weekly' | 'apponly'
     zip_supported?: boolean
     environment_primary?: string
+    supported_market?: 'san-diego' | 'orange-county' | null
   }
   dog_profile_created: { has_breed: boolean; has_age: boolean }
   zip_supported_entered: { environment_primary: string }

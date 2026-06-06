@@ -4,31 +4,32 @@ import { useNavigate } from 'react-router-dom'
 import { LevelProgressCard } from '../components/LevelProgressCard'
 import { ProgressBar } from '../components/ProgressBar'
 import { RewardCard } from '../components/RewardCard'
+import { CategoryIllustration, categoryFromText } from '../components/challenges/CategoryIllustration'
 import { bondArcProgress, identityArc } from '../data/missions'
 import { useAppState } from '../hooks/useAppState'
+import { confettiPalette, FONT_IMPORT, H } from '../lib/editorialTheme'
 import { didLevelUp, getCurrentLevel } from '../utils/xpLevels'
 
-const confettiPalette = [
-  '#FF9500', '#FFB874', '#FF5E00', '#ffbe68', '#ffbd7f', '#e5e2e1', '#ffb599',
-]
-
 const C = {
-  bg:          '#0A0A0A',
-  surface:     '#1c1b1b',
-  primary:     '#ffbd7f',
-  primaryGrad: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
-  onSurface:   '#e5e2e1',
-  muted:       '#dbc2ad',
-  border8:     'rgba(255,255,255,0.08)',
-  border10:    'rgba(255,255,255,0.10)',
+  bg: H.page,
+  surface: H.card,
+  primary: H.sage,
+  primaryGrad: H.sage,
+  onSurface: H.ink,
+  muted: H.muted,
+  border8: H.border,
+  border10: H.borderStrong,
 }
-const FONT = "'Inter', sans-serif"
+const FONT = H.sans
 
 export function RewardPage() {
   const navigate = useNavigate()
   const { state, setReminder, resetRewardFlow } = useAppState()
   const [shareFeedback, setShareFeedback] = useState('')
   const latest = state.latestCompletedAdventure
+  const illustrationCategory = categoryFromText(
+    `${latest?.missionTitle ?? state.selectedMissionTitle} ${latest?.locationHint ?? state.generatedMission?.locationHint ?? ''}`,
+  )
   const bond = bondArcProgress(state.currentStreak)
   const identity = identityArc(state.totalAdventureEnergy, state.currentStreak)
 
@@ -79,6 +80,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
       style={{
         minHeight: '100dvh',
         background: C.bg,
+        backgroundImage: H.pageWash,
         color: C.onSurface,
         fontFamily: FONT,
         maxWidth: '390px',
@@ -87,6 +89,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
         paddingBottom: '40px',
       }}
     >
+      <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes confetti-fall {
           0% { transform: translateY(-60px) rotateZ(0deg); opacity: 1; }
@@ -122,7 +125,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
       <div style={{
         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', height: '480px',
-        background: 'radial-gradient(circle at center, rgba(255,184,116,0.08) 0%, rgba(10,10,10,0) 70%)',
+        background: 'radial-gradient(circle at center, rgba(212, 149, 106, 0.12) 0%, rgba(250, 247, 242, 0) 70%)',
         pointerEvents: 'none',
       }} />
 
@@ -136,7 +139,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
           </p>
           <h2
             data-testid="reward-headline"
-            style={{ fontSize: '28px', fontWeight: '700', color: C.onSurface, margin: '0 0 8px', lineHeight: '1.2' }}
+            style={{ fontFamily: H.serif, fontSize: '28px', fontWeight: '700', color: C.onSurface, margin: '0 0 8px', lineHeight: '1.2' }}
           >
             {state.dogName} had a great day.
           </h2>
@@ -150,10 +153,10 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
         <div style={{
           width: '100%',
           background: C.surface,
-          border: '1px solid rgba(255,255,255,0.10)',
-          borderRadius: '16px',
+          border: `1px solid ${H.border}`,
+          borderRadius: '20px',
           padding: '20px',
-          boxShadow: '0 0 30px 2px rgba(255,149,0,0.15)',
+          boxShadow: H.shadowSoft,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
             <div>
@@ -169,15 +172,15 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
               </div>
             </div>
             <div style={{
-              background: 'rgba(255,189,127,0.10)',
-              border: '1px solid rgba(255,189,127,0.20)',
+              background: H.sageSoft,
+              border: `1px solid ${H.border}`,
               borderRadius: '9999px', padding: '4px 12px',
               fontSize: '12px', fontWeight: '600', color: C.primary,
             }}>
               +{latest?.adventureEnergy ?? 0} warmth
             </div>
           </div>
-          <div style={{ borderTop: '1px solid rgba(85,67,52,0.3)', paddingTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ borderTop: `1px solid ${H.border}`, paddingTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill={C.primary} stroke="none">
               <path d="M12 2c0 0-5.5 5.5-5.5 11a5.5 5.5 0 0011 0C17.5 7.5 12 2 12 2z"/>
             </svg>
@@ -195,7 +198,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
           >
             <blockquote style={{
               fontSize: '20px', fontWeight: '600', fontStyle: 'italic',
-              color: '#ffb874', lineHeight: '1.5', opacity: 0.9, margin: 0,
+              color: H.inkSoft, lineHeight: '1.5', margin: 0, fontFamily: H.serif,
             }}>
               &ldquo;{latest.memoryText}&rdquo;
             </blockquote>
@@ -206,7 +209,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
         <RewardCard delayMs={380}>
           <div
             data-testid="reward-progress-block"
-            style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.035)', padding: '12px' }}
+            style={{ borderRadius: '12px', background: H.cardSoft, padding: '12px', border: `1px solid ${H.border}` }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{ fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.16em', color: C.muted }}>
@@ -289,14 +292,23 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
             borderRadius: '16px', overflow: 'hidden',
             marginBottom: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
           }}>
-            <img
-              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
-              alt={`${state.dogName} on adventure`}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <div
+              aria-label={`${state.dogName} adventure illustration`}
+              role="img"
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(145deg, #E9E5D8 0%, #DDEBDA 56%, #F4E4D4 100%)',
+              }}
+            >
+              <CategoryIllustration category={illustrationCategory} size={190} />
+            </div>
             <div style={{
               position: 'absolute', inset: 0,
-              background: 'linear-gradient(to top, #0A0A0A 0%, transparent 50%, rgba(0,0,0,0.2) 100%)',
+              background: 'linear-gradient(to top, rgba(44, 36, 25, 0.55) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)',
             }} />
             <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
               <button type="button" onClick={handleShare} style={{
@@ -360,7 +372,7 @@ Day ${state.currentStreak} of giving ${state.dogName === 'Your dog' ? 'them' : s
               onClick={() => { if (!state.reminderSet) setReminder(true) }}
               style={{
                 width: '100%', height: '48px',
-                background: state.reminderSet ? 'rgba(255,149,0,0.10)' : C.surface,
+                background: state.reminderSet ? H.sageSoft : C.surface,
                 border: `1px solid ${state.reminderSet ? C.primary : C.border8}`,
                 borderRadius: '12px',
                 color: state.reminderSet ? C.primary : C.muted,

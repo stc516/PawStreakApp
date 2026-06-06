@@ -8,6 +8,48 @@ export type AdventureCategory = 'social' | 'exploration' | 'chill' | 'chaos' | '
 
 export type DogMood = 'restless' | 'curious' | 'explorer' | 'social' | 'zoomie' | 'chill'
 
+export type ReflectionSource = 'user' | 'milestone' | 'composed' | 'fallback'
+
+/** Normalized lightweight signals for future recommendation tuning. */
+export interface AdventureReflectionSignals {
+  enjoyment?: 'great' | 'pretty-good' | 'meh' | 'too-much'
+  repeatIntent?: 'definitely' | 'sometimes' | 'not-really'
+  dogEnergy?: 'calm' | 'happy' | 'wild' | 'tired'
+  favoritePart?:
+    | 'sniffs'
+    | 'running'
+    | 'dogs'
+    | 'people'
+    | 'chilling'
+    | 'treats'
+    | 'view'
+    | 'walk'
+    | 'patio'
+    | 'exploring'
+  socialPreference?: 'high' | 'medium' | 'low'
+  activityPreference?: 'active' | 'balanced' | 'calm'
+  overstimulation?: boolean
+  calmPreference?: boolean
+}
+
+/** Optional post-adventure check-in — warm, not survey-like. */
+export interface AdventureReflection {
+  questionSetId: string
+  answers: Record<string, string>
+  signals: AdventureReflectionSignals
+  capturedAt: string
+}
+
+export interface MemoryNarrative {
+  emotionalTitle: string
+  atmosphere: string[]
+  reflection: string
+  reflectionSource: ReflectionSource
+  sealMetadata: string
+  anticipationLine: string
+  journeyCardSubtitle: string
+}
+
 /** Locale inferred from ZIP — drives mission pools (no APIs). */
 export type ZipLocale = 'generic' | 'coastal' | 'urban' | 'suburban' | 'trail'
 
@@ -30,6 +72,14 @@ export interface GeneratedMission {
   /** Longer mood + rarity flavor line */
   flavor: string
   vibe: VibeArchetype
+  /** Set when mission is anchored to a curated local spot */
+  localSpotId?: string
+  spotName?: string
+  atmosphere?: string
+  whyDogPeopleLoveIt?: string
+  marketId?: 'san-diego' | 'orange-county'
+  image?: string
+  isLocalSpot?: boolean
 }
 
 export interface AdventureEntry {
@@ -52,6 +102,12 @@ export interface AdventureEntry {
   /** Optional memory text the owner captured on the Adventure screen.
    *  Free-form, kept local (never sent to analytics). */
   memoryText?: string
+  /** Curated local spot id when adventure used a real place */
+  localSpotId?: string
+  /** Emotional story layer generated at completion (Memory Seal). */
+  memoryNarrative?: MemoryNarrative
+  /** Lightweight post-adventure check-in for future personalization. */
+  reflection?: AdventureReflection
 }
 
 export interface BadgeDefinition {
@@ -83,6 +139,16 @@ export interface UserProfile {
   homeLat: number | null
   homeLng: number | null
   homeZip: string
+  homeRawLocationInput?: string
+  homeLocationLabel?: string
+  homeResolvedCity?: string
+  homeResolvedState?: string
+  homeResolvedCountry?: string
+  homeMapboxPlaceId?: string
+  homeMapboxRelevance?: number | null
+  homeMapboxConfidence?: string
+  homeSupportedMarket?: 'san-diego' | 'orange-county' | null
+  homeGeocodeSource?: 'mapbox' | 'manual_zip' | null
 }
 
 export type NotificationCadence = 'daily' | 'weekly' | 'apponly'
@@ -149,6 +215,21 @@ export interface PawstreakState {
   /** ISO timestamp the post-first-adventure save prompt was acknowledged.
    *  Tracked separately so we never spam the prompt twice. */
   firstAdventurePromptSeenAt: string | null
+  /** Adventure id to show the Today return strip after Memory Seal. */
+  memoryReturnHighlightId: string | null
+  /** Persisted in-progress adventure so refresh/reopen keeps the same outing alive. */
+  activeAdventure: ActiveAdventureSession | null
+}
+
+export interface ActiveAdventureSession {
+  id: string
+  mission: GeneratedMission
+  startedAt: string
+  accumulatedSeconds: number
+  pausedAt: string | null
+  source: 'home' | 'plan' | 'challenge'
+  challengeId: string | null
+  memoryText: string
 }
 
 /** How long a brand-new user can use the app without signing up. */
@@ -171,7 +252,21 @@ export function defaultOwnerProfile(): OwnerProfile {
 }
 
 export function defaultUserProfile(): UserProfile {
-  return { homeLat: null, homeLng: null, homeZip: '' }
+  return {
+    homeLat: null,
+    homeLng: null,
+    homeZip: '',
+    homeRawLocationInput: '',
+    homeLocationLabel: '',
+    homeResolvedCity: '',
+    homeResolvedState: '',
+    homeResolvedCountry: '',
+    homeMapboxPlaceId: '',
+    homeMapboxRelevance: null,
+    homeMapboxConfidence: '',
+    homeSupportedMarket: null,
+    homeGeocodeSource: null,
+  }
 }
 
 export function defaultNotificationPrefs(): NotificationPrefs {

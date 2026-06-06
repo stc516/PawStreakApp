@@ -1,32 +1,86 @@
 import { useEffect, useMemo, type CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { AccountStatusChip } from '../components/auth/AccountStatusChip'
 import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePrompt'
 import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
+import { TonightChapter } from '../components/dashboard/TonightChapter'
+import { TomorrowTeaseLine } from '../components/dashboard/TomorrowTeaseLine'
 import { LegalFooter } from '../components/legal/LegalFooter'
 import { useAppState } from '../hooks/useAppState'
-import type { VibeArchetype } from '../types'
+import { displayTitleForEntry, narrativeForEntry } from '../lib/memoryNarrative'
+import {
+  missionFallbackConfidenceCue,
+  missionHeroBadge,
+  missionLocalConfidenceCue,
+  missionNeighborhoodLine,
+  missionSocialProofCue,
+  missionWhyTodayLine,
+} from '../lib/missionSurfaceCopy'
+import {
+  buildAfterglowHeadline,
+  streakRhythmLine,
+  weekendEnergyCue,
+} from '../lib/momentumCopy'
+import type { AdventureEntry, DogMood, VibeArchetype } from '../types'
 
 const PLACE_IMAGES: Record<string, string> = {
-  salt:    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
-  wander:  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
-  pulse:   'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
-  wild:    'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=800&q=80',
+  salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+  wander: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+  pulse: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
+  wild: 'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=800&q=80',
   default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80',
 }
 
 const VIBE_CHIPS: { label: string; vibe: VibeArchetype }[] = [
-  { label: 'Beach',     vibe: 'salt'   },
-  { label: 'Coffee',    vibe: 'pulse'  },
-  { label: 'Trail',     vibe: 'wander' },
-  { label: 'Brewery',   vibe: 'wild'   },
-  { label: 'Park',      vibe: 'wander' },
-  { label: 'Social',    vibe: 'wild'   },
-  { label: 'Sunset',    vibe: 'salt'   },
-  { label: 'City Walk', vibe: 'pulse'  },
+  { label: 'Beach', vibe: 'salt' },
+  { label: 'Coffee', vibe: 'pulse' },
+  { label: 'Trail', vibe: 'wander' },
+  { label: 'Brewery', vibe: 'wild' },
+  { label: 'Park', vibe: 'wander' },
+  { label: 'Social', vibe: 'wild' },
+  { label: 'Sunset', vibe: 'salt' },
+  { label: 'City Walk', vibe: 'pulse' },
 ]
+
+const GENERIC_ADVENTURE_CHIPS: { label: string; vibe: VibeArchetype }[] = [
+  { label: 'Neighborhood walk', vibe: 'pulse' },
+  { label: 'Park', vibe: 'wander' },
+  { label: 'Trail', vibe: 'wander' },
+  { label: 'Coffee', vibe: 'pulse' },
+  { label: 'Patio', vibe: 'pulse' },
+  { label: 'Brewery', vibe: 'wild' },
+  { label: 'Dog park', vibe: 'wild' },
+  { label: 'Scenic walk', vibe: 'salt' },
+]
+
+/** Home-only editorial palette — light, warm, lifestyle */
+const H = {
+  page: '#FAF7F2',
+  pageWash: 'linear-gradient(180deg, #FFFDF9 0%, #F5EFE6 48%, #FAF7F2 100%)',
+  card: '#FFFFFF',
+  cardSoft: '#FFFCF8',
+  ink: '#2C2419',
+  inkSoft: '#4A4036',
+  muted: '#7A6E62',
+  sage: '#5C7A6B',
+  sageSoft: 'rgba(92, 122, 107, 0.12)',
+  sageDeep: '#4A6359',
+  terra: '#C67B5C',
+  amber: '#D4956A',
+  amberSoft: 'rgba(212, 149, 106, 0.18)',
+  border: 'rgba(44, 36, 25, 0.08)',
+  borderStrong: 'rgba(44, 36, 25, 0.12)',
+  shadow: '0 12px 40px rgba(44, 36, 25, 0.06)',
+  shadowSoft: '0 4px 20px rgba(44, 36, 25, 0.05)',
+  serif: "'Literata', 'Fraunces', Georgia, 'Times New Roman', serif",
+  sans: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+}
+
+const FONT_IMPORT = `
+  @import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+`
 
 function relativeDayLabel(iso: string): string {
   const then = new Date(iso)
@@ -34,35 +88,54 @@ function relativeDayLabel(iso: string): string {
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
   const diffDays = Math.round((startOfDay(new Date()) - startOfDay(then)) / 86_400_000)
   if (diffDays <= 0) return 'Today'
-  if (diffDays === 1) return '1d'
-  if (diffDays < 7) return `${diffDays}d`
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
   return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
-
-const C = {
-  bg:          '#0A0A0A',
-  surface:     '#201f1f',
-  primary:     '#ffbd7f',
-  onSurface:   '#e5e2e1',
-  muted:       '#dbc2ad',
-  border5:     'rgba(255,255,255,0.05)',
-  border10:    'rgba(255,255,255,0.10)',
-}
-const FONT = "'Inter', sans-serif"
 
 function chipForVibe(vibe: VibeArchetype): string {
   return VIBE_CHIPS.find((c) => c.vibe === vibe)?.label ?? 'Beach'
 }
 
+function moodEditorialLine(mood: DogMood, name: string): string {
+  const lines: Record<DogMood, string> = {
+    restless: `${name} has that bright, ready-to-go energy today.`,
+    curious: `${name} is in a sniff-everything, follow-the-nose kind of mood.`,
+    explorer: `${name} wants a little farther, a little new today.`,
+    social: `${name} is feeling people-and-pups social today.`,
+    zoomie: `${name} is full of bounce — a joyful, busy day.`,
+    chill: `${name} is in a slow-and-cozy mood — gentle is perfect.`,
+  }
+  return lines[mood] ?? `${name} is ready for a good day together.`
+}
+
+function moodShortLabel(mood: DogMood): string {
+  const labels: Record<DogMood, string> = {
+    restless: 'Restless & ready',
+    curious: 'Curious',
+    explorer: 'Explorer',
+    social: 'Social',
+    zoomie: 'Zoomie',
+    chill: 'Chill',
+  }
+  return labels[mood] ?? 'Today'
+}
+
+function scrapbookRotation(index: number): string {
+  const angles = ['-2deg', '1.5deg', '-1deg', '2deg', '0deg']
+  return angles[index % angles.length]
+}
+
 export function DashboardPage() {
   const navigate = useNavigate()
-  const { state, selectVibe } = useAppState()
+  const [searchParams] = useSearchParams()
+  const { state, selectVibe, clearMemoryReturnHighlight } = useAppState()
+
   useEffect(() => {
     if (!state.onboardingComplete) navigate('/', { replace: true })
   }, [navigate, state.onboardingComplete])
 
   const selectedChip = chipForVibe(state.selectedVibe)
-
   const recent = state.recentAdventures.slice(0, 10)
   const placeHints = useMemo(
     () => new Set(state.recentAdventures.map((a) => a.locationHint?.trim()).filter(Boolean)).size,
@@ -71,16 +144,72 @@ export function DashboardPage() {
 
   const dogDisplayName = state.dogName?.trim() || 'Your dog'
   const gm = state.generatedMission
-  const heroImageUrl = PLACE_IMAGES[state.selectedVibe] || PLACE_IMAGES.default
-  const heroTitle = gm?.title ?? "Today's adventure"
-  const heroLocation = gm?.locationHint ?? 'Your neighborhood'
+  const adventureChips = state.userProfile.homeSupportedMarket ? VIBE_CHIPS : GENERIC_ADVENTURE_CHIPS
+  const heroImageUrl = gm?.image || PLACE_IMAGES[state.selectedVibe] || PLACE_IMAGES.default
+  const heroTitle = gm?.title ?? "Today's outing"
+  const heroLocation = gm ? missionNeighborhoodLine(gm) : 'Your neighborhood'
+  const heroBadge = gm ? missionHeroBadge(gm) : 'Suggested for you'
+  const heroConfidenceCue =
+    (gm && missionLocalConfidenceCue(gm, state.zipCode ?? '')) ||
+    (gm && missionFallbackConfidenceCue(gm, state.zipCode ?? '')) ||
+    null
+  const heroSocialProof = gm ? missionSocialProofCue(gm) : null
+  const heroWhyLine = gm ? missionWhyTodayLine(gm) : ''
 
-  const memories = recent.slice(0, 5).map((a) => ({
+  const featuredMemory = useMemo(() => {
+    const withNote = recent.find((a) => a.memoryText?.trim())
+    return withNote ?? recent[0] ?? null
+  }, [recent])
+
+  const isAfterglow = state.todayAdventureDone
+
+  const memoryReturnEntry = useMemo(() => {
+    if (!state.memoryReturnHighlightId) return null
+    return (
+      state.recentAdventures.find((a) => a.id === state.memoryReturnHighlightId) ??
+      state.latestCompletedAdventure
+    )
+  }, [state.memoryReturnHighlightId, state.recentAdventures, state.latestCompletedAdventure])
+
+  const tonightEntry = useMemo(() => {
+    if (!isAfterglow) return null
+    return memoryReturnEntry ?? state.latestCompletedAdventure ?? featuredMemory
+  }, [isAfterglow, memoryReturnEntry, state.latestCompletedAdventure, featuredMemory])
+
+  const rhythmHeaderLine = useMemo(
+    () => streakRhythmLine(state.currentStreak, dogDisplayName),
+    [state.currentStreak, dogDisplayName],
+  )
+
+  const afterglowHeadline = useMemo(
+    () => buildAfterglowHeadline(tonightEntry, dogDisplayName, state.currentStreak),
+    [tonightEntry, dogDisplayName, state.currentStreak],
+  )
+
+  const weekendLine = useMemo(() => weekendEnergyCue(), [])
+
+  const memories = recent.slice(0, 5).map((a, index) => ({
     id: a.id,
-    title: a.missionTitle,
+    title: displayTitleForEntry(a, dogDisplayName, state.zipCode ?? ''),
     date: relativeDayLabel(a.completedAt),
     img: PLACE_IMAGES[a.vibe] || PLACE_IMAGES.default,
+    rotate: scrapbookRotation(index),
+    memorySnippet:
+      a.memoryText?.trim() ??
+      a.memoryNarrative?.journeyCardSubtitle ??
+      narrativeForEntry(a, dogDisplayName, state.zipCode ?? '').journeyCardSubtitle,
   }))
+
+  function openJourneyMemory(entry: AdventureEntry) {
+    clearMemoryReturnHighlight()
+    navigate(`/story?memory=${encodeURIComponent(entry.id)}`)
+  }
+
+  useEffect(() => {
+    const memoryId = searchParams.get('memory')
+    if (!memoryId) return
+    clearMemoryReturnHighlight()
+  }, [searchParams, clearMemoryReturnHighlight])
 
   function handleChipClick(vibe: VibeArchetype) {
     selectVibe(vibe)
@@ -88,23 +217,35 @@ export function DashboardPage() {
 
   function startAdventure() {
     if (state.todayAdventureDone) return
-    navigate('/adventure')
+    navigate('/adventure?source=home')
+  }
+
+  const cardBase: CSSProperties = {
+    background: H.card,
+    borderRadius: '20px',
+    border: `1px solid ${H.border}`,
+    boxShadow: H.shadowSoft,
   }
 
   return (
     <div
       id="s-home"
+      data-testid="dashboard-today-root"
+      data-dashboard-mode={isAfterglow ? 'afterglow' : 'anticipation'}
       style={{
         minHeight: '100dvh',
-        background: C.bg,
-        color: C.onSurface,
-        fontFamily: FONT,
+        background: H.page,
+        backgroundImage: H.pageWash,
+        color: H.ink,
+        fontFamily: H.sans,
         maxWidth: '390px',
         margin: '0 auto',
         overflowX: 'hidden',
         position: 'relative',
       }}
     >
+      <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
+
       <span
         data-testid="dashboard-hero-status"
         style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
@@ -112,151 +253,179 @@ export function DashboardPage() {
         {dogDisplayName}
       </span>
 
+      {/* Header */}
       <header
         style={{
-          position: 'fixed',
+          position: 'sticky',
           top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: '390px',
           zIndex: 50,
-          background: 'rgba(10,10,10,0.80)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '20px 24px 16px',
+          background: 'rgba(250, 247, 242, 0.88)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
+          borderBottom: `1px solid ${H.border}`,
+          padding: '16px 24px 14px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
             <div
               style={{
-                position: 'absolute',
-                inset: '-3px',
+                position: 'relative',
+                flexShrink: 0,
+                padding: '3px',
                 borderRadius: '50%',
-                border: '2px solid rgba(255,189,127,0.4)',
-                pointerEvents: 'none',
-              }}
-            />
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: `1px solid ${C.border10}`,
+                background: `linear-gradient(135deg, ${H.sage} 0%, ${H.amber} 100%)`,
               }}
             >
               <img
                 src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"
                 alt={dogDisplayName}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '2px solid #FFFDF9',
+                  display: 'block',
+                }}
               />
             </div>
-          </div>
-          <div>
-            <h2 style={{ margin: 0 }}>
-              <span
-                data-testid="dashboard-dog-name"
+            <div style={{ minWidth: 0 }}>
+              <div
+                data-testid="dashboard-app-title"
                 style={{
-                  color: C.onSurface,
-                  fontWeight: '700',
-                  fontSize: '18px',
-                  lineHeight: '1.2',
-                  fontFamily: FONT,
+                  fontFamily: H.serif,
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: H.ink,
+                  lineHeight: 1.2,
+                  letterSpacing: '-0.02em',
                 }}
               >
-                {dogDisplayName}
-              </span>
-            </h2>
-            <div
-              data-testid="dashboard-streak-summary"
-              style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill={C.primary} aria-hidden>
-                <path d="M12 2c0 0-5.5 5.5-5.5 11a5.5 5.5 0 0011 0C17.5 7.5 12 2 12 2z" />
-              </svg>
-              <span style={{ fontSize: '12px', fontWeight: '500', color: C.muted }}>
-                {state.currentStreak} day streak
-              </span>
+                PawStreak
+              </div>
+              {!isAfterglow ? (
+                <div
+                  data-testid="dashboard-streak-summary"
+                  style={{ marginTop: '4px', fontSize: '13px', fontWeight: 500, color: H.muted }}
+                >
+                  {rhythmHeaderLine}
+                </div>
+              ) : (
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: H.muted, fontStyle: 'italic' }}>
+                  Tonight&apos;s chapter is written
+                </p>
+              )}
             </div>
           </div>
+          <AccountStatusChip />
         </div>
-        <AccountStatusChip />
       </header>
 
-      <main style={{ padding: '88px 24px 100px' }}>
+      <main style={{ padding: '8px 24px 108px' }}>
         <SaveProgressNudge />
         <PostAdventureSavePrompt />
 
+        {isAfterglow ? (
+          <section style={{ marginBottom: '20px', paddingTop: '8px' }}>
+            <p
+              style={{
+                margin: '0 0 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: H.sage,
+              }}
+            >
+              Afterglow
+            </p>
+            <h1
+              style={{
+                margin: '0 0 10px',
+                fontFamily: H.serif,
+                fontSize: '30px',
+                fontWeight: 700,
+                lineHeight: 1.15,
+                color: H.ink,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {afterglowHeadline}
+            </h1>
+            <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
+              {moodEditorialLine(state.dogMood, dogDisplayName)}
+            </p>
+          </section>
+        ) : (
+          <section style={{ marginBottom: '22px', paddingTop: '8px' }}>
+            <p
+              style={{
+                margin: '0 0 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: H.sage,
+              }}
+            >
+              {moodShortLabel(state.dogMood)}
+            </p>
+            <h1
+              style={{
+                margin: '0 0 10px',
+                fontFamily: H.serif,
+                fontSize: '30px',
+                fontWeight: 700,
+                lineHeight: 1.15,
+                color: H.ink,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              One good outing is waiting.
+            </h1>
+            <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55, color: H.inkSoft }}>
+              {moodEditorialLine(state.dogMood, dogDisplayName)}
+            </p>
+            {weekendLine ? (
+              <p style={{ margin: '10px 0 0', fontSize: '14px', lineHeight: 1.5, color: H.sageDeep, fontStyle: 'italic' }}>
+                {weekendLine}
+              </p>
+            ) : null}
+          </section>
+        )}
+
+        {isAfterglow && tonightEntry ? (
+          <TonightChapter
+            entry={tonightEntry}
+            dogDisplayName={dogDisplayName}
+            zipCode={state.zipCode ?? ''}
+            onOpenJourney={() => openJourneyMemory(tonightEntry)}
+          />
+        ) : null}
+
+        {isAfterglow ? <TomorrowTeaseLine text={state.tomorrowTease} subdued /> : null}
+
+        {!isAfterglow ? (
+          <>
         <section style={{ marginBottom: '20px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: '700', lineHeight: '1.2', color: C.onSurface, margin: 0 }}>
-            Ready for an adventure?
-          </h1>
-        </section>
-
-        <section style={{ margin: '0 -24px 24px' }}>
-          <div
-            data-testid="dashboard-adventure-chips"
+          <p
             style={{
-              display: 'flex',
-              gap: '10px',
-              overflowX: 'auto',
-              scrollbarWidth: 'none',
-              padding: '4px 24px 8px',
+              margin: '0 0 12px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: H.muted,
             }}
           >
-            {VIBE_CHIPS.map((chip) => {
-              const active = selectedChip === chip.label
-              return (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={() => handleChipClick(chip.vibe)}
-                  style={{
-                    flexShrink: 0,
-                    padding: '10px 20px',
-                    borderRadius: '9999px',
-                    border: active ? 'none' : '1px solid rgba(255,255,255,0.05)',
-                    background: active
-                      ? 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)'
-                      : '#201f1f',
-                    color: active ? '#FFFFFF' : C.muted,
-                    fontSize: '14px',
-                    fontWeight: active ? '700' : '500',
-                    cursor: 'pointer',
-                    fontFamily: FONT,
-                    boxShadow: active ? '0 0 15px rgba(255,149,0,0.25)' : 'none',
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {chip.label}
-                </button>
-              )
-            })}
-          </div>
-        </section>
-
-        <section style={{ marginBottom: '24px' }}>
-          <div
-            style={{
-              background: '#201f1f',
-              borderRadius: '16px',
-              padding: '12px',
-              border: '1px solid rgba(255,255,255,0.05)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            }}
-          >
+            Today&apos;s outing
+          </p>
+          <article style={{ ...cardBase, padding: '14px', boxShadow: H.shadow }}>
             <div
               style={{
                 position: 'relative',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 overflow: 'hidden',
-                aspectRatio: '16/10',
+                aspectRatio: '16 / 10',
                 marginBottom: '16px',
               }}
             >
@@ -269,68 +438,65 @@ export function DashboardPage() {
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
+                  background:
+                    'linear-gradient(to top, rgba(44, 36, 25, 0.55) 0%, rgba(44, 36, 25, 0.05) 55%)',
                 }}
               />
-              <div style={{ position: 'absolute', bottom: '12px', left: '16px' }}>
-                <span
-                  style={{
-                    background: 'rgba(255,149,0,0.9)',
-                    backdropFilter: 'blur(4px)',
-                    fontSize: '10px',
-                    textTransform: 'uppercase',
-                    fontWeight: '700',
-                    letterSpacing: '0.12em',
-                    color: '#FFFFFF',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                  }}
-                >
-                  {gm?.moodMatchesToday ? 'Perfect for today' : 'Recommended'}
-                </span>
-              </div>
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '12px',
+                  left: '14px',
+                  background: 'rgba(255, 253, 249, 0.92)',
+                  backdropFilter: 'blur(6px)',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: H.sageDeep,
+                  padding: '5px 10px',
+                  borderRadius: '999px',
+                }}
+              >
+                {heroBadge}
+              </span>
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0 8px 8px',
-              }}
-            >
-              <div style={{ flex: 1, marginRight: '16px' }}>
-                <h3
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h2
                   data-testid="dashboard-gm-title"
                   style={{
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    color: C.onSurface,
-                    margin: '0 0 4px',
-                    lineHeight: '1.2',
+                    margin: '0 0 6px',
+                    fontFamily: H.serif,
+                    fontSize: '22px',
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    color: H.ink,
                   }}
                 >
                   {heroTitle}
-                </h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={C.muted}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    aria-hidden
+                </h2>
+                <p style={{ margin: '0 0 4px', fontSize: '14px', color: H.muted, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span aria-hidden>📍</span>
+                  {heroLocation}
+                </p>
+                {heroConfidenceCue ? (
+                  <p
+                    data-testid="dashboard-gm-confidence"
+                    style={{ margin: '0 0 6px', fontSize: '12px', fontWeight: 600, color: H.sageDeep }}
                   >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span style={{ fontSize: '13px', color: C.muted }}>{heroLocation}</span>
-                </div>
-                {gm?.description ? (
-                  <p style={{ fontSize: '13px', color: C.muted, margin: '8px 0 0', lineHeight: '1.4' }}>
-                    {gm.description}
+                    {heroConfidenceCue}
+                  </p>
+                ) : null}
+                {heroWhyLine ? (
+                  <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, color: H.inkSoft }}>
+                    {heroWhyLine}
+                  </p>
+                ) : null}
+                {heroSocialProof ? (
+                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: H.muted, fontStyle: 'italic' }}>
+                    {heroSocialProof}
                   </p>
                 ) : null}
               </div>
@@ -338,41 +504,101 @@ export function DashboardPage() {
                 type="button"
                 data-testid="dashboard-start-adventure-cta"
                 onClick={startAdventure}
-                disabled={state.todayAdventureDone}
                 style={{
                   flexShrink: 0,
-                  background: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
+                  background: H.sage,
                   border: 'none',
-                  borderRadius: '12px',
-                  color: '#FFFFFF',
-                  fontFamily: FONT,
+                  borderRadius: '14px',
+                  color: '#FFFDF9',
+                  fontFamily: H.sans,
                   fontSize: '15px',
-                  fontWeight: '700',
-                  padding: '12px 24px',
-                  cursor: state.todayAdventureDone ? 'not-allowed' : 'pointer',
-                  opacity: state.todayAdventureDone ? 0.55 : 1,
-                  boxShadow: '0 4px 20px rgba(255,149,0,0.3)',
+                  fontWeight: 700,
+                  padding: '14px 20px',
+                  cursor: 'pointer',
+                  boxShadow: '0 6px 20px rgba(92, 122, 107, 0.28)',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {state.todayAdventureDone ? 'Done ✓' : "Let's go"}
+                Let&apos;s go
               </button>
             </div>
+          </article>
+        </section>
+
+        <section style={{ margin: '0 -24px 20px' }}>
+          <p
+            style={{
+              margin: '0 0 8px',
+              padding: '0 24px',
+              fontSize: '12px',
+              fontWeight: 500,
+              color: H.muted,
+            }}
+          >
+            Or try a different mood
+          </p>
+          <div
+            data-testid="dashboard-adventure-chips"
+            style={{
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              padding: '2px 24px 4px',
+            }}
+          >
+            {adventureChips.map((chip) => {
+              const active = selectedChip === chip.label
+              return (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={() => handleChipClick(chip.vibe)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '7px 14px',
+                    borderRadius: '999px',
+                    border: `1px solid ${active ? 'transparent' : H.border}`,
+                    background: active ? H.sageSoft : 'transparent',
+                    color: active ? H.sageDeep : H.muted,
+                    fontSize: '13px',
+                    fontWeight: active ? 600 : 400,
+                    cursor: 'pointer',
+                    fontFamily: H.sans,
+                    boxShadow: 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {chip.label}
+                </button>
+              )
+            })}
           </div>
         </section>
 
+        <TomorrowTeaseLine text={state.tomorrowTease} />
+
+        {/* Recent memories */}
         {memories.length > 0 ? (
-          <section style={{ marginBottom: '24px' }} data-testid="dashboard-recent-memories">
+          <section style={{ marginBottom: '28px' }} data-testid="dashboard-recent-memories">
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '16px',
+                marginBottom: '14px',
               }}
             >
-              <h2 style={{ fontSize: '20px', fontWeight: '700', color: C.onSurface, margin: 0 }}>
-                Recent Memories
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: H.serif,
+                  fontSize: '22px',
+                  fontWeight: 700,
+                  color: H.ink,
+                }}
+              >
+                Recent memories
               </h2>
               <button
                 type="button"
@@ -380,11 +606,11 @@ export function DashboardPage() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: C.primary,
+                  color: H.sage,
                   fontSize: '13px',
-                  fontWeight: '700',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  fontFamily: FONT,
+                  fontFamily: H.sans,
                 }}
               >
                 See all
@@ -393,11 +619,11 @@ export function DashboardPage() {
             <div
               style={{
                 display: 'flex',
-                gap: '16px',
+                gap: '14px',
                 overflowX: 'auto',
                 scrollbarWidth: 'none',
                 margin: '0 -24px',
-                padding: '0 24px',
+                padding: '8px 24px 12px',
               }}
             >
               {memories.map((m) => (
@@ -407,70 +633,89 @@ export function DashboardPage() {
                   onClick={() => navigate('/story')}
                   style={{
                     flexShrink: 0,
-                    width: '96px',
+                    width: '108px',
                     background: 'none',
                     border: 'none',
                     padding: 0,
                     cursor: 'pointer',
                     textAlign: 'left',
-                    fontFamily: FONT,
+                    fontFamily: H.sans,
+                    transform: `rotate(${m.rotate})`,
                   }}
                 >
                   <div
                     style={{
-                      width: '96px',
-                      height: '96px',
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      border: `1px solid ${C.border5}`,
-                      marginBottom: '8px',
-                      background: C.surface,
+                      padding: '6px 6px 10px',
+                      background: H.card,
+                      borderRadius: '12px',
+                      border: `1px solid ${H.border}`,
+                      boxShadow: H.shadowSoft,
                     }}
                   >
-                    <img
-                      src={m.img}
-                      alt={m.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
+                    <div
+                      style={{
+                        width: '96px',
+                        height: '96px',
+                        borderRadius: '10px',
+                        overflow: 'hidden',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      <img
+                        src={m.img}
+                        alt={m.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                    </div>
+                    <p
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        color: H.ink,
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        margin: '0 0 2px',
+                        padding: '0 4px',
+                      }}
+                    >
+                      {m.title}
+                    </p>
+                    <p style={{ fontSize: '10px', color: H.muted, margin: 0, padding: '0 4px' }}>
+                      {m.date}
+                    </p>
                   </div>
-                  <p
-                    style={{
-                      fontSize: '12px',
-                      fontWeight: '700',
-                      color: '#FFFFFF',
-                      overflow: 'hidden',
-                      whiteSpace: 'nowrap',
-                      textOverflow: 'ellipsis',
-                      margin: '0 0 2px',
-                    }}
-                  >
-                    {m.title}
-                  </p>
-                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{m.date}</p>
                 </button>
               ))}
             </div>
           </section>
         ) : (
-          <section style={{ marginBottom: '24px', textAlign: 'center', padding: '24px 16px' }}>
-            <p style={{ fontSize: '15px', color: C.muted, margin: '0 0 16px', lineHeight: '1.5' }}>
-              Start your first walk to capture the moments that matter most.
+          <section
+            style={{
+              ...cardBase,
+              marginBottom: '28px',
+              padding: '28px 20px',
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ fontSize: '15px', color: H.muted, margin: '0 0 16px', lineHeight: 1.55 }}>
+              Your scrapbook is waiting for its first walk.
             </p>
             <button
               type="button"
               onClick={startAdventure}
               disabled={state.todayAdventureDone}
               style={{
-                background: 'linear-gradient(135deg, #FF9500 0%, #FF5E00 100%)',
+                background: H.sage,
                 border: 'none',
-                borderRadius: '9999px',
-                color: '#FFFFFF',
-                fontFamily: FONT,
+                borderRadius: '999px',
+                color: '#FFFDF9',
+                fontFamily: H.sans,
                 fontSize: '14px',
-                fontWeight: '700',
+                fontWeight: 700,
                 padding: '14px 28px',
                 cursor: state.todayAdventureDone ? 'not-allowed' : 'pointer',
-                opacity: state.todayAdventureDone ? 0.55 : 1,
+                opacity: state.todayAdventureDone ? 0.65 : 1,
               }}
             >
               Start first walk
@@ -478,28 +723,47 @@ export function DashboardPage() {
           </section>
         )}
 
+        {/* 8. Quiet stats row */}
         <section
           data-testid="dashboard-stats-row"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: '10px',
+            marginBottom: '8px',
+          }}
         >
           {[
-            { value: state.totalAdventures, label: 'Adventures', testId: undefined as string | undefined },
-            { value: state.currentStreak, label: 'Day Streak', highlight: true, testId: undefined },
+            { value: state.totalAdventures, label: 'Walks', testId: undefined as string | undefined },
+            {
+              value: state.currentStreak,
+              label: 'Streak',
+              highlight: true,
+              testId: undefined,
+            },
             { value: placeHints, label: 'Places', testId: 'dashboard-the-wild-cta' },
           ].map((s) => {
             const content = (
               <>
-                <span style={{ fontSize: '24px', fontWeight: '700', color: '#FFFFFF', lineHeight: '1' }}>
+                <span
+                  style={{
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    color: s.highlight ? H.sage : H.ink,
+                    lineHeight: 1,
+                    fontFamily: H.serif,
+                  }}
+                >
                   {s.value}
                 </span>
                 <span
                   style={{
                     fontSize: '10px',
-                    fontWeight: '700',
-                    color: s.highlight ? C.primary : C.muted,
+                    fontWeight: 600,
+                    color: H.muted,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    marginTop: '4px',
+                    letterSpacing: '0.06em',
+                    marginTop: '6px',
                   }}
                 >
                   {s.label}
@@ -507,14 +771,14 @@ export function DashboardPage() {
               </>
             )
             const boxStyle: CSSProperties = {
-              background: 'rgba(32,31,31,0.5)',
+              background: H.card,
               borderRadius: '16px',
-              padding: '16px 8px',
+              padding: '14px 8px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '1px solid rgba(255,255,255,0.05)',
+              border: `1px solid ${H.border}`,
               textAlign: 'center',
             }
             if (s.testId) {
@@ -524,7 +788,7 @@ export function DashboardPage() {
                   type="button"
                   data-testid={s.testId}
                   onClick={() => navigate('/wild')}
-                  style={{ ...boxStyle, cursor: 'pointer', fontFamily: FONT }}
+                  style={{ ...boxStyle, cursor: 'pointer', fontFamily: H.sans }}
                 >
                   {content}
                 </button>
@@ -537,8 +801,10 @@ export function DashboardPage() {
             )
           })}
         </section>
+          </>
+        ) : null}
 
-        <div style={{ marginTop: '32px' }}>
+        <div style={{ marginTop: '28px' }}>
           <LegalFooter />
         </div>
       </main>
