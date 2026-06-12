@@ -270,7 +270,6 @@ export function missionFromLocalSpot(params: MissionFromLocalSpotParams): Genera
     atmosphere: spot.atmosphere,
     whyDogPeopleLoveIt: spot.whyDogPeopleLoveIt,
     marketId: spot.market as LocalMarketId,
-    image: spot.image,
     isLocalSpot: true,
   }
 }

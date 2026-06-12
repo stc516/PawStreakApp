@@ -1,15 +1,8 @@
 import type { CSSProperties } from 'react'
 
+import { AdventureArtwork, artworkCategoryForLabel } from '../adventure/AdventureArtwork'
 import { memoryReturnTimeLabel, narrativeForEntry } from '../../lib/memoryNarrative'
 import type { AdventureEntry } from '../../types'
-
-const PLACE_IMAGES: Record<string, string> = {
-  salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
-  wander: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
-  pulse: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
-  wild: 'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=1200&q=85',
-  default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85',
-}
 
 const H = {
   ink: '#2C2419',
@@ -30,7 +23,7 @@ interface TonightChapterProps {
 
 export function TonightChapter({ entry, dogDisplayName, zipCode, onOpenJourney }: TonightChapterProps) {
   const narrative = narrativeForEntry(entry, dogDisplayName, zipCode)
-  const imageUrl = PLACE_IMAGES[entry.vibe] || PLACE_IMAGES.default
+  const artworkCategory = artworkCategoryForLabel(`${entry.missionTitle} ${entry.locationHint ?? ''}`, entry.vibe)
   const timeLabel = memoryReturnTimeLabel(entry.completedAt)
   const reflection =
     entry.memoryText?.trim() ||
@@ -52,10 +45,12 @@ export function TonightChapter({ entry, dogDisplayName, zipCode, onOpenJourney }
       style={shell}
     >
       <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', maxHeight: '52vh' }}>
-        <img
-          src={imageUrl}
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        <AdventureArtwork
+          category={artworkCategory}
+          size={390}
+          rounded={0}
+          label={narrative.emotionalTitle}
+          style={{ width: '100%', height: '100%' }}
         />
         <div
           aria-hidden

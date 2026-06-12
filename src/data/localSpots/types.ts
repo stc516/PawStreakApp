@@ -78,7 +78,7 @@ export interface LocalSpot {
   atmosphere: string
   whyDogPeopleLoveIt: string
 
-  /** Unsplash or CDN reference — editorial lifestyle, not stock forest mood */
+  /** Deprecated visual reference. Product UI uses illustrated category artwork. */
   image?: string
 
   /** Soft rollout flag per spot */

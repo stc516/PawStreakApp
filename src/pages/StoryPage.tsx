@@ -1,18 +1,11 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
+import { AdventureArtwork, artworkCategoryForLabel } from '../components/adventure/AdventureArtwork'
 import { BottomNav } from '../components/BottomNav'
 import { useAppState } from '../hooks/useAppState'
 import { displayTitleForEntry, narrativeForEntry } from '../lib/memoryNarrative'
 import type { AdventureEntry } from '../types'
-
-const PLACE_IMAGES: Record<string, string> = {
-  salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
-  wander: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
-  pulse: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
-  wild: 'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=800&q=80',
-  default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80',
-}
 
 const H = {
   page: '#FAF7F2',
@@ -86,7 +79,7 @@ function MemoryDetailSheet({
   zipCode: string
   onClose: () => void
 }) {
-  const img = PLACE_IMAGES[entry.vibe] || PLACE_IMAGES.default
+  const artworkCategory = artworkCategoryForLabel(`${entry.missionTitle} ${entry.locationHint ?? ''}`, entry.vibe)
   const narrative = narrativeForEntry(entry, dogName, zipCode)
   const displayTitle = narrative.emotionalTitle
 
@@ -136,10 +129,12 @@ function MemoryDetailSheet({
         }}
       >
         <div style={{ position: 'relative', height: '240px' }}>
-          <img
-            src={img}
-            alt={displayTitle}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          <AdventureArtwork
+            category={artworkCategory}
+            size={390}
+            rounded={0}
+            label={displayTitle}
+            style={{ width: '100%', height: '100%' }}
           />
           <div
             style={{
@@ -490,9 +485,9 @@ export function StoryPage() {
                 {entries.map((a) => {
                   const idx = cardIndex++
                   const rotate = scrapbookRotation(idx)
-                  const img = PLACE_IMAGES[a.vibe] || PLACE_IMAGES.default
                   const caption = memoryCaption(a, dogName, state.zipCode ?? '')
                   const cardTitle = displayTitleForEntry(a, dogName, state.zipCode ?? '')
+                  const artworkCategory = artworkCategoryForLabel(`${a.missionTitle} ${a.locationHint ?? ''}`, a.vibe)
                   const isQuote = Boolean(a.memoryText?.trim())
 
                   return (
@@ -531,10 +526,12 @@ export function StoryPage() {
                         }}
                       >
                         <div style={{ position: 'relative', aspectRatio: '16 / 10', overflow: 'hidden' }}>
-                          <img
-                            src={img}
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          <AdventureArtwork
+                            category={artworkCategory}
+                            size={342}
+                            rounded={0}
+                            label={cardTitle}
+                            style={{ width: '100%', height: '100%' }}
                           />
                           <div
                             style={{

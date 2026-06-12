@@ -130,8 +130,9 @@ function AppStateSynced({
       startAdventureSession: (
         source: Parameters<typeof startAdventureSession>[1],
         challengeId: string | null = null,
+        missionOverride?: Parameters<typeof startAdventureSession>[4],
       ) => {
-        setState((currentState) => startAdventureSession(currentState, source, challengeId))
+        setState((currentState) => startAdventureSession(currentState, source, challengeId, undefined, missionOverride))
       },
       pauseAdventureSession: (paused: boolean) => {
         setState((currentState) => pauseAdventureSession(currentState, paused))

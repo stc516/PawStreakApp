@@ -2,6 +2,11 @@ import { useEffect, useMemo, type CSSProperties } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { AccountStatusChip } from '../components/auth/AccountStatusChip'
+import {
+  AdventureArtwork,
+  artworkCategoryForLabel,
+  artworkCategoryForMission,
+} from '../components/adventure/AdventureArtwork'
 import { PostAdventureSavePrompt } from '../components/auth/PostAdventureSavePrompt'
 import { SaveProgressNudge } from '../components/auth/SaveProgressNudge'
 import { BottomNav } from '../components/BottomNav'
@@ -24,14 +29,6 @@ import {
   weekendEnergyCue,
 } from '../lib/momentumCopy'
 import type { AdventureEntry, DogMood, VibeArchetype } from '../types'
-
-const PLACE_IMAGES: Record<string, string> = {
-  salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
-  wander: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
-  pulse: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
-  wild: 'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=800&q=80',
-  default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80',
-}
 
 const VIBE_CHIPS: { label: string; vibe: VibeArchetype }[] = [
   { label: 'Beach', vibe: 'salt' },
@@ -145,7 +142,9 @@ export function DashboardPage() {
   const dogDisplayName = state.dogName?.trim() || 'Your dog'
   const gm = state.generatedMission
   const adventureChips = state.userProfile.homeSupportedMarket ? VIBE_CHIPS : GENERIC_ADVENTURE_CHIPS
-  const heroImageUrl = gm?.image || PLACE_IMAGES[state.selectedVibe] || PLACE_IMAGES.default
+  const heroArtworkCategory = gm
+    ? artworkCategoryForMission(gm)
+    : artworkCategoryForLabel(selectedChip, state.selectedVibe)
   const heroTitle = gm?.title ?? "Today's outing"
   const heroLocation = gm ? missionNeighborhoodLine(gm) : 'Your neighborhood'
   const heroBadge = gm ? missionHeroBadge(gm) : 'Suggested for you'
@@ -192,7 +191,7 @@ export function DashboardPage() {
     id: a.id,
     title: displayTitleForEntry(a, dogDisplayName, state.zipCode ?? ''),
     date: relativeDayLabel(a.completedAt),
-    img: PLACE_IMAGES[a.vibe] || PLACE_IMAGES.default,
+    category: artworkCategoryForLabel(`${a.missionTitle} ${a.locationHint ?? ''}`, a.vibe),
     rotate: scrapbookRotation(index),
     memorySnippet:
       a.memoryText?.trim() ??
@@ -277,18 +276,23 @@ export function DashboardPage() {
                 background: `linear-gradient(135deg, ${H.sage} 0%, ${H.amber} 100%)`,
               }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"
-                alt={dogDisplayName}
+              <div
+                aria-label={dogDisplayName}
                 style={{
                   width: '44px',
                   height: '44px',
                   borderRadius: '50%',
-                  objectFit: 'cover',
                   border: '2px solid #FFFDF9',
-                  display: 'block',
+                  display: 'grid',
+                  placeItems: 'center',
+                  background: H.cardSoft,
+                  color: H.sageDeep,
+                  fontSize: '18px',
+                  fontWeight: 800,
                 }}
-              />
+              >
+                {dogDisplayName.slice(0, 1).toUpperCase()}
+              </div>
             </div>
             <div style={{ minWidth: 0 }}>
               <div
@@ -429,17 +433,18 @@ export function DashboardPage() {
                 marginBottom: '16px',
               }}
             >
-              <img
-                src={heroImageUrl}
-                alt={heroTitle}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              <AdventureArtwork
+                category={heroArtworkCategory}
+                size={342}
+                rounded={16}
+                label={heroTitle}
+                style={{ width: '100%', height: '100%' }}
               />
               <div
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background:
-                    'linear-gradient(to top, rgba(44, 36, 25, 0.55) 0%, rgba(44, 36, 25, 0.05) 55%)',
+                  background: 'linear-gradient(to top, rgba(44, 36, 25, 0.14) 0%, rgba(44, 36, 25, 0) 65%)',
                 }}
               />
               <span
@@ -661,10 +666,11 @@ export function DashboardPage() {
                         marginBottom: '8px',
                       }}
                     >
-                      <img
-                        src={m.img}
-                        alt={m.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      <AdventureArtwork
+                        category={m.category}
+                        size={96}
+                        rounded={10}
+                        label={m.title}
                       />
                     </div>
                     <p

@@ -4,11 +4,13 @@ export * from './tags'
 export * from './markets'
 export {
   ALL_LOCAL_SPOTS,
+  LOCAL_SPOT_DAY_TRIP_RADIUS_KM,
   LOCAL_SPOT_DEFAULT_RADIUS_KM,
   getAllLocalSpots,
   getLocalSpotById,
   getLocalSpotsByMarket,
   getLocalSpotsByCategory,
+  getLocalSpotsNearCoords,
   getLocalSpotsByZip,
 } from './spotRegistry'
 export { SAN_DIEGO_SPOTS } from './sanDiegoSpots'

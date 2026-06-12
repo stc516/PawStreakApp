@@ -250,6 +250,10 @@ test('fresh onboarding with Orange County CA shows curated OC spots', async ({ p
   })
   expect(stored.userProfile.homeSupportedMarket).toBe('orange-county')
   expect(stored.generatedMission.marketId).toBe('orange-county')
+  await page.getByRole('link', { name: 'Plan' }).click()
+  await expect(page.getByText(/Nearby spots are sorted/)).toBeVisible()
+  await expect(page.getByText(/PCH & 21st, Huntington Beach.*mi/)).toBeVisible()
+  await expect(page.getByText(/Coronado|San Diego|Balboa Park|Mission Trails/)).toHaveCount(0)
   expect(consoleErrors, `Console errors: ${consoleErrors.join('\n')}`).toEqual([])
 })
 
@@ -518,6 +522,13 @@ test('challenge detail shows path map and seasonal filtering', async ({ page }) 
 test('badges and challenges avoid stock image elements', async ({ page }) => {
   await completeOnboarding(page, { dogName: 'AssetDog', zip: '92104' })
 
+  await page.goto('/app')
+  await expect(page.locator('img[src*="unsplash"], [style*="unsplash"]')).toHaveCount(0)
+
+  await page.goto('/adventure')
+  await expect(page.getByText('What should we do next?')).toBeVisible()
+  await expect(page.locator('img[src*="unsplash"], [style*="unsplash"]')).toHaveCount(0)
+
   await page.goto('/packs')
   await expect(page.getByRole('heading', { name: 'Challenges' })).toBeVisible()
   await expect(page.locator('main img[src*="unsplash"], section img[src*="unsplash"]')).toHaveCount(0)
@@ -529,6 +540,10 @@ test('badges and challenges avoid stock image elements', async ({ page }) => {
   await page.goto('/badges')
   await expect(page.getByRole('heading', { name: "AssetDog's Finds" })).toBeVisible()
   await expect(page.locator('#screen-badges img[src*="unsplash"]')).toHaveCount(0)
+
+  await page.goto('/story')
+  await expect(page.getByRole('heading', { name: 'This Month With AssetDog' })).toBeVisible()
+  await expect(page.locator('img[src*="unsplash"], [style*="unsplash"]')).toHaveCount(0)
 })
 
 test('adventure generation and Memory Seal appears', async ({ page }) => {

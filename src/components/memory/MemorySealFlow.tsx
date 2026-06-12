@@ -1,16 +1,9 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
 
+import { AdventureArtwork, artworkCategoryForLabel } from '../adventure/AdventureArtwork'
 import { FONT_IMPORT, H } from '../../lib/editorialTheme'
 import { linesOverlap } from '../../lib/memoryNarrative'
 import type { MemoryNarrative, VibeArchetype } from '../../types'
-
-const PLACE_IMAGES: Record<string, string> = {
-  salt: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
-  wander: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
-  pulse: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
-  wild: 'https://images.unsplash.com/photo-1571173081901-3f839da36ac0?w=1200&q=85',
-  default: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85',
-}
 
 /**
  * Sacred-screen beats — one emotional idea visible at a time.
@@ -97,7 +90,10 @@ export function MemorySealFlow({ narrative, vibe, onComplete }: MemorySealFlowPr
   const canTapAdvance = beat >= 3 && beat < 9
   const canSkip = beat >= 4 && beat < 9
 
-  const heroUrl = PLACE_IMAGES[vibe] || PLACE_IMAGES.default
+  const heroCategory = artworkCategoryForLabel(
+    `${narrative.emotionalTitle} ${narrative.sealMetadata}`,
+    vibe,
+  )
 
   const fade = useCallback(
     (active: boolean): CSSProperties => ({
@@ -205,14 +201,15 @@ export function MemorySealFlow({ narrative, vibe, onComplete }: MemorySealFlowPr
               overflow: 'hidden',
             }}
           >
-            <img
-              src={heroUrl}
-              alt=""
+            <AdventureArtwork
+              category={heroCategory}
+              size={360}
+              rounded={0}
+              label={narrative.emotionalTitle}
+              animated={!reducedMotion}
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
-                display: 'block',
                 transform: reducedMotion ? 'none' : 'scale(1.02)',
                 transition: reducedMotion ? 'none' : 'transform 3s ease-out',
               }}

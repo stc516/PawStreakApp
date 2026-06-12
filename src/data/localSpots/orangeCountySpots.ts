@@ -22,7 +22,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'OC off-leash beach — long sand stretch and a serious dog crowd.',
     atmosphere: 'Volleyball nets, surfers nearby, and dogs sprinting the full length of the beach.',
     whyDogPeopleLoveIt: 'The Huntington answer to dog beach. Busy on weekends but that is part of the fun.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -43,7 +42,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Cliff-top path above Laguna with ocean views at every turn.',
     atmosphere: 'Sculpture garden energy, tide pools below, and golden light on the water.',
     whyDogPeopleLoveIt: 'The sunset spot OC people post about. On-leash, scenic, and walkable from downtown Laguna.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
     isActive: true,
   },
   {
@@ -65,7 +63,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Bluff trails down toward historic beach cottages — worth the steps.',
     atmosphere: 'Coastal sage, Pacific views, and a quieter pace than downtown Laguna.',
     whyDogPeopleLoveIt: 'Real trail energy close to the coast. Go early for cooler temps and easier parking.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -86,7 +83,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Flat bay-side paths — birds, kayakers, and long easy loops.',
     atmosphere: 'Tidal mudflats, pelicans overhead, and a mellow local walking crowd.',
     whyDogPeopleLoveIt: 'When you want distance without hills. Popular with runners and daily dog walkers.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -107,7 +103,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Harbor walk with shops, patios, and whale-watching boats in season.',
     atmosphere: 'Masts in the marina, seafood smells, and a relaxed South OC weekend rhythm.',
     whyDogPeopleLoveIt: 'Easy social outing — walk the harbor, sit outside, watch the boats.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
     isActive: true,
   },
   {
@@ -129,7 +124,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Classic pier-and-beach stroll — surf town energy, easy parking off-peak.',
     atmosphere: 'Train horn in the distance, surfers below the pier, and a laid-back local crowd.',
     whyDogPeopleLoveIt: 'South OC favorite for an after-work walk. Beach path runs north and south from the pier.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -151,7 +145,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Food hall campus with outdoor seating — easy group hang with the dog.',
     atmosphere: 'String lights, shared tables, and a young crowd doing exactly this on weekends.',
     whyDogPeopleLoveIt: 'Indoor-outdoor food options mean you can actually eat with your dog nearby.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -173,7 +166,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Historic plaza ringed with patios and antique shops — slow stroll energy.',
     atmosphere: 'Fountain in the center, outdoor dining spilling onto the sidewalk, old-town charm.',
     whyDogPeopleLoveIt: 'Walkable blocks, lots of patio seating, and a different vibe from coastal OC.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -194,7 +186,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Summit viewpoint over Laguna and the coast — short hike, big payoff.',
     atmosphere: '360-degree views, breezy hilltop, and a small crowd timing the sunset.',
     whyDogPeopleLoveIt: 'When someone asks for a sunset spot tonight in Laguna, this is the move.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
     isActive: true,
   },
   {
@@ -217,7 +208,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Outdoor mall loop — patios, fountains, and a built-in evening crowd.',
     atmosphere: 'Ferris wheel lights, restaurant row energy, and families out after dinner.',
     whyDogPeopleLoveIt: 'Central OC meet-up spot. Lots of patio tables and a long walkable loop.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -239,7 +229,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Laguna main beach and boardwalk — busy, scenic, classic OC.',
     atmosphere: 'Basketball courts, skimboarders, art galleries steps away, and a tourist-meets-local mix.',
     whyDogPeopleLoveIt: 'Combine beach walk with downtown Laguna — coffee, galleries, and people watching.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -260,7 +249,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Small-town pier and beach — quieter than Huntington, easy loop.',
     atmosphere: 'Old pier, Main Street shops, and a slower pace than the big OC beaches.',
     whyDogPeopleLoveIt: 'When you want beach without the chaos. Main Street has dog-friendly patios too.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -281,7 +269,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Lake loops and shaded paths — one of OC best daily dog-walk parks.',
     atmosphere: 'Ducks on the water, picnic tables under trees, and a steady local dog-walking crowd.',
     whyDogPeopleLoveIt: 'Flat, shaded, and long enough to tire out a high-energy dog without driving to the coast.',
-    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85',
     isActive: true,
   },
   {
@@ -303,7 +290,6 @@ export const ORANGE_COUNTY_SPOTS: LocalSpot[] = [
     shortDescription: 'Walkable brewery cluster — patios, food trucks, and a young OC crowd.',
     atmosphere: 'Industrial-chic taprooms, string lights, and groups with dogs under every table.',
     whyDogPeopleLoveIt: 'The inland OC answer to North Park. Easy to bar-hop on foot with your dog.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
 ]

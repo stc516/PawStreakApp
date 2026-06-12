@@ -811,6 +811,7 @@ export function startAdventureSession(
   source: NonNullable<PawstreakState['activeAdventure']>['source'] = 'plan',
   challengeId: string | null = null,
   now: Date = new Date(),
+  missionOverride?: GeneratedMission,
 ): PawstreakState {
   if (state.todayAdventureDone) return state
   if (state.activeAdventure) return state
@@ -820,9 +821,10 @@ export function startAdventureSession(
       ? buildTodayMission(state, `challenge|${state.pickNonce}|${challengeId}`, { fixedVibe: challengeVibe })
       : state.generatedMission
   const mission =
-    source === 'challenge' && challengeId && challengeMissionOverrides[challengeId]
+    missionOverride ??
+    (source === 'challenge' && challengeId && challengeMissionOverrides[challengeId]
       ? { ...baseMission, ...challengeMissionOverrides[challengeId] }
-      : baseMission
+      : baseMission)
   return {
     ...state,
     activeAdventure: {

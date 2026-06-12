@@ -24,6 +24,7 @@ export const ALL_LOCAL_SPOTS: LocalSpot[] = [...SAN_DIEGO_SPOTS, ...ORANGE_COUNT
 const byId = new Map(ALL_LOCAL_SPOTS.map((s) => [s.id, s]))
 
 export const LOCAL_SPOT_DEFAULT_RADIUS_KM = 35
+export const LOCAL_SPOT_DAY_TRIP_RADIUS_KM = 90
 
 export function getAllLocalSpots(options?: { activeOnly?: boolean }): LocalSpot[] {
   if (options?.activeOnly === false) return [...ALL_LOCAL_SPOTS]
@@ -69,4 +70,24 @@ export function getLocalSpotsByZip(
         haversineKm(env.latCenter, env.lngCenter, a.lat, a.lng) -
         haversineKm(env.latCenter, env.lngCenter, b.lat, b.lng),
     )
+}
+
+export function getLocalSpotsNearCoords(
+  coords: { lat: number; lng: number },
+  options?: { market?: LocalMarketId; maxDistanceKm?: number; activeOnly?: boolean },
+): Array<LocalSpot & { distanceKm: number }> {
+  const maxKm = options?.maxDistanceKm ?? LOCAL_SPOT_DEFAULT_RADIUS_KM
+  const activeOnly = options?.activeOnly !== false
+  return ALL_LOCAL_SPOTS
+    .filter((spot) => {
+      if (options?.market && spot.market !== options.market) return false
+      if (activeOnly && !spot.isActive) return false
+      return true
+    })
+    .map((spot) => ({
+      ...spot,
+      distanceKm: haversineKm(coords.lat, coords.lng, spot.lat, spot.lng),
+    }))
+    .filter((spot) => spot.distanceKm <= maxKm)
+    .sort((a, b) => a.distanceKm - b.distanceKm)
 }

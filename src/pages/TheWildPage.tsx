@@ -137,11 +137,21 @@ export function TheWildPage() {
             width: '40px', height: '40px', borderRadius: '50%',
             overflow: 'hidden', border: `2px solid ${H.sage}`, flexShrink: 0,
           }}>
-            <img
-              src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"
-              alt={state.dogName}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <div
+              aria-label={state.dogName}
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'grid',
+                placeItems: 'center',
+                background: H.cardSoft,
+                color: H.sageDeep,
+                fontSize: '16px',
+                fontWeight: 800,
+              }}
+            >
+              {(state.dogName || 'P').slice(0, 1).toUpperCase()}
+            </div>
           </div>
           <div style={{ fontFamily: H.serif, fontSize: '18px', fontWeight: '700', color: C.onSurface }}>
             PawStreak

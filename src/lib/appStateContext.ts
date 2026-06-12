@@ -6,6 +6,7 @@ import type {
   AdventureReflection,
   ActiveAdventureSession,
   DogProfile,
+  GeneratedMission,
   NotificationPrefs,
   OwnerProfile,
   PawstreakState,
@@ -41,7 +42,11 @@ export interface AppStateContextValue extends AuthContextSlice {
   rollPickForMe: () => void
   pickSuggestedAdventure: (index: number) => void
   selectVibe: (vibe: VibeArchetype) => void
-  startAdventureSession: (source: ActiveAdventureSession['source'], challengeId?: string | null) => void
+  startAdventureSession: (
+    source: ActiveAdventureSession['source'],
+    challengeId?: string | null,
+    missionOverride?: GeneratedMission,
+  ) => void
   pauseAdventureSession: (paused: boolean) => void
   updateAdventureMemoryDraft: (memoryText: string) => void
   abandonAdventureSession: () => void

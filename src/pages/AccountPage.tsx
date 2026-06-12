@@ -20,8 +20,6 @@ interface FeedbackState {
   message: string
 }
 
-const SAMPLE_DOG_PHOTO = 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80'
-
 const C = {
   bg: H.page,
   surface: H.card,
@@ -37,6 +35,37 @@ const FONT = H.sans
 
 function floatingCard(extra?: CSSProperties): CSSProperties {
   return editorialCard(extra)
+}
+
+function DogInitialAvatar({
+  name,
+  size,
+  borderWidth = 2,
+}: {
+  name: string
+  size: number
+  borderWidth?: number
+}) {
+  return (
+    <div
+      aria-label={name}
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: '50%',
+        border: `${borderWidth}px solid ${H.sage}`,
+        background: H.cardSoft,
+        color: H.sageDeep,
+        display: 'grid',
+        placeItems: 'center',
+        fontSize: `${Math.max(16, Math.round(size * 0.36))}px`,
+        fontWeight: 800,
+        boxShadow: size > 80 ? H.shadowSoft : undefined,
+      }}
+    >
+      {name.slice(0, 1).toUpperCase()}
+    </div>
+  )
 }
 
 export function AccountPage() {
@@ -181,12 +210,7 @@ export function AccountPage() {
         padding: '16px 24px 12px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '50%',
-            overflow: 'hidden', border: `2px solid ${H.sage}`, flexShrink: 0,
-          }}>
-            <img src={SAMPLE_DOG_PHOTO} alt={dogName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
+          <DogInitialAvatar name={dogName} size={32} />
           <span style={{ fontFamily: H.serif, fontSize: '20px', fontWeight: '700', color: C.onSurface }}>PawStreak</span>
         </div>
         <button
@@ -223,19 +247,7 @@ export function AccountPage() {
 
           {/* Avatar */}
           <div style={{ position: 'relative', marginBottom: '20px', zIndex: 1 }}>
-            <div style={{
-              width: '144px', height: '144px', borderRadius: '50%',
-              border: `3px solid ${H.sage}`,
-              boxShadow: H.shadowSoft,
-              background: C.surface,
-              overflow: 'hidden',
-            }}>
-              <img
-                src={SAMPLE_DOG_PHOTO}
-                alt={dogName}
-                style={{ width: '100%', height: '110%', objectFit: 'cover', transform: 'scale(1.1)' }}
-              />
-            </div>
+            <DogInitialAvatar name={dogName} size={144} borderWidth={3} />
           </div>
 
           {/* Name + subtitle */}

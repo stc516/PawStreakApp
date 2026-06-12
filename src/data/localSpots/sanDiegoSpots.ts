@@ -22,7 +22,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'The classic SD off-leash beach — busy, sandy, and full of dogs.',
     atmosphere: 'Salt air, tennis balls flying, and a mix of locals plus weekend visitors.',
     whyDogPeopleLoveIt: 'It is the spot everyone names first. Your dog gets real off-leash time and you will always find other owners to talk to.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -44,7 +43,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Flat, off-leash island in Mission Bay — room to run for days.',
     atmosphere: 'Wide grass and sand loops with bay water nearby and a steady dog crowd.',
     whyDogPeopleLoveIt: 'When your dog needs to actually run, not just walk. Easy parking and plenty of space even on busy weekends.',
-    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85',
     isActive: true,
   },
   {
@@ -66,7 +64,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Cliffside walk with big ocean views — best right before sunset.',
     atmosphere: 'Wind off the Pacific, dramatic bluffs, and everyone timing the light.',
     whyDogPeopleLoveIt: 'A go-to when someone asks for a sunset spot tonight. On-leash, but the views make it worth it.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
     isActive: true,
   },
   {
@@ -89,7 +86,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Markets, patios, and a walkable campus — easy weekend plan.',
     atmosphere: 'Open courtyards, food halls, and a steady flow of families and dogs.',
     whyDogPeopleLoveIt: 'You can combine coffee, lunch, and a long loop without driving twice. Lots of patio seating.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -111,7 +107,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Wide beach and a long parallel boardwalk — classic La Jolla stroll.',
     atmosphere: 'Kayakers offshore, families on the sand, and a relaxed upscale beach town pace.',
     whyDogPeopleLoveIt: 'On-leash but spacious. Good when you want beach energy without the OB dog-beach chaos.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -133,7 +128,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Bluff-to-beach trails with serious views — worth the climb down.',
     atmosphere: 'Torrey pines, sandstone cliffs, and a quieter crowd than the boardwalk beaches.',
     whyDogPeopleLoveIt: 'When you want a real outing, not a neighborhood loop. Go early for parking and cooler temps.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -154,7 +148,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Harbor views, shops, and a waterfront path with downtown across the bay.',
     atmosphere: 'Ferry bells, skyline views, and tourists mixed with locals out for a slow walk.',
     whyDogPeopleLoveIt: 'Feels like a mini getaway without leaving town. Plenty of outdoor seating nearby.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
     isActive: true,
   },
   {
@@ -176,7 +169,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Walk the 30th St corridor — patios, breweries, and dog-friendly tables.',
     atmosphere: 'Neon signs, sidewalk traffic, and a young crowd doing exactly this on Friday nights.',
     whyDogPeopleLoveIt: 'This is where SD dog owners actually go out. Hit one patio or make a whole loop of them.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -199,7 +191,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Saturday farmers market energy plus walkable blocks and espresso stops.',
     atmosphere: 'Produce stalls, restaurant patios, and a dense sidewalk scene on market days.',
     whyDogPeopleLoveIt: 'The default answer to what are we doing Saturday morning with the dog.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -220,7 +211,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Iconic park loop — museums, gardens, and long shaded paths.',
     atmosphere: 'Spanish architecture, street performers on weekends, and tourists mixed with daily walkers.',
     whyDogPeopleLoveIt: 'Central, beautiful, and you can make it 20 minutes or two hours depending on the dog.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -242,7 +232,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'The hike everyone in SD has done — summit views, steady foot traffic.',
     atmosphere: 'Dusty switchbacks, friendly trail culture, and a full parking lot by 9am on weekends.',
     whyDogPeopleLoveIt: 'When your dog needs a real workout and you want a view at the top. Go early.',
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=85',
     isActive: true,
   },
   {
@@ -263,7 +252,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Grab coffee, walk the Bird Rock blocks, loop back for a refill.',
     atmosphere: 'Coastal neighborhood calm — surfers, strollers, and a tight local regular crowd.',
     whyDogPeopleLoveIt: 'Low-key morning ritual. Patio seating and easy side-street loops afterward.',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=85',
     isActive: true,
   },
   {
@@ -284,7 +272,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Off-leash grass fields next to Liberty Station — fetch-friendly.',
     atmosphere: 'Open lawns, frisbee games, and a steady rotation of neighborhood dogs.',
     whyDogPeopleLoveIt: 'Easy off-leash time without driving to the beach. Pair with Liberty Station after.',
-    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85',
     isActive: true,
   },
   {
@@ -307,7 +294,6 @@ export const SAN_DIEGO_SPOTS: LocalSpot[] = [
     shortDescription: 'Waterfront promenade with ships, skyline views, and steady foot traffic.',
     atmosphere: 'Harbor breeze, cruise ships, and a mix of tourists and locals on evening walks.',
     whyDogPeopleLoveIt: 'Good downtown option when you want water views and a lively sidewalk without driving north.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85',
     isActive: true,
   },
 ]

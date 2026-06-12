@@ -9,6 +9,7 @@ import {
   buildSpotMissionTitle,
   getAllLocalSpots,
   getLocalSpotById,
+  getLocalSpotsNearCoords,
   spotShortName,
 } from '../../src/data/localSpots'
 import {
@@ -201,6 +202,18 @@ describe('generateTodayMission', () => {
 
     expect(mission.isLocalSpot).toBe(true)
     expect(`${mission.title} ${mission.locationHint}`).not.toMatch(/sunset cliffs/i)
+  })
+
+  it('sorts curated spots by real coordinates for local planning', () => {
+    const spots = getLocalSpotsNearCoords(
+      { lat: 33.6595, lng: -117.9988 },
+      { market: 'orange-county', maxDistanceKm: 25 },
+    )
+
+    expect(spots.length).toBeGreaterThan(0)
+    expect(spots.every((spot) => spot.market === 'orange-county')).toBe(true)
+    expect(spots[0].distanceKm).toBeLessThanOrEqual(spots.at(-1)!.distanceKm)
+    expect(spots.some((spot) => spot.market === 'san-diego')).toBe(false)
   })
 })
 
